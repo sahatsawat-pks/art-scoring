@@ -1,0 +1,14 @@
+{
+  "name": "art-classroom-leaderboard",
+  "version": "1.0.0",
+  "description": "Art Classroom Management System with Neon PostgreSQL & Vercel Serverless Functions",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "dotenv": "^16.4.7"
+  }
+}

@@ -471,6 +471,64 @@ function saveConfigToStorage() {
   localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(appConfig));
 }
 
+// Cloud Database (Neon PostgreSQL) Synchronization Layer
+let isCloudDbConnected = false;
+
+async function checkAndSyncCloudDb() {
+  const badge = document.getElementById('dbStatusBadge');
+  const text = document.getElementById('dbStatusText');
+
+  try {
+    const res = await fetch('/api/data', { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.dbConnected) {
+        isCloudDbConnected = true;
+        if (data.config) appConfig = data.config;
+        if (data.students) appData = data.students;
+        if (data.accounts) saveAccounts(data.accounts);
+
+        // Mirror to local cache
+        saveDataToStorage();
+        saveConfigToStorage();
+
+        if (badge && text) {
+          badge.className = 'db-status-badge connected';
+          text.textContent = '☁️ Neon PostgreSQL';
+        }
+
+        populateGradeDropdowns();
+        if (currentView === 'teacher') renderTeacherView();
+        else renderLeaderboardView();
+        return;
+      }
+    }
+  } catch (e) {
+    // Serverless API not available (e.g. running via file:// or static server)
+  }
+
+  isCloudDbConnected = false;
+  if (badge && text) {
+    badge.className = 'db-status-badge offline';
+    text.textContent = '💾 โหมดออฟไลน์ (Local)';
+  }
+}
+
+async function apiPost(payload) {
+  if (!isCloudDbConnected) return null;
+  try {
+    const res = await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    return await res.json();
+  } catch (e) {
+    console.warn("Neon Cloud DB sync error:", e);
+    return null;
+  }
+}
+
 function getClassKey(grade = currentGrade, room = currentRoom) {
   return `${grade}_${room}`;
 }
@@ -1058,6 +1116,12 @@ function renderTeacherView() {
 
         student.scores[taskId] = val;
         saveDataToStorage();
+        apiPost({
+          action: 'save_student',
+          grade: currentGrade,
+          room: currentRoom,
+          student: student
+        });
 
         const newTotal = calcStudentTotalScore(student);
         document.getElementById(`total-val-${student.id}`).textContent = newTotal;
@@ -1071,6 +1135,12 @@ function renderTeacherView() {
     feedInput.addEventListener('change', (e) => {
       student.feedback = e.target.value;
       saveDataToStorage();
+      apiPost({
+        action: 'save_student',
+        grade: currentGrade,
+        room: currentRoom,
+        student: student
+      });
       showToast(`บันทึกคำติชมสำหรับ ${student.name} แล้ว`);
     });
 
@@ -1099,6 +1169,7 @@ function deleteStudent(studentId) {
   if (index !== -1) {
     list.splice(index, 1);
     saveDataToStorage();
+    apiPost({ action: 'delete_student', studentId });
     showToast("ลบข้อมูลนักเรียนเรียบร้อยแล้ว");
     artSound.playPop();
     renderTeacherView();
@@ -1200,6 +1271,7 @@ function addNewAssignment(title, maxScore) {
   });
 
   saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
   renderTasksManagerList();
   showToast(`เพิ่มชิ้นงาน "${cleanTitle}" สำเร็จแล้ว!`);
   artSound.playSaveChime();
@@ -1213,6 +1285,7 @@ function deleteAssignment(taskId) {
   if (idx !== -1) {
     const deleted = appConfig.assignments.splice(idx, 1)[0];
     saveConfigToStorage();
+    apiPost({ action: 'save_config', config: appConfig });
     renderTasksManagerList();
     showToast(`ลบชิ้นงาน "${deleted.title}" เรียบร้อยแล้ว`);
     artSound.playPop();
@@ -1354,6 +1427,12 @@ function handleStudentFormSubmit(e) {
   }
 
   saveDataToStorage();
+  apiPost({
+    action: 'save_student',
+    grade: currentGrade,
+    room: currentRoom,
+    student: id ? list.find(s => s.id === id) : list[list.length - 1]
+  });
   artSound.playSaveChime();
   closeStudentModal();
 
@@ -1425,6 +1504,7 @@ function addNewRoom(gradeId, roomName) {
 
   appConfig.rooms[gradeId].push(cleanName);
   saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
   populateRoomDropdowns();
   renderRoomsTree();
   showToast(`เพิ่มห้อง ${cleanName} ใน ${getGradeLabel(gradeId)} เรียบร้อย!`);
@@ -1445,6 +1525,7 @@ function deleteRoom(gradeId, roomName) {
     if (idx !== -1) {
       list.splice(idx, 1);
       saveConfigToStorage();
+      apiPost({ action: 'save_config', config: appConfig });
       populateRoomDropdowns();
       renderRoomsTree();
       showToast(`ลบห้อง ${roomName} เรียบร้อยแล้ว`);
@@ -1708,6 +1789,13 @@ function confirmImport() {
   }
 
   saveDataToStorage();
+  apiPost({
+    action: 'import_students',
+    grade: currentGrade,
+    room: currentRoom,
+    students: stagedImportStudents,
+    mode
+  });
   artSound.playFanfare();
   confettiEngine.fire(80);
   showToast(`นำเข้านักเรียน ${stagedImportStudents.length} คน เข้าสู่ ${getGradeLabel(currentGrade)} ห้อง ${currentRoom} สำเร็จแล้ว!`);
@@ -2031,16 +2119,18 @@ async function handleCreateAccountSubmit(e) {
   }
 
   const passwordHash = await sha256Hex(password);
-  accounts.push({
+  const newAccountObj = {
     username,
     displayName,
     passwordHash,
     role: "ครูผู้สอน",
     createdAt: new Date().toLocaleDateString('th-TH'),
     isPrimary: false
-  });
+  };
+  accounts.push(newAccountObj);
 
   saveAccounts(accounts);
+  apiPost({ action: 'save_account', account: newAccountObj });
   document.getElementById('createAccountForm').reset();
   renderAccountsList();
   showToast(`สร้างบัญชีผู้ใช้สำหรับ "${displayName}" สำเร็จ!`);
@@ -2052,6 +2142,7 @@ function deleteTeacherAccount(username) {
     let accounts = loadAccounts();
     accounts = accounts.filter(a => a.username !== username);
     saveAccounts(accounts);
+    apiPost({ action: 'delete_account', username });
     renderAccountsList();
     showToast(`ลบบัญชี "${username}" เรียบร้อยแล้ว`);
     artSound.playPop();
@@ -2335,6 +2426,7 @@ document.addEventListener('DOMContentLoaded', () => {
       appConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
       saveDataToStorage();
       saveConfigToStorage();
+      apiPost({ action: 'reset_data' });
       populateGradeDropdowns();
       artSound.playSaveChime();
       showToast("รีเซ็ตข้อมูลทั้งหมดกลับเป็นค่าเริ่มต้นเรียบร้อย!");
@@ -2342,7 +2434,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 15. Initial Render
+  // 15. Initial Render & Cloud DB Sync
   renderLeaderboardView();
+  checkAndSyncCloudDb();
   setTimeout(() => confettiEngine.fire(50), 400);
 });
