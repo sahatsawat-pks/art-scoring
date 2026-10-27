@@ -2173,6 +2173,249 @@ function deleteTeacherAccount(username) {
   }
 }
 
+// ==========================================
+// 17. ACADEMIC YEAR PROMOTION SYSTEM
+// ==========================================
+function getNextGradeId(gradeId) {
+  const sequence = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'];
+  const idx = sequence.indexOf(gradeId);
+  if (idx === -1 || idx === sequence.length - 1) return null; // p6 graduates
+  return sequence[idx + 1];
+}
+
+function openPromoteModal() {
+  const modal = document.getElementById('promoteYearModal');
+  const currentClassLabel = document.getElementById('promoteCurrentClassLabel');
+  const classFlowPreview = document.getElementById('promoteClassFlowPreview');
+  const ackCheck = document.getElementById('promoteAcknowledgeCheck');
+  const confirmBtn = document.getElementById('confirmPromoteActionBtn');
+  const radioSchool = document.getElementById('promoteScopeSchool');
+
+  if (radioSchool) radioSchool.checked = true;
+  if (ackCheck) ackCheck.checked = false;
+  if (confirmBtn) confirmBtn.disabled = true;
+
+  const curGradeLabel = getGradeLabel(currentGrade);
+  const nextGId = getNextGradeId(currentGrade);
+  const nextGradeLabel = nextGId ? getGradeLabel(nextGId) : 'จบการศึกษา (Graduated)';
+
+  if (currentClassLabel) {
+    currentClassLabel.textContent = `${curGradeLabel} ห้อง ${currentRoom}`;
+  }
+  if (classFlowPreview) {
+    classFlowPreview.textContent = `${curGradeLabel} / ${currentRoom} ➔ ${nextGradeLabel} / ${currentRoom}`;
+  }
+
+  updatePromoteModeCards();
+  renderPromoteStats();
+
+  modal.classList.remove('hidden');
+  artSound.playPop();
+}
+
+function closePromoteModal() {
+  const modal = document.getElementById('promoteYearModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function updatePromoteModeCards() {
+  const schoolRadio = document.getElementById('promoteScopeSchool');
+  const schoolLabel = document.getElementById('promoteModeSchoolLabel');
+  const classLabel = document.getElementById('promoteModeClassLabel');
+  if (schoolRadio && schoolLabel && classLabel) {
+    if (schoolRadio.checked) {
+      schoolLabel.classList.add('active');
+      classLabel.classList.remove('active');
+    } else {
+      schoolLabel.classList.remove('active');
+      classLabel.classList.add('active');
+    }
+  }
+}
+
+function renderPromoteStats() {
+  const container = document.getElementById('promoteStatsRow');
+  if (!container) return;
+
+  const sequence = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'];
+  let totalSchoolStudents = 0;
+  let graduatingCount = 0;
+  let currentClassCount = (appData[`${currentGrade}_${currentRoom}`] || []).length;
+
+  sequence.forEach(gId => {
+    const rooms = (appConfig.rooms && appConfig.rooms[gId]) || [];
+    rooms.forEach(r => {
+      const list = appData[`${gId}_${r}`] || [];
+      totalSchoolStudents += list.length;
+      if (gId === 'p6') graduatingCount += list.length;
+    });
+  });
+
+  const scope = document.querySelector('input[name="promoteScope"]:checked')?.value || 'school';
+
+  if (scope === 'school') {
+    container.innerHTML = `
+      <div class="promote-stat-card">
+        <div class="stat-num">${totalSchoolStudents}</div>
+        <div class="stat-text">นักเรียนทั้งหมดในระบบ</div>
+      </div>
+      <div class="promote-stat-card">
+        <div class="stat-num" style="color: #059669;">${Math.max(0, totalSchoolStudents - graduatingCount)}</div>
+        <div class="stat-text">ที่จะเลื่อนขึ้น 1 ระดับชั้น</div>
+      </div>
+      <div class="promote-stat-card">
+        <div class="stat-num" style="color: #D97706;">${graduatingCount}</div>
+        <div class="stat-text">ป.6 ที่จะจบการศึกษา</div>
+      </div>
+      <div class="promote-stat-card">
+        <div class="stat-num" style="color: #6366F1;">ป.1 ว่าง</div>
+        <div class="stat-text">พร้อมรับนักเรียนใหม่</div>
+      </div>
+    `;
+  } else {
+    const nextGId = getNextGradeId(currentGrade);
+    const nextLabel = nextGId ? getGradeLabel(nextGId) : 'จบการศึกษา';
+    container.innerHTML = `
+      <div class="promote-stat-card">
+        <div class="stat-num">${currentClassCount}</div>
+        <div class="stat-text">นักเรียนในห้องปัจจุบัน</div>
+      </div>
+      <div class="promote-stat-card">
+        <div class="stat-num" style="color: #059669;">➔ ${nextLabel}</div>
+        <div class="stat-text">ระดับชั้นปลายทาง</div>
+      </div>
+      <div class="promote-stat-card">
+        <div class="stat-num" style="color: #4338CA;">ห้อง ${currentRoom}</div>
+        <div class="stat-text">ห้องเรียนเดิม</div>
+      </div>
+    `;
+  }
+}
+
+async function executeAcademicPromotion() {
+  const scope = document.querySelector('input[name="promoteScope"]:checked')?.value || 'school';
+  const resetScores = document.getElementById('promoteResetScores')?.checked ?? true;
+  const resetFeedback = document.getElementById('promoteResetFeedback')?.checked ?? true;
+
+  const sequence = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'];
+  let promotedCount = 0;
+  let graduatedCount = 0;
+
+  if (scope === 'school') {
+    const newAppData = {};
+    if (!appData.alumni) appData.alumni = [];
+
+    // Loop backwards from highest grade down to lowest: p6 -> p5 -> p4 -> p3 -> p2 -> p1
+    for (let i = sequence.length - 1; i >= 0; i--) {
+      const gId = sequence[i];
+      const rooms = (appConfig.rooms && appConfig.rooms[gId]) || [];
+
+      if (gId === 'p6') {
+        // Students in P.6 graduate
+        rooms.forEach(r => {
+          const list = appData[`${gId}_${r}`] || [];
+          graduatedCount += list.length;
+          list.forEach(s => {
+            appData.alumni.push({
+              ...s,
+              graduatedFrom: `p6_${r}`,
+              graduatedYear: new Date().getFullYear() + 543
+            });
+          });
+        });
+      } else {
+        const nextGId = sequence[i + 1];
+        if (!appConfig.rooms[nextGId]) appConfig.rooms[nextGId] = [];
+
+        rooms.forEach(r => {
+          if (!appConfig.rooms[nextGId].includes(r)) {
+            appConfig.rooms[nextGId].push(r);
+          }
+          const sourceStudents = appData[`${gId}_${r}`] || [];
+          const targetKey = `${nextGId}_${r}`;
+          
+          newAppData[targetKey] = sourceStudents.map(s => ({
+            ...s,
+            scores: resetScores ? {} : { ...(s.scores || {}) },
+            feedback: resetFeedback ? '' : (s.feedback || '')
+          }));
+
+          promotedCount += sourceStudents.length;
+        });
+      }
+    }
+
+    // Set empty rooms for p1
+    ((appConfig.rooms && appConfig.rooms['p1']) || []).forEach(r => {
+      newAppData[`p1_${r}`] = [];
+    });
+
+    // Replace appData with newAppData while preserving alumni
+    const alumniBackup = appData.alumni || [];
+    appData = newAppData;
+    appData.alumni = alumniBackup;
+
+  } else {
+    // Current class only promotion
+    const nextGId = getNextGradeId(currentGrade);
+    const sourceKey = `${currentGrade}_${currentRoom}`;
+    const sourceStudents = appData[sourceKey] || [];
+
+    if (!appData.alumni) appData.alumni = [];
+
+    if (!nextGId) {
+      // Current is p6, so they graduate
+      graduatedCount = sourceStudents.length;
+      sourceStudents.forEach(s => {
+        appData.alumni.push({
+          ...s,
+          graduatedFrom: sourceKey,
+          graduatedYear: new Date().getFullYear() + 543
+        });
+      });
+      appData[sourceKey] = [];
+    } else {
+      // Promote to nextGId
+      if (!appConfig.rooms[nextGId]) appConfig.rooms[nextGId] = [];
+      if (!appConfig.rooms[nextGId].includes(currentRoom)) {
+        appConfig.rooms[nextGId].push(currentRoom);
+      }
+      const targetKey = `${nextGId}_${currentRoom}`;
+      appData[targetKey] = sourceStudents.map(s => ({
+        ...s,
+        scores: resetScores ? {} : { ...(s.scores || {}) },
+        feedback: resetFeedback ? '' : (s.feedback || '')
+      }));
+      appData[sourceKey] = [];
+      promotedCount = sourceStudents.length;
+      currentGrade = nextGId; // Switch view to new grade
+    }
+  }
+
+  // Save to LocalStorage
+  saveDataToStorage();
+  saveConfigToStorage();
+
+  // Sync to Neon Cloud Database
+  apiPost({ action: 'promote_students', studentsMap: appData });
+  apiPost({ action: 'save_config', config: appConfig });
+
+  // Update UI & Dropdowns
+  populateGradeDropdowns();
+  populateRoomDropdowns();
+  renderLeaderboardView();
+  renderTeacherView();
+
+  closePromoteModal();
+  artSound.playFanfare();
+  confettiEngine.fire(90);
+
+  const message = scope === 'school'
+    ? `🎓 เลื่อนชั้นเรียนทั้งโรงเรียนสำเร็จ! เลื่อนชั้น ${promotedCount} คน, ป.6 จบการศึกษา ${graduatedCount} คน`
+    : `🎓 เลื่อนชั้นเรียนห้อง ${currentRoom} สำเร็จแล้ว!`;
+  showToast(message);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Initialize Storage & Dropdowns
   loadStorage();
@@ -2383,6 +2626,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     addNewRoom(gId, rName);
     document.getElementById('configNewRoomName').value = '';
+  });
+
+  // 11.5. Academic Year Promotion Modal
+  document.getElementById('openPromoteYearBtn').addEventListener('click', () => {
+    artSound.playPop();
+    openPromoteModal();
+  });
+  document.getElementById('closePromoteModalBtn').addEventListener('click', closePromoteModal);
+  document.getElementById('cancelPromoteBtn').addEventListener('click', closePromoteModal);
+  document.getElementById('promoteYearModal').addEventListener('click', (e) => {
+    if (e.target.id === 'promoteYearModal') closePromoteModal();
+  });
+
+  document.getElementById('promoteBackupExcelBtn').addEventListener('click', () => {
+    exportAllClasses('xlsx');
+    showToast("ดาวน์โหลดไฟล์สำรองคะแนนทั้งหมดเรียบร้อยแล้ว!");
+  });
+
+  document.getElementById('promoteScopeSchool').addEventListener('change', () => {
+    updatePromoteModeCards();
+    renderPromoteStats();
+  });
+  document.getElementById('promoteScopeClass').addEventListener('change', () => {
+    updatePromoteModeCards();
+    renderPromoteStats();
+  });
+
+  const ackCheck = document.getElementById('promoteAcknowledgeCheck');
+  const confirmPromoteBtn = document.getElementById('confirmPromoteActionBtn');
+  ackCheck.addEventListener('change', () => {
+    confirmPromoteBtn.disabled = !ackCheck.checked;
+  });
+
+  confirmPromoteBtn.addEventListener('click', () => {
+    const scope = document.querySelector('input[name="promoteScope"]:checked')?.value || 'school';
+    const msg = scope === 'school'
+      ? "คุณแน่ใจหรือไม่ว่าต้องการเลื่อนชั้นเด็กทุกคนทั้งโรงเรียน (ป.1 - ป.6) ประจำปีการศึกษาใหม่?"
+      : `คุณแน่ใจหรือไม่ว่าต้องการเลื่อนชั้นเด็กนักเรียนห้อง ${getGradeLabel(currentGrade)} ห้อง ${currentRoom} ขึ้นสู่ระดับชั้นถัดไป?`;
+    
+    if (confirm(msg)) {
+      executeAcademicPromotion();
+    }
   });
 
   // 12. Import Modal

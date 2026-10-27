@@ -226,6 +226,9 @@
           <button id="manageRoomsBtn" class="btn btn-secondary-art" title="เพิ่ม/ลดห้องเรียนและระดับชั้น">
             <span>⚙️ จัดการห้องเรียน</span>
           </button>
+          <button id="openPromoteYearBtn" class="btn btn-indigo" title="เลื่อนชั้นเรียนเด็กทุกคนเมื่อขึ้นปีการศึกษาใหม่">
+            <span>🎓 เลื่อนชั้นเรียน (ขึ้นปีใหม่)</span>
+          </button>
           <button id="openImportBtn" class="btn btn-emerald" title="นำเข้าไฟล์ Excel หรือ CSV">
             <span>📥 นำเข้า Excel / CSV</span>
           </button>
@@ -667,6 +670,121 @@
         </button>
         <button type="button" id="confirmLogoutActionBtn" class="btn btn-danger-gradient btn-logout-confirm">
           <span>🚪 ยืนยันออกจากระบบ</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 9: ACADEMIC YEAR PROMOTION ================= -->
+  <div id="promoteYearModal" class="modal-overlay hidden">
+    <div class="modal-card modal-promote-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">🎓</span>
+          <div>
+            <h3>เลื่อนชั้นเรียนประจำปีการศึกษาใหม่</h3>
+            <p class="modal-subtitle-text">ระบบปรับระดับชั้นเด็กนักเรียนอัตโนมัติ (เช่น ป.4/1 ➔ ป.5/1) เมื่อเปิดภาคเรียนใหม่</p>
+          </div>
+        </div>
+        <button id="closePromoteModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <div class="promote-modal-body">
+        <!-- Backup Reminder Alert -->
+        <div class="promote-backup-banner">
+          <div class="backup-banner-left">
+            <span class="backup-icon">💾</span>
+            <div>
+              <strong>แนะนำให้สำรองข้อมูลก่อนเริ่ม:</strong>
+              <p>ดาวน์โหลดไฟล์คะแนนและข้อมูลของปีปัจจุบันเก็บไว้เป็นหลักฐาน ก่อนดำเนินการเลื่อนชั้น</p>
+            </div>
+          </div>
+          <button type="button" id="promoteBackupExcelBtn" class="btn btn-sm btn-amber">
+            <span>📥 สำรองคะแนน (.xlsx)</span>
+          </button>
+        </div>
+
+        <!-- Promotion Mode Selector -->
+        <div class="promote-section">
+          <h4 class="promote-section-title">1. เลือกรูปแบบการเลื่อนชั้นเรียน</h4>
+          
+          <div class="promote-mode-grid">
+            <label class="promote-mode-card active" id="promoteModeSchoolLabel">
+              <input type="radio" name="promoteScope" value="school" id="promoteScopeSchool" checked>
+              <div class="mode-card-content">
+                <div class="mode-card-header">
+                  <span class="mode-emoji">🏫</span>
+                  <strong>เลื่อนชั้นทั้งโรงเรียน (ทุกระดับชั้น ป.1 - ป.6)</strong>
+                </div>
+                <p class="mode-desc">เลื่อนเด็กทุกคนขึ้น 1 ระดับชั้นพร้อมกันทั้งโรงเรียนตามห้องเดิม (เช่น ป.4/1 ➔ ป.5/1, ป.5/1 ➔ ป.6/1 และ ป.6 จบการศึกษา)</p>
+                <div class="promote-flow-badge">
+                  <span>ป.1 ➔ ป.2 ➔ ป.3 ➔ ป.4 ➔ ป.5 ➔ ป.6 ➔ 🎓 จบการศึกษา</span>
+                </div>
+              </div>
+            </label>
+
+            <label class="promote-mode-card" id="promoteModeClassLabel">
+              <input type="radio" name="promoteScope" value="current_class" id="promoteScopeClass">
+              <div class="mode-card-content">
+                <div class="mode-card-header">
+                  <span class="mode-emoji">🚪</span>
+                  <strong>เลื่อนชั้นเฉพาะห้องปัจจุบัน (<span id="promoteCurrentClassLabel">ป.4/1</span>)</strong>
+                </div>
+                <p class="mode-desc">เลื่อนเฉพาะนักเรียนในห้องที่กำลังเลือกอยู่ ขึ้นไปเป็นระดับชั้นถัดไปห้องเดิม (เช่น <span id="promoteClassFlowPreview">ป.4/1 ➔ ป.5/1</span>)</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Promotion Summary / Preview Stats -->
+        <div class="promote-section">
+          <h4 class="promote-section-title">2. สรุปยอดนักเรียนที่จะดำเนินการ</h4>
+          <div class="promote-stats-row" id="promoteStatsRow">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Promotion Options Checkboxes -->
+        <div class="promote-section">
+          <h4 class="promote-section-title">3. ตัวเลือกการปรับข้อมูลสำหรับปีการศึกษาใหม่</h4>
+          <div class="promote-options-list">
+            <label class="promote-option-item">
+              <input type="checkbox" id="promoteResetScores" checked>
+              <div class="option-text">
+                <strong>รีเซ็ตคะแนนงานเป็น 0 (แนะนำสำหรับปีการศึกษาใหม่)</strong>
+                <span>นักเรียนจะเริ่มเก็บคะแนนชิ้นงานใหม่ในปีการศึกษาที่กำลังจะมาถึง</span>
+              </div>
+            </label>
+            <label class="promote-option-item">
+              <input type="checkbox" id="promoteResetFeedback" checked>
+              <div class="option-text">
+                <strong>ล้างคำติชมเดิมของคุณครู</strong>
+                <span>เพื่อเตรียมบันทึกคำติชมและพัฒนาการของนักเรียนสำหรับปีการศึกษาใหม่</span>
+              </div>
+            </label>
+            <label class="promote-option-item">
+              <input type="checkbox" id="promoteKeepStudentNumber" checked>
+              <div class="option-text">
+                <strong>คงเลขที่เดิมของนักเรียนไว้</strong>
+                <span>คงเลขที่ประจำตัวเดิมของเด็กแต่ละคน (สามารถปรับเปลี่ยนในห้องพักครูภายหลังได้)</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Confirmation Checkbox -->
+        <div class="promote-confirm-box">
+          <label class="promote-confirm-item">
+            <input type="checkbox" id="promoteAcknowledgeCheck">
+            <span>ฉันได้ตรวจสอบและเข้าใจว่าการเลื่อนชั้นเรียนจะมีผลต่อระดับชั้นของนักเรียนทันที</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="cancelPromoteBtn" class="btn btn-outline">ยกเลิก</button>
+        <button type="button" id="confirmPromoteActionBtn" class="btn btn-indigo" disabled>
+          <span>🎓 ยืนยันการเลื่อนชั้นเรียน</span>
         </button>
       </div>
     </div>

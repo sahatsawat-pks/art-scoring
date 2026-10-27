@@ -131,6 +131,38 @@ module.exports = async (req, res) => {
         return res.status(200).json({ success: true, count: students.length });
       }
 
+      if (action === 'promote_students') {
+        const { studentsMap } = body;
+        await sql`DELETE FROM art_students`;
+        if (studentsMap && typeof studentsMap === 'object') {
+          for (const [classKey, students] of Object.entries(studentsMap)) {
+            const parts = classKey.split('_');
+            if (parts.length >= 2 && Array.isArray(students)) {
+              const grade = parts[0];
+              const room = parts.slice(1).join('_');
+              for (const s of students) {
+                const scoresJson = JSON.stringify(s.scores || {});
+                await sql`
+                  INSERT INTO art_students (id, grade_id, room_id, no, name, nickname, avatar, scores, feedback, updated_at)
+                  VALUES (${s.id}, ${grade}, ${room}, ${s.no}, ${s.name}, ${s.nickname}, ${s.avatar}, ${scoresJson}::jsonb, ${s.feedback || ''}, NOW())
+                  ON CONFLICT (id) DO UPDATE SET
+                    grade_id = EXCLUDED.grade_id,
+                    room_id = EXCLUDED.room_id,
+                    no = EXCLUDED.no,
+                    name = EXCLUDED.name,
+                    nickname = EXCLUDED.nickname,
+                    avatar = EXCLUDED.avatar,
+                    scores = EXCLUDED.scores,
+                    feedback = EXCLUDED.feedback,
+                    updated_at = NOW();
+                `;
+              }
+            }
+          }
+        }
+        return res.status(200).json({ success: true });
+      }
+
       if (action === 'reset_data') {
         await sql`DROP TABLE IF EXISTS art_students;`;
         await sql`DROP TABLE IF EXISTS art_config;`;
