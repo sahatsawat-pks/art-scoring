@@ -50,6 +50,16 @@
       </div>
 
       <div class="header-actions">
+        <!-- Logged-in Teacher Header Badge -->
+        <div id="headerTeacherBadge" class="header-teacher-badge hidden" title="คุณครูที่กำลังเข้าสู่ระบบ (คลิกเพื่อเข้าสู่ห้องพักครู)">
+          <div class="teacher-badge-avatar">👩‍🏫</div>
+          <div class="teacher-badge-info">
+            <span class="teacher-badge-role">เข้าสู่ระบบโดย</span>
+            <span id="headerTeacherName" class="teacher-badge-name">คุณครู</span>
+          </div>
+          <span class="teacher-status-dot" title="ออนไลน์"></span>
+        </div>
+
         <!-- Sound FX Toggle -->
         <button id="soundToggleBtn" class="btn-icon" title="เปิด/ปิดเสียงเอฟเฟกต์">
           <span class="sound-icon">🔊</span>
@@ -619,6 +629,45 @@
 
       <div class="modal-footer">
         <button type="button" id="closeAccountFooterBtn" class="btn btn-outline">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 8: LOGOUT CONFIRMATION POP-UP ================= -->
+  <div id="logoutConfirmModal" class="modal-overlay hidden">
+    <div class="modal-card modal-logout-card">
+      <div class="logout-hero-art">
+        <div class="logout-icon-circle">
+          <span class="logout-hero-icon">🚪</span>
+        </div>
+        <span class="logout-art-badge">🎨</span>
+      </div>
+      
+      <h3 class="logout-modal-title">ยืนยันการออกจากระบบห้องพักครู</h3>
+      <p class="logout-modal-desc">
+        คุณครูต้องการออกจากระบบห้องพักครูใช่หรือไม่?
+      </p>
+
+      <div class="logout-teacher-card">
+        <div class="logout-teacher-avatar">👩‍🏫</div>
+        <div class="logout-teacher-details">
+          <span class="logout-teacher-title">บัญชีผู้สอนปัจจุบัน</span>
+          <strong id="logoutTeacherName" class="logout-teacher-name">คุณครู</strong>
+        </div>
+        <span class="logout-teacher-status">กำลังใช้งาน</span>
+      </div>
+
+      <div class="logout-security-note">
+        <span>✨ ข้อมูลคะแนนและงานที่บันทึกไว้ได้รับการซิงค์อย่างปลอดภัยแล้ว</span>
+      </div>
+
+      <div class="modal-actions-dual">
+        <button type="button" id="cancelLogoutBtn" class="btn btn-outline btn-logout-cancel">
+          <span>ยกเลิก (อยู่ในระบบต่อ)</span>
+        </button>
+        <button type="button" id="confirmLogoutActionBtn" class="btn btn-danger-gradient btn-logout-confirm">
+          <span>🚪 ยืนยันออกจากระบบ</span>
+        </button>
       </div>
     </div>
   </div>

@@ -240,6 +240,81 @@ body {
   gap: 12px;
 }
 
+/* Header Logged-in Teacher Badge */
+.header-teacher-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #EEF2FF, #FAF5FF);
+  border: 1.5px solid #C7D2FE;
+  padding: 5px 14px 5px 10px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.12);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: fadeInDown 0.3s ease;
+}
+
+.header-teacher-badge:hover {
+  transform: translateY(-2px) scale(1.02);
+  background: linear-gradient(135deg, #E0E7FF, #F3E8FF);
+  border-color: #818CF8;
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.22);
+}
+
+.teacher-badge-avatar {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.teacher-badge-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.teacher-badge-role {
+  font-size: 0.68rem;
+  color: #6366F1;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.teacher-badge-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #312E81;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teacher-status-dot {
+  width: 9px;
+  height: 9px;
+  background-color: #10B981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  animation: dotPulse 2s infinite ease-in-out;
+}
+
+@keyframes dotPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
 /* Sound Button */
 .btn-icon {
   background: white;
@@ -1847,18 +1922,57 @@ body {
    MODAL 1: STUDENT FULL DETAILS / PASSPORT
    ======================================================== */
 .modal-student-passport {
-  max-width: 620px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   border-radius: var(--radius-lg);
-  overflow: hidden;
   padding: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-student-passport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-student-passport::-webkit-scrollbar-track {
+  background: #F1F5F9;
+  border-radius: 0 16px 16px 0;
+}
+
+.modal-student-passport::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+.modal-student-passport::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
 }
 
 .modal-student-passport .close-modal-btn {
-  position: absolute;
+  position: sticky;
   top: 14px;
-  right: 14px;
-  z-index: 10;
-  background: rgba(255, 255, 255, 0.85);
+  align-self: flex-end;
+  margin-right: 14px;
+  margin-bottom: -40px;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.modal-student-passport .close-modal-btn:hover {
+  transform: scale(1.1) rotate(90deg);
+  background: white;
 }
 
 .passport-hero-banner {
@@ -2332,6 +2446,177 @@ body {
   font-family: var(--font-fun);
   margin-top: 4px;
   color: var(--art-primary);
+}
+
+/* ========================================================
+   LOGOUT CONFIRMATION MODAL
+   ======================================================== */
+.modal-logout-card {
+  max-width: 440px;
+  text-align: center;
+  padding: 32px 28px 24px;
+  border-radius: 28px;
+  background: #FFFFFF;
+  border: 2px solid #FEE2E2;
+  box-shadow: 0 20px 50px rgba(239, 68, 68, 0.15), 0 10px 25px rgba(0, 0, 0, 0.08);
+  animation: modalBounceIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalBounceIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.logout-hero-art {
+  position: relative;
+  display: inline-flex;
+  margin-bottom: 16px;
+}
+
+.logout-icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FEE2E2, #FFEDD5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.18);
+  border: 3px solid #FFFFFF;
+}
+
+.logout-hero-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.logout-art-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  font-size: 1.3rem;
+  background: #FFFFFF;
+  border-radius: 50%;
+  padding: 2px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: pulseSparkle 2s infinite;
+}
+
+.logout-modal-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1F2937;
+  margin-bottom: 6px;
+}
+
+.logout-modal-desc {
+  font-size: 0.95rem;
+  color: #4B5563;
+  margin-bottom: 18px;
+}
+
+.logout-teacher-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #F9FAFB;
+  border: 1.5px dashed #CBD5E1;
+  border-radius: 16px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.logout-teacher-avatar {
+  font-size: 1.8rem;
+  line-height: 1;
+  background: #EFF6FF;
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.logout-teacher-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.logout-teacher-title {
+  display: block;
+  font-size: 0.72rem;
+  color: #6B7280;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.logout-teacher-name {
+  display: block;
+  font-size: 0.96rem;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logout-teacher-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #059669;
+  background: #D1FAE5;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.logout-security-note {
+  font-size: 0.8rem;
+  color: #059669;
+  background: #ECFDF5;
+  border-radius: 10px;
+  padding: 6px 12px;
+  margin-bottom: 22px;
+  display: inline-block;
+}
+
+.modal-actions-dual {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-logout-cancel {
+  flex: 1;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.btn-danger-gradient {
+  flex: 1.2;
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: #FFFFFF !important;
+  border: none;
+  padding: 10px 18px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.92rem;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-danger-gradient:hover {
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45);
 }
 
 /* ========================================================

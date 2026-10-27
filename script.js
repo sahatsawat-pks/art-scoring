@@ -666,7 +666,6 @@ function openStudentDetailModal(student, rank = null) {
   const actualRank = rank !== null ? rank : (ranked.findIndex(s => s.id === student.id) + 1);
   const total = calcStudentTotalScore(student);
   const totalMax = getTotalMaxScore();
-  const gradeInfo = getLetterGrade(total, totalMax);
   const tier = getArtRankTier(total, actualRank, totalMax);
   const tasks = getActiveAssignments();
 
@@ -728,8 +727,7 @@ function openStudentDetailModal(student, rank = null) {
         <div class="scores-card-header">
           <span class="scores-card-title">🎯 คะแนนสะสมรวมตามงาน (${getSubmittedTasksCount(student)}/${tasks.length} ชิ้นงาน)</span>
           <div class="scores-big-total">
-            ${total} <small>/ ${totalMax}</small>
-            <span class="art-tier-badge ${tier.class}" style="font-size: 0.8rem; margin-left: 6px;">เกรด ${gradeInfo.grade}</span>
+            ${total} <small>/ ${totalMax} คะแนน</small>
           </div>
         </div>
 
@@ -908,7 +906,6 @@ function renderRankTable(ranked) {
     const actualRank = ranked.findIndex(item => item.id === student.id) + 1;
     const total = calcStudentTotalScore(student);
     const tier = getArtRankTier(total, actualRank, totalMax);
-    const gradeInfo = getLetterGrade(total, totalMax);
 
     let rankBadgeClass = 'rank-badge-other';
     let rankBadgeContent = actualRank;
@@ -1805,7 +1802,6 @@ function getExportDataForClass(gradeId, roomId) {
   return list.map((s, index) => {
     const rank = index + 1;
     const total = calcStudentTotalScore(s);
-    const letter = getLetterGrade(total, totalMax);
     const tier = getArtRankTier(total, rank, totalMax);
 
     const rowObj = {
@@ -1824,7 +1820,6 @@ function getExportDataForClass(gradeId, roomId) {
     });
 
     rowObj[`คะแนนรวม (${totalMax})`] = total;
-    rowObj["เกรด"] = letter.grade;
     rowObj["ฉายาทางศิลปะ"] = tier.title;
     rowObj["คำติชมของครู"] = s.feedback || '';
 
@@ -1966,8 +1961,29 @@ function switchView(viewName) {
 function updateTeacherAuthUI(user = null) {
   const current = user || getLoggedInTeacher();
   const chip = document.getElementById('loggedInUserChip');
-  if (chip && current) {
-    chip.textContent = `👤 ${current.displayName || current.username}`;
+  const headerBadge = document.getElementById('headerTeacherBadge');
+  const headerName = document.getElementById('headerTeacherName');
+
+  if (current) {
+    const displayName = current.displayName || current.username;
+    if (chip) {
+      chip.textContent = `👩‍🏫 ${displayName}`;
+      chip.title = `บัญชีผู้สอน: ${displayName} (@${current.username})`;
+    }
+    if (headerName) {
+      headerName.textContent = displayName;
+    }
+    if (headerBadge) {
+      headerBadge.classList.remove('hidden');
+    }
+  } else {
+    if (chip) {
+      chip.textContent = '👤 ครูผู้ดูแลระบบ';
+      chip.removeAttribute('title');
+    }
+    if (headerBadge) {
+      headerBadge.classList.add('hidden');
+    }
   }
 }
 
@@ -2023,13 +2039,33 @@ async function handleTeacherLoginSubmit(e) {
   }
 }
 
-function handleTeacherLogout() {
-  if (confirm("คุณต้องการออกจากระบบห้องพักครูใช่หรือไม่?")) {
-    clearLoggedInTeacher();
-    switchView('leaderboard');
-    artSound.playPop();
-    showToast("ออกจากระบบห้องพักครูเรียบร้อยแล้ว");
+function openLogoutConfirmModal() {
+  const current = getLoggedInTeacher();
+  const nameEl = document.getElementById('logoutTeacherName');
+  if (nameEl) {
+    if (current) {
+      nameEl.textContent = `${current.displayName || current.username} (@${current.username})`;
+    } else {
+      nameEl.textContent = 'คุณครูผู้ดูแลระบบ';
+    }
   }
+  const modal = document.getElementById('logoutConfirmModal');
+  if (modal) modal.classList.remove('hidden');
+  artSound.playPop();
+}
+
+function closeLogoutConfirmModal() {
+  const modal = document.getElementById('logoutConfirmModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function executeTeacherLogout() {
+  closeLogoutConfirmModal();
+  clearLoggedInTeacher();
+  updateTeacherAuthUI(null);
+  switchView('leaderboard');
+  artSound.playPop();
+  showToast("ออกจากระบบห้องพักครูเรียบร้อยแล้ว ขอบคุณครับ/ค่ะคุณครู ✨");
 }
 
 // ==========================================
@@ -2236,7 +2272,23 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('cancelLoginBtn').addEventListener('click', closeTeacherLoginModal);
   document.getElementById('teacherLoginForm').addEventListener('submit', handleTeacherLoginSubmit);
 
-  document.getElementById('logoutBtn').addEventListener('click', handleTeacherLogout);
+  // Logout Confirmation Modal Listeners
+  document.getElementById('logoutBtn').addEventListener('click', openLogoutConfirmModal);
+  document.getElementById('cancelLogoutBtn').addEventListener('click', closeLogoutConfirmModal);
+  document.getElementById('confirmLogoutActionBtn').addEventListener('click', executeTeacherLogout);
+  document.getElementById('logoutConfirmModal').addEventListener('click', (e) => {
+    if (e.target.id === 'logoutConfirmModal') closeLogoutConfirmModal();
+  });
+
+  // Header Teacher Badge Click Listener
+  document.getElementById('headerTeacherBadge').addEventListener('click', () => {
+    artSound.playPop();
+    const user = getLoggedInTeacher();
+    if (user) {
+      updateTeacherAuthUI(user);
+      switchView('teacher');
+    }
+  });
 
   document.getElementById('manageAccountsBtn').addEventListener('click', () => {
     artSound.playPop();
@@ -2422,7 +2474,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 15. Initial Render & Cloud DB Sync
+  // 15. Initial Render, Auth State & Cloud DB Sync
+  updateTeacherAuthUI();
   renderLeaderboardView();
   checkAndSyncCloudDb();
   setTimeout(() => confettiEngine.fire(50), 400);
