@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบบันทึกคะแนนเก็บตามงาน (Art Leaderboard)</title>
+  <!-- Favicon with 🎨 emoji -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- SheetJS library for robust Excel (.xlsx) import & export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Animated Background Elements -->
+  <div class="art-bg-canvas" id="artBgCanvas">
+    <div class="paint-blob blob-1"></div>
+    <div class="paint-blob blob-2"></div>
+    <div class="paint-blob blob-3"></div>
+    <div class="paint-blob blob-4"></div>
+    <div class="paint-splatter sp-1"></div>
+    <div class="paint-splatter sp-2"></div>
+    <div class="paint-splatter sp-3"></div>
+    <div class="floating-art-item item-brush">🖌️</div>
+    <div class="floating-art-item item-palette">🎨</div>
+    <div class="floating-art-item item-crayon">🖍️</div>
+    <div class="floating-art-item item-star">✨</div>
+    <div class="floating-art-item item-easel">🖼️</div>
+  </div>
+
+  <!-- Confetti Canvas for Celebrations -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Navigation / Header -->
+  <header class="app-header">
+    <div class="container header-container">
+      <div class="brand-group">
+        <div class="palette-logo" id="logoInteractive" title="คลิกเพื่อสาดสี!">
+          <span class="logo-emoji">🎨</span>
+          <span class="sparkle-spark">✨</span>
+        </div>
+        <div class="brand-text">
+          <span class="badge-sub">วิชาทัศนศิลป์และศิลปะสร้างสรรค์</span>
+          <h1 class="brand-title">Art Classroom Leaderboard</h1>
+          <p class="brand-caption">ระบบบันทึกคะแนนเก็บตามชิ้นงาน & ทำเนียบจิตรกรน้อย</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Sound FX Toggle -->
+        <button id="soundToggleBtn" class="btn-icon" title="เปิด/ปิดเสียงเอฟเฟกต์">
+          <span class="sound-icon">🔊</span>
+          <span class="btn-text-sm">เสียงเอฟเฟกต์</span>
+        </button>
+
+        <!-- Mode Switcher Tabs -->
+        <div class="view-switch-nav">
+          <button id="viewLeaderboardBtn" class="nav-tab active">
+            <span class="tab-icon">🏆</span>
+            <span class="tab-text">ทำเนียบแรงกิ้ง</span>
+          </button>
+          <button id="viewTeacherBtn" class="nav-tab">
+            <span class="tab-icon">👩‍🏫</span>
+            <span class="tab-text">ห้องพักครู (จัดการระบบ)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content container">
+
+    <!-- ==================== VIEW 1: STUDENT LEADERBOARD ==================== -->
+    <section id="leaderboardView" class="view-section active-view">
+      
+      <!-- Class Selector Banner -->
+      <div class="class-picker-card">
+        <div class="picker-intro">
+          <div class="easel-icon-tag">🎨</div>
+          <div>
+            <h2 class="picker-title">เลือกห้องเรียนศิลปะ</h2>
+            <p class="picker-subtitle">ดูแรงกิ้งคะแนนสะสมตามชิ้นงานที่สั่ง (คลิกที่ชื่อเพื่อดูคะแนนแต่ละงาน)</p>
+          </div>
+        </div>
+
+        <div class="selectors-wrapper">
+          <div class="select-group">
+            <label for="gradeSelect"><span class="label-icon">🎒</span> ระดับชั้น:</label>
+            <div class="custom-select-box">
+              <select id="gradeSelect">
+                <!-- Dynamically populated from config -->
+              </select>
+            </div>
+          </div>
+
+          <div class="select-group">
+            <label for="roomSelect"><span class="label-icon">🚪</span> ห้องเรียน:</label>
+            <div class="custom-select-box">
+              <select id="roomSelect">
+                <!-- Dynamically populated from config -->
+              </select>
+            </div>
+          </div>
+
+          <button id="celebrateBtn" class="btn btn-bounce" title="จุดพลุฉลองผลงานยอดเยี่ยม">
+            <span>🎉 จุดพลุยินดี</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Current Class Banner Bar -->
+      <div class="current-class-badge-strip">
+        <div class="strip-left">
+          <span class="paint-dot"></span>
+          <span class="strip-title" id="currentClassTitle">กำลังแสดง: ชั้นประถมศึกษาปีที่ 4 ห้อง 1</span>
+          <span class="student-count-chip" id="studentCountChip">12 คน</span>
+          <span class="task-summary-chip" id="taskSummaryChip">4 ชิ้นงาน (เต็ม 100 คะแนน)</span>
+        </div>
+        <div class="strip-right">
+          <span class="hint-clickable">💡 คลิกที่ชื่อนักเรียนเพื่อดู <strong>คะแนนเก็บแยกตามชิ้นงานฉบับเต็ม</strong></span>
+        </div>
+      </div>
+
+      <!-- ================= PODIUM SECTION (TOP 3) ================= -->
+      <div class="podium-area-wrapper">
+        <div class="podium-header-banner">
+          <div class="sparkle-line"></div>
+          <h2 class="podium-title">👑 ทำเนียบ 3 ยอดจิตรกรเอก 👑</h2>
+          <p class="podium-desc">ผู้มีคะแนนสะสมรวมจากชิ้นงานศิลปะสูงสุดประจำห้อง</p>
+          <div class="sparkle-line"></div>
+        </div>
+
+        <div class="podium-stage" id="podiumStage">
+          <!-- Rank 2: Silver (Left) -->
+          <div class="podium-slot slot-rank2" id="slotRank2"></div>
+
+          <!-- Rank 1: Gold (Center & Highest) -->
+          <div class="podium-slot slot-rank1" id="slotRank1"></div>
+
+          <!-- Rank 3: Bronze (Right) -->
+          <div class="podium-slot slot-rank3" id="slotRank3"></div>
+        </div>
+      </div>
+
+      <!-- ================= ALL STUDENTS RANKING TABLE / LIST ================= -->
+      <div class="leaderboard-full-list-card">
+        <div class="list-card-header">
+          <div class="header-left">
+            <h3 class="list-title">📋 รายชื่อนักเรียนทุกคนเรียงลำดับคะแนนรวม</h3>
+            <span class="list-subtitle" id="tableHeaderSubtitle">คะแนนประเมินตามชิ้นงานที่สั่ง</span>
+          </div>
+
+          <div class="header-tools">
+            <div class="search-input-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="studentSearchInput" placeholder="ค้นหาชื่อ, เลขที่ หรือชื่อเล่น...">
+              <button id="clearSearchBtn" class="clear-search-btn" title="ล้างการค้นหา">&times;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Table -->
+        <div class="table-responsive">
+          <table class="art-rank-table" id="rankTable">
+            <thead>
+              <tr id="rankTableHeadRow">
+                <!-- Dynamically rendered based on active assignments -->
+              </tr>
+            </thead>
+            <tbody id="rankTableBody">
+              <!-- Rendered via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="noResultsState" class="empty-state hidden">
+          <span class="empty-icon">🎨🔍</span>
+          <h4>ไม่พบข้อมูลนักเรียนที่ค้นหา</h4>
+          <p>ลองค้นหาด้วยคำอื่น หรือเพิ่มรายชื่อในห้องพักครู</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: TEACHER MANAGEMENT & CONFIG PORTAL ==================== -->
+    <section id="teacherView" class="view-section">
+      
+      <!-- Top Teacher Command Center Banner -->
+      <div class="teacher-control-banner">
+        <div class="teacher-banner-left">
+          <div class="teacher-avatar-badge">👩‍🎨</div>
+          <div>
+            <h2 class="teacher-title">ศูนย์จัดการข้อมูล & กรอกคะแนนตามชิ้นงาน (Teacher Portal)</h2>
+            <p class="teacher-sub">กำหนดหัวข้องาน/คะแนนเต็ม เพิ่มห้อง จัดการรายชื่อ นำเข้า-ส่งออก Excel/CSV ครบวงจร</p>
+          </div>
+        </div>
+        <div class="teacher-banner-actions">
+          <div class="teacher-auth-chip-group">
+            <span id="loggedInUserChip" class="logged-in-chip">👤 ครูผู้ดูแลระบบ</span>
+            <button id="manageAccountsBtn" class="btn btn-sm btn-outline" title="เพิ่มและจัดการบัญชีผู้ใช้งาน">
+              <span>👥 เพิ่ม / จัดการ Account</span>
+            </button>
+            <button id="logoutBtn" class="btn btn-sm btn-outline-danger" title="ออกจากระบบห้องพักครู">
+              <span>🚪 ออกจากระบบ</span>
+            </button>
+          </div>
+          <button id="manageTasksBtn" class="btn btn-purple" title="เพิ่ม/ลด/แก้ไข หัวข้องานที่สั่งและคะแนนเต็ม">
+            <span>📝 จัดการหัวข้องาน</span>
+          </button>
+          <button id="addNewStudentBtn" class="btn btn-art-primary" title="เพิ่มนักเรียนคนใหม่ในห้องปัจจุบัน">
+            <span>➕ เพิ่มนักเรียนใหม่</span>
+          </button>
+          <button id="manageRoomsBtn" class="btn btn-secondary-art" title="เพิ่ม/ลดห้องเรียนและระดับชั้น">
+            <span>⚙️ จัดการห้องเรียน</span>
+          </button>
+          <button id="openImportBtn" class="btn btn-emerald" title="นำเข้าไฟล์ Excel หรือ CSV">
+            <span>📥 นำเข้า Excel / CSV</span>
+          </button>
+          
+          <!-- Export Dropdown -->
+          <div class="dropdown-wrapper">
+            <button id="exportDropdownBtn" class="btn btn-amber">
+              <span>📤 ส่งออกคะแนน (Export) ▾</span>
+            </button>
+            <div id="exportMenu" class="dropdown-menu hidden">
+              <a href="#" id="exportCurrentExcelBtn" class="dropdown-item">📊 ส่งออกห้องปัจจุบัน (.xlsx)</a>
+              <a href="#" id="exportCurrentCsvBtn" class="dropdown-item">📄 ส่งออกห้องปัจจุบัน (.csv)</a>
+              <div class="dropdown-divider"></div>
+              <a href="#" id="exportAllExcelBtn" class="dropdown-item">📚 ส่งออกทุกห้องเรียน (.xlsx)</a>
+              <a href="#" id="exportAllCsvBtn" class="dropdown-item">📑 ส่งออกทุกห้องเรียน (.csv)</a>
+            </div>
+          </div>
+
+          <button id="resetSampleDataBtn" class="btn btn-outline" title="รีเซ็ตข้อมูลตัวอย่างกลับเป็นค่าเริ่มต้น">
+            <span>🔄 รีเซ็ตข้อมูล</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Class Selection Bar for Teacher -->
+      <div class="teacher-filter-bar">
+        <div class="filter-item">
+          <label>ระดับชั้น:</label>
+          <select id="teacherGradeSelect" class="form-input-sm">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+        <div class="filter-item">
+          <label>ห้องเรียน:</label>
+          <select id="teacherRoomSelect" class="form-input-sm">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+        <div class="filter-item">
+          <button id="quickAddRoomBtn" class="btn-text-action" title="สร้างห้องใหม่ในระดับชั้นนี้">+ เพิ่มห้องใหม่</button>
+        </div>
+        <div class="filter-item">
+          <button id="quickAddTaskBtn" class="btn-text-action" style="color: #9D4EDD;" title="สั่งงานชิ้นใหม่">+ สั่งงานใหม่</button>
+        </div>
+        <div class="filter-info">
+          <span>💡 <strong>เคล็ดลับ:</strong> พิมพ์กรอกคะแนนตามช่องงานที่สั่งได้ทันที ระบบ Auto-save บันทึกอัตโนมัติ และอัปเดตโพเดียม Real-time</span>
+        </div>
+      </div>
+
+      <!-- Teacher Scoring Grid/Table -->
+      <div class="teacher-table-card">
+        <div class="table-responsive">
+          <table class="teacher-table" id="teacherTable">
+            <thead>
+              <tr id="teacherTableHeadRow">
+                <!-- Dynamically rendered based on active assignments -->
+              </tr>
+            </thead>
+            <tbody id="teacherTableBody">
+              <!-- Rendered via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODAL 1: STUDENT FULL DETAILS (สำหรับเด็กกดดูคะแนนตามงาน) ================= -->
+  <div id="studentDetailModal" class="modal-overlay hidden">
+    <div class="modal-card modal-student-passport">
+      <button id="closeDetailModalBtn" class="close-modal-btn">&times;</button>
+      <div id="studentDetailContent">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 2: ADD / EDIT STUDENT ================= -->
+  <div id="studentModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">🎨</span>
+          <h3 id="modalTitle">เพิ่มข้อมูลนักเรียนศิลปะ</h3>
+        </div>
+        <button id="closeModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <form id="studentForm" class="modal-form">
+        <input type="hidden" id="editStudentId">
+
+        <div class="form-row">
+          <div class="form-group col-4">
+            <label for="inputStudentNo">เลขที่ *</label>
+            <input type="number" id="inputStudentNo" min="1" max="99" required placeholder="เช่น 1">
+          </div>
+          <div class="form-group col-8">
+            <label for="inputStudentName">ชื่อ - นามสกุล *</label>
+            <input type="text" id="inputStudentName" required placeholder="เช่น ด.ช. ธนกร ศิลป์เลิศ">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-5">
+            <label for="inputNickname">ชื่อเล่น</label>
+            <input type="text" id="inputNickname" placeholder="เช่น อาร์ต">
+          </div>
+          <div class="form-group col-7">
+            <label for="inputAvatar">อิโมจิประจำตัว / มาสคอต</label>
+            <select id="inputAvatar">
+              <option value="👦">👦 เด็กชาย (อาร์ตติสท์)</option>
+              <option value="👧">👧 เด็กหญิง (จิตรกรน้อย)</option>
+              <option value="🦊">🦊 จิ้งจอกช่างวาด</option>
+              <option value="🐱">🐱 แมวน้อยสีพาสเทล</option>
+              <option value="🐼">🐼 แพนด้ามือศิลป์</option>
+              <option value="🦁">🦁 สิงโตหัวใจศิลป์</option>
+              <option value="🦄">🦄 ยูนิคอร์นแฟนตาซี</option>
+              <option value="🐰">🐰 กระต่ายน้อยร่าเริง</option>
+              <option value="🦖">🦖 ไดโนเสาร์สร้างสรรค์</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Dynamic Assignments Score Input Container -->
+        <div class="rubric-box">
+          <div class="rubric-header">
+            <span>📝 คะแนนตามงานที่สั่งในห้องเรียน</span>
+            <span class="rubric-total-badge" id="modalScoreSum">รวม: 0 / 100</span>
+          </div>
+          <div class="tasks-modal-grid" id="modalTasksGrid">
+            <!-- Injected dynamically based on active assignments -->
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputTeacherFeedback">คำชื่นชมและข้อเสนอแนะจากคุณครู</label>
+          <textarea id="inputTeacherFeedback" rows="2" placeholder="เช่น ส่งงานตรงเวลา ลายเส้นมีความมั่นใจและกล้าแสดงออก"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelModalBtn" class="btn btn-outline">ยกเลิก</button>
+          <button type="submit" class="btn btn-art-primary">💾 บันทึกข้อมูล</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 3: ASSIGNMENT / TASK MANAGER (จัดการหัวข้องาน) ================= -->
+  <div id="taskManagerModal" class="modal-overlay hidden">
+    <div class="modal-card modal-task-manager">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">📝</span>
+          <h3>จัดการหัวข้องานศิลปะที่สั่ง (Assignments)</h3>
+        </div>
+        <button id="closeTaskManagerModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <div class="config-modal-body">
+        <!-- Add New Assignment Box -->
+        <div class="config-create-box">
+          <h4>➕ เพิ่มหัวข้องานใหม่</h4>
+          <div class="task-create-row">
+            <input type="text" id="newTaskTitle" placeholder="เช่น งานที่ 5: ปั้นดินน้ำมันสร้างสรรค์" class="task-input-title">
+            <div class="task-maxscore-group">
+              <label>คะแนนเต็ม:</label>
+              <input type="number" id="newTaskMaxScore" min="1" max="100" value="20" class="task-input-score">
+            </div>
+            <button id="submitNewTaskBtn" class="btn btn-purple">เพิ่มชิ้นงาน</button>
+          </div>
+          <small class="hint-text">* เมื่อเพิ่มงานใหม่ ระบบจะเพิ่มช่องกรอกคะแนนให้นักเรียนทุกคนโดยอัตโนมัติ</small>
+        </div>
+
+        <!-- Assignments List -->
+        <div class="config-list-box">
+          <div class="tasks-summary-bar">
+            <h4>📋 รายการชิ้นงานปัจจุบัน (<span id="taskCountLabel">0</span> งาน)</h4>
+            <span class="total-max-badge" id="totalMaxScoreBadge">คะแนนเต็มรวม: 0 คะแนน</span>
+          </div>
+          <div id="tasksListContainer" class="tasks-list-scroll">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="closeTaskManagerFooterBtn" class="btn btn-outline">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 4: ROOM & CLASS CONFIGURATION (จัดการห้องเรียน) ================= -->
+  <div id="roomConfigModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">⚙️</span>
+          <h3>จัดการระดับชั้นและห้องเรียน (Room Config)</h3>
+        </div>
+        <button id="closeRoomConfigModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <div class="config-modal-body">
+        <div class="config-create-box">
+          <h4>➕ เพิ่มห้องเรียนใหม่</h4>
+          <div class="config-create-row">
+            <select id="configNewRoomGrade">
+              <!-- Dynamically populated -->
+            </select>
+            <input type="text" id="configNewRoomName" placeholder="เช่น 4 หรือ ห้องดนตรี/ศิลปะ">
+            <button id="submitNewRoomBtn" class="btn btn-art-primary">บันทึกเพิ่มห้อง</button>
+          </div>
+          <small class="hint-text">* หากพิมพ์เลข 4 จะกลายเป็น "ห้อง 4" โดยอัตโนมัติ</small>
+        </div>
+
+        <div class="config-list-box">
+          <h4>📋 รายการห้องเรียนทั้งหมดในระบบ</h4>
+          <div id="configRoomsListContainer" class="config-rooms-tree">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="closeRoomConfigFooterBtn" class="btn btn-outline">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 5: EXCEL / CSV IMPORT ================= -->
+  <div id="importModal" class="modal-overlay hidden">
+    <div class="modal-card modal-import-wide">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">📥</span>
+          <h3>นำเข้าข้อมูลนักเรียนและคะแนนตามงานจาก Excel / CSV</h3>
+        </div>
+        <button id="closeImportModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <div class="import-modal-body">
+        <!-- Target Class Indicator -->
+        <div class="import-target-banner">
+          <div>
+            <strong>ห้องเรียนเป้าหมาย:</strong>
+            <span id="importTargetLabel" class="target-chip">ชั้น ป.4 ห้อง 1</span>
+          </div>
+          <button id="downloadTemplateBtn" class="btn btn-outline btn-sm">
+            <span>📥 ดาวน์โหลดไฟล์ตัวอย่าง Template (.csv)</span>
+          </button>
+        </div>
+
+        <!-- Drop Area -->
+        <div class="file-dropzone" id="fileDropzone">
+          <input type="file" id="fileInputExcel" accept=".csv, .xlsx, .xls" class="hidden-file-input">
+          <div class="dropzone-inner">
+            <span class="dropzone-icon">📁</span>
+            <h4>ลากไฟล์ Excel (.xlsx) หรือ CSV มาวางที่นี่</h4>
+            <p>หรือคลิกเพื่อเลือกไฟล์จากคอมพิวเตอร์ของคุณ</p>
+            <span class="file-spec-tag">รองรับ: .xlsx, .xls, .csv (UTF-8)</span>
+          </div>
+        </div>
+
+        <!-- File Uploaded Info & Preview -->
+        <div id="importPreviewArea" class="import-preview-area hidden">
+          <div class="preview-header">
+            <h4>ตัวอย่างข้อมูลที่พบ (<span id="previewCount">0</span> รายการ)</h4>
+            <div class="import-mode-radio">
+              <label>
+                <input type="radio" name="importMode" value="append" checked> เพิ่มต่อท้าย
+              </label>
+              <label>
+                <input type="radio" name="importMode" value="replace"> เขียนทับห้องนี้ทั้งหมด
+              </label>
+            </div>
+          </div>
+          <div class="table-responsive preview-table-wrapper">
+            <table class="preview-table" id="importPreviewTable">
+              <thead>
+                <tr id="previewTableHeadRow">
+                  <!-- Rendered dynamically based on active assignments -->
+                </tr>
+              </thead>
+              <tbody id="importPreviewTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="cancelImportBtn" class="btn btn-outline">ยกเลิก</button>
+        <button type="button" id="confirmImportBtn" class="btn btn-art-primary" disabled>
+          <span>🚀 ยืนยันนำเข้าข้อมูล</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 6: TEACHER AUTHENTICATION (LOGIN) ================= -->
+  <div id="teacherLoginModal" class="modal-overlay hidden">
+    <div class="modal-card modal-auth-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">🔐</span>
+          <h3>เข้าสู่ระบบห้องพักครู</h3>
+        </div>
+        <button id="closeLoginModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <form id="teacherLoginForm" class="modal-form">
+        <p class="auth-intro-text">กรุณากรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าใช้งานระบบจัดการคะแนนและข้อมูลห้องเรียน</p>
+        
+        <div id="loginErrorMsg" class="auth-error-alert hidden">
+          <span>⚠️</span> <span id="loginErrorText">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</span>
+        </div>
+
+        <div class="form-group">
+          <label for="loginUsername">ชื่อผู้ใช้ (Username) *</label>
+          <input type="text" id="loginUsername" required autocomplete="username" placeholder="กรอก Username ของคุณครู">
+        </div>
+
+        <div class="form-group">
+          <label for="loginPassword">รหัสผ่าน (Password) *</label>
+          <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="กรอกรหัสผ่าน">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelLoginBtn" class="btn btn-outline">ยกเลิก</button>
+          <button type="submit" class="btn btn-art-primary">🔐 เข้าสู่ระบบ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 7: TEACHER ACCOUNT MANAGER ================= -->
+  <div id="accountManagerModal" class="modal-overlay hidden">
+    <div class="modal-card modal-account-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">👥</span>
+          <h3>จัดการบัญชีผู้สอน (Teacher Accounts)</h3>
+        </div>
+        <button id="closeAccountModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <div class="config-modal-body">
+        <!-- Create Account Form -->
+        <div class="config-create-box">
+          <h4>➕ เพิ่มบัญชีผู้ใช้ใหม่ (Add Account)</h4>
+          <form id="createAccountForm" class="account-create-form">
+            <div class="form-row">
+              <div class="form-group col-6">
+                <label for="newAccountUsername">ชื่อผู้ใช้ (Username) *</label>
+                <input type="text" id="newAccountUsername" required placeholder="เช่น kru_somchai">
+              </div>
+              <div class="form-group col-6">
+                <label for="newAccountDisplayName">ชื่อ-นามสกุล / ชื่อที่แสดง *</label>
+                <input type="text" id="newAccountDisplayName" required placeholder="เช่น คุณครูสมชาย ศิลป์เจริญ">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-6">
+                <label for="newAccountPassword">รหัสผ่าน *</label>
+                <input type="password" id="newAccountPassword" minlength="4" required placeholder="รหัสผ่านอย่างน้อย 4 ตัวอักษร">
+              </div>
+              <div class="form-group col-6">
+                <label for="newAccountConfirmPassword">ยืนยันรหัสผ่าน *</label>
+                <input type="password" id="newAccountConfirmPassword" minlength="4" required placeholder="กรอกรหัสผ่านซ้ำอีกครั้ง">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+              <button type="submit" class="btn btn-art-primary">➕ สร้างบัญชีผู้ใช้</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Accounts List Table -->
+        <div class="config-list-box">
+          <h4>📋 รายชื่อบัญชีผู้ใช้งานในระบบ</h4>
+          <div class="table-responsive accounts-table-wrapper">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>ชื่อผู้ใช้ (Username)</th>
+                  <th>ชื่อที่แสดง</th>
+                  <th>บทบาท</th>
+                  <th>วันที่สร้าง</th>
+                  <th style="text-align: center;">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="accountsTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="closeAccountFooterBtn" class="btn btn-outline">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="art-toast hidden">
+    <span class="toast-icon">🎨</span>
+    <span class="toast-message" id="toastMessage">บันทึกข้อมูลสำเร็จแล้ว!</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="container footer-content">
+      <p>🎨 เว็บไซต์การจัดการห้องเรียนศิลปะและแรงกิ้งคะแนนสะสมตามชิ้นงาน | Art Classroom Management System</p>
+      <p class="footer-sub">สนับสนุนการเรียนรู้ที่สนุกสนานและการชื่นชมพัฒนาการของเด็กทุกคน ✨</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
