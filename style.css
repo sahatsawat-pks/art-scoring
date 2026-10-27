@@ -241,43 +241,6 @@ body {
 }
 
 /* Sound Button */
-.db-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: white;
-  border: 1px solid var(--border-art);
-  padding: 6px 12px;
-  border-radius: var(--radius-full);
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #475569;
-  box-shadow: var(--shadow-sm);
-}
-
-.db-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #94A3B8;
-  display: inline-block;
-}
-
-.db-status-badge.connected .db-dot {
-  background: #10B981;
-  box-shadow: 0 0 0 3px #D1FAE5;
-}
-
-.db-status-badge.connected {
-  color: #065F46;
-  border-color: #A7F3D0;
-  background: #ECFDF5;
-}
-
-.db-status-badge.offline .db-dot {
-  background: #F59E0B;
-}
-
 .btn-icon {
   background: white;
   border: 1px solid var(--border-art);

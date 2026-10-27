@@ -475,9 +475,6 @@ function saveConfigToStorage() {
 let isCloudDbConnected = false;
 
 async function checkAndSyncCloudDb() {
-  const badge = document.getElementById('dbStatusBadge');
-  const text = document.getElementById('dbStatusText');
-
   try {
     const res = await fetch('/api/data', { cache: 'no-store' });
     if (res.ok) {
@@ -492,11 +489,6 @@ async function checkAndSyncCloudDb() {
         saveDataToStorage();
         saveConfigToStorage();
 
-        if (badge && text) {
-          badge.className = 'db-status-badge connected';
-          text.textContent = '☁️ Neon PostgreSQL';
-        }
-
         populateGradeDropdowns();
         if (currentView === 'teacher') renderTeacherView();
         else renderLeaderboardView();
@@ -504,14 +496,10 @@ async function checkAndSyncCloudDb() {
       }
     }
   } catch (e) {
-    // Serverless API not available (e.g. running via file:// or static server)
+    // Serverless API not available (e.g. running via file:// or offline)
   }
 
   isCloudDbConnected = false;
-  if (badge && text) {
-    badge.className = 'db-status-badge offline';
-    text.textContent = '💾 โหมดออฟไลน์ (Local)';
-  }
 }
 
 async function apiPost(payload) {
