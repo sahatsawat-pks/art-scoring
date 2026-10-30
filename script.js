@@ -85,12 +85,12 @@ const DEFAULT_CONFIG = {
     "default": "1234"
   },
   grades: [
-    { id: 'p4', name: 'ชั้นประถมศึกษาปีที่ 4 (ป.4)' },
-    { id: 'p5', name: 'ชั้นประถมศึกษาปีที่ 5 (ป.5)' },
-    { id: 'p6', name: 'ชั้นประถมศึกษาปีที่ 6 (ป.6)' },
-    { id: 'm1', name: 'ชั้นมัธยมศึกษาปีที่ 1 (ม.1)' },
-    { id: 'm2', name: 'ชั้นมัธยมศึกษาปีที่ 2 (ม.2)' },
-    { id: 'm3', name: 'ชั้นมัธยมศึกษาปีที่ 3 (ม.3)' }
+    { id: 'p4', name: 'ชั้นประถมศึกษาปีที่ 4' },
+    { id: 'p5', name: 'ชั้นประถมศึกษาปีที่ 5' },
+    { id: 'p6', name: 'ชั้นประถมศึกษาปีที่ 6' },
+    { id: 'm1', name: 'ชั้นมัธยมศึกษาปีที่ 1' },
+    { id: 'm2', name: 'ชั้นมัธยมศึกษาปีที่ 2' },
+    { id: 'm3', name: 'ชั้นมัธยมศึกษาปีที่ 3' }
   ],
   rooms: {
     'p4': ['1', '2', '3'],
@@ -100,6 +100,7 @@ const DEFAULT_CONFIG = {
     'm2': ['1', '2', '3'],
     'm3': ['1', '2', '3']
   },
+  customFolders: [],
   // 5 Active Assignments as specified in briefs
   assignments: [
     { id: 'task_1', title: 'งาน 1: การไล่เฉดสีน้ำและเทคนิคเปียกบนเปียก', maxScore: 25 },
@@ -109,6 +110,7 @@ const DEFAULT_CONFIG = {
     { id: 'task_5', title: 'งาน 5: ออกแบบประติมากรรมสร้างสรรค์', maxScore: 20 }
   ],
   magazine: {
+    issueDate: "ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567",
     head1: "ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ",
     copy1: "ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี",
     pic1: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80",
@@ -665,10 +667,9 @@ function calcStudentRawAssignmentScore(student) {
 }
 
 function calcStudentAssignmentScore80(student) {
-  const totalMax = getTotalMaxScore();
-  if (totalMax <= 0) return 0;
   const raw = calcStudentRawAssignmentScore(student);
-  return Math.round((raw / totalMax) * 80 * 10) / 10;
+  // Direct sum capped at 80 so scores add up directly (บวกตรงตามคะแนนจริง)
+  return Math.min(80, Math.round(raw * 10) / 10);
 }
 
 function calcStudentExamScore(student) {
@@ -733,18 +734,74 @@ function getRankedStudents(grade = currentGrade, room = currentRoom) {
 // 7 HILARIOUS RANK TIERS as specified in brief
 function getArtRankTier(total100) {
   const s = Math.round(Number(total100 || 0));
-  if (s >= 100) return { title: "มหาเทพไร้พ่าย ก็มาดิครับ", rankName: "แรงก์เลเจนดารี", class: "tier-legendary", icon: "👑" };
-  if (s >= 90) return { title: "ร่างทรงแวนโก๊ะ", rankName: "แรงก์มาสเตอร์", class: "tier-master", icon: "🌟" };
-  if (s >= 80) return { title: "มือขวาปีกัสโซ่", rankName: "แรงก์อีลิต", class: "tier-elite", icon: "🎨" };
-  if (s >= 60) return { title: "จิตรกรหยุดฟัน", rankName: "แรงก์ไดมอนด์", class: "tier-diamond", icon: "💎" };
-  if (s >= 40) return { title: "เน้นส่ง ไม่เน้นสวย", rankName: "แรงก์โกลด์", class: "tier-gold", icon: "🥇" };
-  if (s >= 20) return { title: "เด็กล้างพู่กัน", rankName: "แรงก์ซิลเวอร์", class: "tier-silver", icon: "🥈" };
-  return { title: "ทาสในเรือนเบี้ย", rankName: "แรงก์บรอนซ์", class: "tier-bronze", icon: "🥉" };
+  if (s >= 100) {
+    return {
+      title: "มหาเทพไร้พ่าย ก็มาดิครับ",
+      rankName: "แรงก์เลเจนดารี",
+      label: "แรงก์เลเจนดารี - “มหาเทพไร้พ่าย ก็มาดิครับ”",
+      class: "tier-legendary",
+      icon: "👑"
+    };
+  }
+  if (s >= 90) {
+    return {
+      title: "ร่างทรงแวนโก๊ะ",
+      rankName: "แรงก์มาสเตอร์",
+      label: "แรงก์มาสเตอร์ - “ร่างทรงแวนโก๊ะ”",
+      class: "tier-master",
+      icon: "🏆"
+    };
+  }
+  if (s >= 80) {
+    return {
+      title: "มือขวาปีกัสโซ่",
+      rankName: "แรงก์อีลิต",
+      label: "แรงก์อีลิต - “มือขวาปีกัสโซ่”",
+      class: "tier-elite",
+      icon: "🎨"
+    };
+  }
+  if (s >= 60) {
+    return {
+      title: "จิตรกรยุคฟื้นฟู",
+      rankName: "แรงก์ไดม่อน",
+      label: "แรงก์ไดม่อน - “จิตรกรยุคฟื้นฟู”",
+      class: "tier-diamond",
+      icon: "👨🏻‍🎨"
+    };
+  }
+  if (s >= 40) {
+    return {
+      title: "เน้นส่ง ไม่เน้นสวย",
+      rankName: "แรงก์โกลด์",
+      label: "แรงก์โกลด์ - “เน้นส่ง ไม่เน้นสวย”",
+      class: "tier-gold",
+      icon: "🤦🏻‍♂️"
+    };
+  }
+  if (s >= 20) {
+    return {
+      title: "เด็กล้างพู่กัน",
+      rankName: "แรงก์ซิลเวอร์",
+      label: "แรงก์ซิลเวอร์ - “เด็กล้างพู่กัน”",
+      class: "tier-silver",
+      icon: "🪣"
+    };
+  }
+  return {
+    title: "ทาสในเรือนเบี้ย",
+    rankName: "แรงก์บรอนซ์",
+    label: "แรงก์บรอนซ์ - “ทาสในเรือนเบี้ย”",
+    class: "tier-bronze",
+    icon: "🪠"
+  };
 }
 
 function getGradeLabel(gradeKey) {
   const found = appConfig.grades.find(g => g.id === gradeKey);
-  return found ? found.name : gradeKey;
+  const raw = found ? found.name : gradeKey;
+  // Always remove (ป.4), (ม.1) etc. as requested in brief
+  return String(raw || '').replace(/\s*\([ปม]\.[0-9]\)/g, '').trim();
 }
 
 // ==========================================
@@ -896,7 +953,7 @@ function renderHomeView() {
   }
 
   if (termBadge) termBadge.textContent = `ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
-  if (magDate) magDate.textContent = `ฉบับพิเศษ • ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
+  if (magDate) magDate.textContent = mag.issueDate || `ฉบับพิเศษ • ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
 
   // Populate Magazine from appConfig.magazine
   const mag = appConfig.magazine || {};
@@ -1075,7 +1132,7 @@ function buildPodiumSlotHtml(student, rank) {
         ${total100} <span class="unit">/ 100 คะแนน</span>
       </div>
       <div class="podium-tier-label ${tier.class}">
-        <span>${tier.icon}</span> <span>${tier.title}</span>
+        <span>${tier.icon}</span> <span>${tier.label}</span>
       </div>
       <button type="button" class="btn btn-sm btn-outline" style="margin-top: 8px; font-size: 0.76rem; border-radius: var(--radius-full);">
         🎨 ดูผลงาน & โปรไฟล์
@@ -1102,7 +1159,7 @@ function renderRankTable(ranked) {
     <th class="col-student" style="min-width: 200px;">ชื่อ-นามสกุล (คลิกดูผลงาน)</th>
     <th>คะแนนรายชิ้นงานที่สั่ง (${tasks.length} งาน)</th>
     <th class="col-score" style="width: 110px; text-align: center;">คะแนนรวม (100)</th>
-    <th class="col-badge" style="width: 180px; text-align: center;">อันดับแรงก์</th>
+    <th class="col-badge" style="min-width: 250px; text-align: center;">อันดับแรงก์</th>
     <th class="col-action" style="width: 130px; text-align: center;">ดูผลงาน & โปรไฟล์</th>
   `;
 
@@ -1180,7 +1237,7 @@ function renderRankTable(ranked) {
       </td>
       <td style="text-align: center;">
         <span class="art-tier-badge ${tier.class}">
-          <span>${tier.icon}</span> <span>${tier.title}</span>
+          <span>${tier.icon}</span> <span>${tier.label}</span>
         </span>
       </td>
       <td style="text-align: center;">
@@ -1206,27 +1263,29 @@ function renderClassroomGallery() {
   const photosGrid = document.getElementById('galleryPhotosGrid');
   const teacherActions = document.getElementById('galleryHeaderActions');
   const tasks = getActiveAssignments();
+  const folders = appConfig.customFolders || [];
+  const allCategories = [...tasks, ...folders];
 
   if (!tabsContainer || !photosGrid) return;
 
-  if (tasks.length === 0) {
+  if (allCategories.length === 0) {
     tabsContainer.innerHTML = '';
-    photosGrid.innerHTML = `<div style="text-align: center; color: #94A3B8; padding: 30px;">ยังไม่มีหัวข้องานที่สั่ง</div>`;
+    photosGrid.innerHTML = `<div style="text-align: center; color: #94A3B8; padding: 30px;">ยังไม่มีหัวข้องานหรือโฟลเดอร์กิจกรรม</div>`;
     return;
   }
 
   if (!appConfig.galleries) appConfig.galleries = {};
-  if (!activeGalleryTaskId || !tasks.some(t => t.id === activeGalleryTaskId)) {
-    activeGalleryTaskId = tasks[0].id;
+  if (!activeGalleryTaskId || !allCategories.some(c => c.id === activeGalleryTaskId)) {
+    activeGalleryTaskId = allCategories[0].id;
   }
 
   // Render Tabs
-  tabsContainer.innerHTML = tasks.map(t => {
-    const count = (appConfig.galleries[t.id] || []).length;
-    const isActive = t.id === activeGalleryTaskId;
+  tabsContainer.innerHTML = allCategories.map(c => {
+    const count = (appConfig.galleries[c.id] || []).length;
+    const isActive = c.id === activeGalleryTaskId;
     return `
-      <button class="gallery-task-tab ${isActive ? 'active' : ''}" data-task-id="${t.id}">
-        ${t.title} (${count} ภาพ)
+      <button class="gallery-task-tab ${isActive ? 'active' : ''}" data-task-id="${c.id}">
+        📁 ${c.title} (${count} ภาพ)
       </button>
     `;
   }).join('');
@@ -1244,10 +1303,14 @@ function renderClassroomGallery() {
   if (teacherActions) {
     if (loggedTeacher) {
       teacherActions.innerHTML = `
-        <button id="quickUploadGalleryBtn" class="btn btn-sm btn-emerald">
-          <span>➕ อัปโหลดภาพกิจกรรม</span>
+        <button id="galleryNewFolderBtn" class="btn btn-sm btn-outline" style="border-radius: var(--radius-full); margin-right: 8px;">
+          <span>➕ สร้างโฟลเดอร์ใหม่</span>
+        </button>
+        <button id="quickUploadGalleryBtn" class="btn btn-sm btn-emerald" style="border-radius: var(--radius-full);">
+          <span>📸 อัปโหลดภาพกิจกรรม</span>
         </button>
       `;
+      document.getElementById('galleryNewFolderBtn')?.addEventListener('click', promptAddNewGalleryFolder);
       document.getElementById('quickUploadGalleryBtn')?.addEventListener('click', () => {
         openGalleryUploadModal(activeGalleryTaskId);
       });
@@ -1399,7 +1462,7 @@ function openStudentProfileModal(student) {
           <h3>${student.name}</h3>
           <p>เลขที่ ${student.no} • ${getGradeLabel(currentGrade)} ห้อง ${currentRoom}</p>
           <div class="passport-rank-chip" style="margin-top: 6px;">
-            <span>${tier.icon}</span> <span>${tier.title}</span>
+            <span>${tier.icon}</span> <span>${tier.label}</span>
           </div>
         </div>
       </div>
@@ -1727,19 +1790,21 @@ function renderTeacherView() {
       if (elGrade) elGrade.textContent = newGrade;
     };
 
-    // Attach inline score listeners
-    const scoreInputs = tr.querySelectorAll('.task-score-input');
-    scoreInputs.forEach(input => {
-      input.addEventListener('change', () => {
-        const taskId = input.getAttribute('data-task-id');
-        const maxScore = parseInt(input.getAttribute('data-max'), 10) || 100;
-        let val = parseInt(input.value, 10);
+    // Realtime score update handler
+    const updateTaskScore = (input, commit = false) => {
+      const taskId = input.getAttribute('data-task-id');
+      const maxScore = parseInt(input.getAttribute('data-max'), 10) || 100;
+      let rawVal = input.value.trim();
+      let val = rawVal === '' ? 0 : parseInt(rawVal, 10);
 
-        if (isNaN(val) || val < 0) val = 0;
-        if (val > maxScore) val = maxScore;
-        input.value = val;
+      if (isNaN(val) || val < 0) val = 0;
+      if (val > maxScore) val = maxScore;
+      if (commit) input.value = rawVal === '' ? '' : val;
 
-        student.scores[taskId] = val;
+      student.scores[taskId] = val;
+      refreshRowCalculations();
+
+      if (commit) {
         saveDataToStorage();
         apiPost({
           action: 'save_student',
@@ -1747,36 +1812,49 @@ function renderTeacherView() {
           room: currentRoom,
           student: student
         });
-
-        refreshRowCalculations();
         showToast(`บันทึกคะแนน ${student.name} แล้ว!`);
         artSound.playSaveChime();
-      });
+      }
+    };
+
+    // Attach inline score listeners (both input for instant calculation & change for saving)
+    const scoreInputs = tr.querySelectorAll('.task-score-input');
+    scoreInputs.forEach(input => {
+      input.addEventListener('input', () => updateTaskScore(input, false));
+      input.addEventListener('change', () => updateTaskScore(input, true));
     });
+
+    // Realtime exam score update handler
+    const updateExamScore = (commit = false) => {
+      if (!examInput) return;
+      let rawVal = examInput.value.trim();
+      let val = rawVal === '' ? 0 : parseInt(rawVal, 10);
+      if (isNaN(val) || val < 0) val = 0;
+      if (val > 20) val = 20;
+      if (commit) examInput.value = rawVal === '' ? '' : val;
+
+      student.scores.examScore = val;
+      student.examScore = val;
+      refreshRowCalculations();
+
+      if (commit) {
+        saveDataToStorage();
+        apiPost({
+          action: 'save_student',
+          grade: currentGrade,
+          room: currentRoom,
+          student: student
+        });
+        showToast(`บันทึกคะแนนสอบ ${student.name} (${val}/20) แล้ว!`);
+        artSound.playSaveChime();
+      }
+    };
 
     // Attach exam score listener
     const examInput = tr.querySelector('.exam-score-input');
     if (examInput) {
-      examInput.addEventListener('change', () => {
-        let val = parseInt(examInput.value, 10);
-        if (isNaN(val) || val < 0) val = 0;
-        if (val > 20) val = 20;
-        examInput.value = val;
-
-        student.scores.examScore = val;
-        student.examScore = val;
-        saveDataToStorage();
-        apiPost({
-          action: 'save_student',
-          grade: currentGrade,
-          room: currentRoom,
-          student: student
-        });
-
-        refreshRowCalculations();
-        showToast(`บันทึกคะแนนสอบ ${student.name} (${val}/20) แล้ว!`);
-        artSound.playSaveChime();
-      });
+      examInput.addEventListener('input', () => updateExamScore(false));
+      examInput.addEventListener('change', () => updateExamScore(true));
     }
 
     // Teacher Change Profile Photo Listener
@@ -2484,8 +2562,11 @@ function getExportDataForClass(gradeId, roomId) {
 
   return list.map((s, index) => {
     const rank = index + 1;
-    const total = calcStudentTotalScore(s);
-    const tier = getArtRankTier(total, rank, totalMax);
+    const total100 = calcStudentTotal100(s);
+    const sc80 = calcStudentAssignmentScore80(s);
+    const exam = calcStudentExamScore(s);
+    const gradeVal = calculateGrade(total100);
+    const tier = getArtRankTier(total100);
 
     const rowObj = {
       "อันดับ (Rank)": rank,
@@ -2502,7 +2583,11 @@ function getExportDataForClass(gradeId, roomId) {
       rowObj[`งานที่ ${i + 1}: ${t.title} (${t.maxScore})`] = val;
     });
 
-    rowObj[`คะแนนรวม (${totalMax})`] = total;
+    rowObj["คะแนนเก็บ (80)"] = sc80;
+    rowObj["คะแนนสอบ (20)"] = exam;
+    rowObj["คะแนนรวม (100)"] = total100;
+    rowObj["เกรด (Grade)"] = gradeVal;
+    rowObj["อันดับแรงก์ (Art Rank)"] = `${tier.icon} ${tier.label}`;
     rowObj["ฉายาทางศิลปะ"] = tier.title;
     rowObj["คำติชมของครู"] = s.feedback || '';
 
@@ -3116,6 +3201,22 @@ async function executeAcademicPromotion() {
 // ==========================================
 let currentGalleryUploadBase64 = null;
 
+function promptAddNewGalleryFolder() {
+  const folderName = prompt("➕ กรุณาระบุชื่อโฟลเดอร์ / หัวข้อกิจกรรมใหม่:");
+  if (!folderName || !folderName.trim()) return;
+  const cleanName = folderName.trim();
+  if (!appConfig.customFolders) appConfig.customFolders = [];
+  const folderId = `folder_${Date.now()}`;
+  appConfig.customFolders.push({ id: folderId, title: cleanName });
+  saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
+  showToast(`สร้างโฟลเดอร์ "${cleanName}" สำเร็จแล้ว! 📂`);
+  artSound.playUnlock();
+
+  openGalleryUploadModal(folderId);
+  renderClassroomGallery();
+}
+
 function openGalleryUploadModal(selectedTaskId = null) {
   const modal = document.getElementById('galleryUploadModal');
   const taskSelect = document.getElementById('galleryTaskSelect');
@@ -3125,8 +3226,16 @@ function openGalleryUploadModal(selectedTaskId = null) {
   const fileInput = document.getElementById('galleryFileInput');
 
   const tasks = getActiveAssignments();
+  const folders = appConfig.customFolders || [];
+
   if (taskSelect) {
-    taskSelect.innerHTML = tasks.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
+    let opts = tasks.map(t => `<option value="${t.id}">📁 ${t.title}</option>`).join('');
+    if (folders.length > 0) {
+      opts += `<optgroup label="📂 โฟลเดอร์กิจกรรมเพิ่มเติม">` +
+        folders.map(f => `<option value="${f.id}">📂 ${f.title}</option>`).join('') +
+        `</optgroup>`;
+    }
+    taskSelect.innerHTML = opts;
     if (selectedTaskId) taskSelect.value = selectedTaskId;
   }
 
@@ -3140,10 +3249,18 @@ function openGalleryUploadModal(selectedTaskId = null) {
   artSound.playPop();
 }
 
-function closeGalleryUploadModal() {
+function closeGalleryUploadModal(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
   const modal = document.getElementById('galleryUploadModal');
   if (modal) modal.classList.add('hidden');
   currentGalleryUploadBase64 = null;
+  const fileInput = document.getElementById('galleryFileInput');
+  if (fileInput) fileInput.value = '';
+  const previewBox = document.getElementById('galleryPreviewContainer');
+  if (previewBox) previewBox.classList.add('hidden');
 }
 
 async function handleGalleryUploadSubmit(e) {
@@ -3360,6 +3477,7 @@ function openMagazineModal() {
   const modal = document.getElementById('magazineEditModal');
   const mag = appConfig.magazine || {};
 
+  const issueDateInp = document.getElementById('editMagIssueDate');
   const h1 = document.getElementById('editMagHead1');
   const c1 = document.getElementById('editMagCopy1');
   const p1 = document.getElementById('editMagPic1');
@@ -3370,6 +3488,7 @@ function openMagazineModal() {
   const p4 = document.getElementById('editMagPic4');
   const quote = document.getElementById('editMagQuote');
 
+  if (issueDateInp) issueDateInp.value = mag.issueDate || "ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567";
   if (h1) h1.value = mag.head1 || '';
   if (c1) c1.value = mag.copy1 || '';
   if (p1) p1.value = mag.pic1 || '';
@@ -3393,6 +3512,7 @@ function handleMagazineSubmit(e) {
   e.preventDefault();
   if (!appConfig.magazine) appConfig.magazine = {};
 
+  const issueDateInp = document.getElementById('editMagIssueDate');
   const h1 = document.getElementById('editMagHead1');
   const c1 = document.getElementById('editMagCopy1');
   const p1 = document.getElementById('editMagPic1');
@@ -3403,6 +3523,7 @@ function handleMagazineSubmit(e) {
   const p4 = document.getElementById('editMagPic4');
   const quote = document.getElementById('editMagQuote');
 
+  if (issueDateInp) appConfig.magazine.issueDate = issueDateInp.value.trim();
   if (h1) appConfig.magazine.head1 = h1.value.trim();
   if (c1) appConfig.magazine.copy1 = c1.value.trim();
   if (p1) appConfig.magazine.pic1 = p1.value.trim();
@@ -3547,7 +3668,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('viewLeaderboardBtn')?.addEventListener('click', () => {
     artSound.playPop();
-    switchView('leaderboard');
+    const loggedTeacher = getLoggedInTeacher();
+    const targetKey = `${currentGrade}_${currentRoom}`;
+    if (loggedTeacher || unlockedRooms.has(targetKey)) {
+      switchView('leaderboard');
+    } else {
+      showToast("🔒 กรุณาเลือกระดับชั้นและกรอกรหัสผ่านเพื่อเข้าสู่ทำเนียบแรงกิ้ง");
+      requestRoomAccess(currentGrade, currentRoom);
+    }
   });
 
   document.getElementById('viewTeacherBtn')?.addEventListener('click', () => {
@@ -3656,6 +3784,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (cancelGalleryUploadBtn) {
     cancelGalleryUploadBtn.addEventListener('click', closeGalleryUploadModal);
   }
+  document.getElementById('addNewFolderBtn')?.addEventListener('click', promptAddNewGalleryFolder);
   const galleryUploadForm = document.getElementById('galleryUploadForm');
   if (galleryUploadForm) {
     galleryUploadForm.addEventListener('submit', handleGalleryUploadSubmit);
@@ -3939,7 +4068,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const exportBtn = document.getElementById('exportDropdownBtn');
   const exportMenu = document.getElementById('exportMenu');
 
-  exportBtn.addEventListener('click', (e) => {
+  exportBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
     exportMenu.classList.toggle('hidden');
   });
@@ -3966,6 +4095,23 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('exportAllCsvBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     exportAllClasses('csv');
+  });
+
+  // 13.5 Rank Criteria Modal
+  const rankCriteriaModal = document.getElementById('rankCriteriaModal');
+  const openRankCriteriaModal = () => {
+    artSound.playPop();
+    rankCriteriaModal?.classList.remove('hidden');
+  };
+  const closeRankCriteriaModal = () => {
+    artSound.playPop();
+    rankCriteriaModal?.classList.add('hidden');
+  };
+  document.getElementById('viewRankCriteriaBtn')?.addEventListener('click', openRankCriteriaModal);
+  document.getElementById('closeRankCriteriaModalBtn')?.addEventListener('click', closeRankCriteriaModal);
+  document.getElementById('okRankCriteriaBtn')?.addEventListener('click', closeRankCriteriaModal);
+  rankCriteriaModal?.addEventListener('click', (e) => {
+    if (e.target.id === 'rankCriteriaModal') closeRankCriteriaModal();
   });
 
   // 14. Reset Data Button

@@ -43,9 +43,6 @@
         <span id="schoolNameDisplay" class="school-name-text">โรงเรียนบริษัทไทยกสิกรสงเคราะห์</span>
         <span class="school-tag-chip">(ศ.ท.ส.) • ART CREATIVE</span>
       </div>
-      <div class="school-strip-right">
-        <span class="semester-academic-badge" id="semesterYearBadge">ภาคเรียนที่ 1 ปีการศึกษา 2567</span>
-      </div>
     </div>
   </div>
 
@@ -59,21 +56,12 @@
           <span class="sparkle-spark">✨</span>
         </div>
         <div class="brand-text">
-          <div class="brand-badge-row">
-            <span class="badge-sub">วิชาทัศนศิลป์และศิลปะสร้างสรรค์</span>
-          </div>
           <h1 class="brand-title">Artist Leaderboard</h1>
-          <p class="brand-caption">ระบบบันทึกคะแนนเก็บตามชิ้นงาน & ทำเนียบจิตรกรน้อย</p>
+          <p class="brand-caption">ระบบบันทึกคะแนนเก็บวิชาศิลปะ โรงเรียนบริษัทไทยกสิกรสงเคราะห์</p>
         </div>
       </div>
 
       <div class="header-actions">
-        <!-- Sound FX Toggle -->
-        <button id="soundToggleBtn" class="btn-icon" title="เปิด/ปิดเสียงเอฟเฟกต์">
-          <span class="sound-icon">🔊</span>
-          <span class="btn-text-sm">เสียงเอฟเฟกต์</span>
-        </button>
-
         <!-- Mode Switcher Tabs -->
         <div class="view-switch-nav">
           <button id="viewHomeBtn" class="nav-tab active" title="หน้าหลัก & THE ART TIME">
@@ -119,7 +107,7 @@
         <div class="picker-single-left">
           <div class="picker-art-tag">🎨</div>
           <div class="picker-text-wrap">
-            <h2 class="picker-title-inline">พร้อมแล้วไปดูกันเลย?!</h2>
+            <h2 class="picker-title-inline">พร้อมแล้วไปดูกันเลย!</h2>
             <p class="picker-sub-inline">เลือกระดับชั้นและห้องเพื่อดูคะแนนและการไต่แรงค์</p>
           </div>
         </div>
@@ -149,72 +137,80 @@
         </form>
       </div>
 
-      <!-- ================= THE ART TIME MAGAZINE SECTION ================= -->
+      <!-- ================= THE ART TIME MAGAZINE SECTION (PINK THEME LAYOUT) ================= -->
       <section class="art-magazine-container">
-        <!-- Magazine Header Masthead -->
+        <!-- Magazine Header Masthead (Centered) -->
         <div class="magazine-masthead">
-          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-            <div class="masthead-badge">ART & CREATIVE QUARTERLY</div>
-            <button type="button" id="openMagEditDirectBtn" class="btn btn-sm btn-art-primary" style="font-size: 0.82rem; padding: 5px 14px; border-radius: var(--radius-full); box-shadow: var(--shadow-sm);" title="แก้ไขข้อความและรูปภาพใน THE ART TIME">
-              <span>✏️ แก้ไขเนื้อหาบทความ & รูปภาพ</span>
-            </button>
-          </div>
+          <div class="masthead-badge">ART & CREATIVE QUARTERLY</div>
           <h2 class="magazine-main-title">THE ART TIME</h2>
           <div class="masthead-meta">
-            <span id="magazineIssueDate">ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567</span>
-            <span class="masthead-sep">•</span>
-            <span>บันทึกแรงบันดาลใจและพื้นที่สร้างสรรค์ของจิตรกรน้อย</span>
+            <span id="magazineIssueDate" class="masthead-meta-chip">ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567</span>
+          </div>
+          <div style="margin-top: 14px;">
+            <button type="button" id="openMagEditDirectBtn" class="btn btn-sm btn-art-primary" style="font-size: 0.82rem; padding: 6px 18px; border-radius: var(--radius-full); box-shadow: var(--shadow-sm);" title="แก้ไขข้อความและรูปภาพใน THE ART TIME">
+              <span>✏️ แก้ไขเนื้อหา THE ART TIME</span>
+            </button>
           </div>
         </div>
 
-        <!-- Editorial Grid Layout matching Brief: SubHead, Picture, Copy, Picture, Picture, SubHead, Copy -->
-        <div class="magazine-editorial-grid" id="magazineEditorialGrid">
+        <!-- Wireframe Pink Layout matching Brief: Top (SubHead+Copy | Picture) & Bottom (Picture+SubHead | Copy | Picture+Copy) -->
+        <div class="mag-pink-wireframe" id="magazineEditorialGrid">
           
-          <!-- Column 1: Feature Lead -->
-          <article class="mag-card mag-lead">
-            <div class="mag-subhead-pill">🌟 SPECIAL STORY</div>
-            <h3 class="mag-headline" id="magHead1">ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ</h3>
-            <p class="mag-copy" id="magCopy1">
-              ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี
-            </p>
-            <div class="mag-photo-wrap">
-              <img id="magPic1" class="mag-photo" src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" alt="ศิลปะสร้างสรรค์">
-              <span class="mag-photo-caption">🎨 การทดลองผสมสีน้ำสร้างโทนสีแห่งความสุข</span>
-            </div>
-          </article>
-
-          <!-- Column 2: Photo Collage & Process -->
-          <div class="mag-column-duo">
-            <article class="mag-card mag-visual">
-              <div class="mag-photo-wrap h-lg">
-                <img id="magPic2" class="mag-photo" src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" alt="ผลงานภาพพิมพ์">
-                <span class="mag-photo-caption">🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ</span>
-              </div>
+          <!-- TOP ROW: 2 Columns (Sub Head + Copy on Left, Picture on Right) -->
+          <div class="mag-layout-top">
+            <!-- Top Left: Sub Head + Copy -->
+            <article class="mag-card">
+              <div class="mag-subhead-pill">🌟 SPECIAL STORY</div>
+              <h3 class="mag-headline" id="magHead1">ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ</h3>
+              <p class="mag-copy" id="magCopy1">
+                ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี
+              </p>
             </article>
 
-            <article class="mag-card mag-visual">
-              <div class="mag-photo-wrap h-lg">
-                <img id="magPic3" class="mag-photo" src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" alt="ภาพวาดสัตว์ในจินตนาการ">
-                <span class="mag-photo-caption">🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด</span>
+            <!-- Top Right: Picture -->
+            <article class="mag-card" style="padding: 12px;">
+              <div class="mag-photo-wrap h-xl">
+                <img id="magPic1" class="mag-photo" src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" alt="ศิลปะสร้างสรรค์">
+                <span class="mag-photo-caption">🎨 การทดลองผสมสีน้ำสร้างโทนสีแห่งความสุข</span>
               </div>
             </article>
           </div>
 
-          <!-- Column 3: Secondary Editorial & Quote -->
-          <article class="mag-card mag-insight">
-            <div class="mag-photo-wrap h-md">
-              <img id="magPic4" class="mag-photo" src="https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80" alt="ห้องเรียนศิลปะ">
-            </div>
-            <div class="mag-subhead-pill pill-purple">💡 ARTIST MINDSET</div>
-            <h3 class="mag-headline" id="magHead2">เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า</h3>
-            <p class="mag-copy" id="magCopy2">
-              เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง
-            </p>
-            <div class="mag-quote-box">
-              <span class="quote-mark">“</span>
-              <p class="quote-text" id="magQuoteText">ศิลปะไม่ใช่แค่ผลงานที่แขวนบนผนัง แต่คือการเดินทางที่เด็กๆ ได้ค้นพบคุณค่าในตัวเอง</p>
-            </div>
-          </article>
+          <!-- BOTTOM ROW: 3 Columns -->
+          <div class="mag-layout-bottom">
+            <!-- Col 1: Picture + Sub Head -->
+            <article class="mag-card">
+              <div class="mag-photo-wrap h-md">
+                <img id="magPic2" class="mag-photo" src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" alt="ผลงานภาพพิมพ์">
+                <span class="mag-photo-caption">🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ</span>
+              </div>
+              <div class="mag-subhead-pill pill-purple">💡 ARTIST MINDSET</div>
+              <h3 class="mag-headline" id="magHead2" style="font-size: 1.15rem; margin-bottom: 0;">เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า</h3>
+            </article>
+
+            <!-- Col 2: Copy -->
+            <article class="mag-card">
+              <p class="mag-copy" id="magCopy2">
+                เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง
+              </p>
+              <div class="mag-quote-box">
+                <span class="quote-mark">“</span>
+                <p class="quote-text" id="magQuoteText">ศิลปะไม่ใช่แค่ผลงานที่แขวนบนผนัง แต่คือการเดินทางที่เด็กๆ ได้ค้นพบคุณค่าในตัวเอง</p>
+              </div>
+            </article>
+
+            <!-- Col 3: Picture + Copy -->
+            <article class="mag-card">
+              <div class="mag-photo-wrap h-md">
+                <img id="magPic3" class="mag-photo" src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" alt="ภาพวาดสัตว์ในจินตนาการ">
+                <span class="mag-photo-caption">🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด</span>
+              </div>
+              <div class="mag-photo-wrap h-md" style="margin-bottom: 0;">
+                <img id="magPic4" class="mag-photo" src="https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80" alt="ห้องเรียนศิลปะ">
+                <span class="mag-photo-caption">🏛️ ห้องเรียนศิลปะและพื้นที่ทดลองความคิดสร้างสรรค์</span>
+              </div>
+            </article>
+          </div>
 
         </div>
       </section>
@@ -246,7 +242,7 @@
         <div class="podium-header-banner">
           <div class="sparkle-line"></div>
           <h2 class="podium-title">👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑</h2>
-          <p class="podium-desc">ทำเนียบยอดจิตรกรน้อยผู้ทำคะแนนรวมสูงสุดประจำห้อง</p>
+          <p class="podium-desc">ทำเนียบยอดศิลปินผู้ทำคะแนนรวมสูงสุดประจำห้อง</p>
           <div class="sparkle-line"></div>
         </div>
 
@@ -276,6 +272,9 @@
               <input type="text" id="studentSearchInput" placeholder="ค้นหาชื่อนักเรียน...">
               <button id="clearSearchBtn" class="clear-search-btn" title="ล้างการค้นหา">&times;</button>
             </div>
+            <button id="viewRankCriteriaBtn" class="btn btn-outline" style="border-radius: var(--radius-full); font-weight: 700; font-size: 0.84rem; display: inline-flex; align-items: center; gap: 5px; background: white;" title="ดูเกณฑ์และฉายาของทั้ง 7 อันดับแรงก์">
+              <span>🎖️ เกณฑ์ 7 อันดับแรงก์</span>
+            </button>
             <button id="celebrateBtn" class="btn btn-bounce" title="จุดพลุฉลองผลงานยอดเยี่ยม">
               <span>🎉 จุดพลุยินดี</span>
             </button>
@@ -999,14 +998,19 @@
           <span class="modal-emoji">📸</span>
           <h3>อัปโหลดภาพกิจกรรมการเรียนรู้</h3>
         </div>
-        <button id="closeGalleryUploadBtn" class="close-modal-btn">&times;</button>
+        <button type="button" id="closeGalleryUploadBtn" class="close-modal-btn">&times;</button>
       </div>
 
       <form id="galleryUploadForm" class="modal-form">
         <div class="form-group">
-          <label for="galleryTaskSelect">เลือกชิ้นงาน / หัวข้อการเรียนรู้ *</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label for="galleryTaskSelect" style="margin-bottom: 0;">เลือกโฟลเดอร์ / หัวข้อกิจกรรม *</label>
+            <button type="button" id="addNewFolderBtn" class="btn btn-sm btn-outline" style="font-size: 0.78rem; padding: 2px 10px; border-radius: var(--radius-full);">
+              ➕ สร้างโฟลเดอร์ใหม่
+            </button>
+          </div>
           <select id="galleryTaskSelect" required>
-            <!-- Dynamically populated with active assignments -->
+            <!-- Dynamically populated with active assignments and custom folders -->
           </select>
         </div>
 
@@ -1133,6 +1137,11 @@
       </div>
 
       <form id="magazineEditForm" class="modal-form">
+        <div class="form-group" style="background: #FFF1F2; padding: 12px; border-radius: 12px; border: 1.5px solid #FECDD3;">
+          <label for="editMagIssueDate" style="color: #BE123C; font-weight: 700;">📅 ป้ายฉบับ & ปีการศึกษา (แก้ไขได้เองทุกปี) *</label>
+          <input type="text" id="editMagIssueDate" placeholder="เช่น ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567" required>
+        </div>
+
         <h4 style="color: #4F46E5; font-size: 0.95rem; margin-bottom: 8px;">🌟 คอลัมน์ที่ 1: บทความหลัก (Lead Story)</h4>
         <div class="form-group">
           <label for="editMagHead1">หัวข้อบทความหลัก 1 *</label>
@@ -1187,6 +1196,85 @@
     </div>
   </div>
 
+  <!-- ================= MODAL 16: 7 HILARIOUS RANK TIERS CRITERIA ================= -->
+  <div id="rankCriteriaModal" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">🎖️</span>
+          <h3>เกณฑ์การจัด 7 อันดับแรงก์ศิลปะ</h3>
+        </div>
+        <button id="closeRankCriteriaModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+      <div style="padding: 20px;">
+        <p style="font-size: 0.88rem; color: #64748B; margin-bottom: 16px;">
+          เกณฑ์คะแนนเต็ม 100 คะแนน (คะแนนเก็บตามงาน 80 + สอบประเมิน 20) แบ่งออกเป็น 7 ระดับแรงก์ตามบรีฟ:
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- 100 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: linear-gradient(135deg, #FEF08A, #F59E0B); color: #78350F; font-weight: 700;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.4rem;">👑</span>
+              <span><strong>100 :</strong> แรงก์เลเจนดารี - “มหาเทพไร้พ่าย ก็มาดิครับ”</span>
+            </div>
+            <span style="background: rgba(255,255,255,0.7); padding: 3px 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 800;">100 เต็ม</span>
+          </div>
+          <!-- 90-99 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: linear-gradient(135deg, #FBCFE8, #EC4899); color: #831843; font-weight: 700;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.4rem;">🏆</span>
+              <span><strong>90-99 :</strong> แรงก์มาสเตอร์ - “ร่างทรงแวนโก๊ะ”</span>
+            </div>
+            <span style="background: rgba(255,255,255,0.7); padding: 3px 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 800;">90-99</span>
+          </div>
+          <!-- 80-89 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: linear-gradient(135deg, #DDD6FE, #8B5CF6); color: #4C1D95; font-weight: 700;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.4rem;">🎨</span>
+              <span><strong>80-89 :</strong> แรงก์อีลิต - “มือขวาปีกัสโซ่”</span>
+            </div>
+            <span style="background: rgba(255,255,255,0.7); padding: 3px 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 800;">80-89</span>
+          </div>
+          <!-- 60-79 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: linear-gradient(135deg, #BAE6FD, #38BDF8); color: #0369A1; font-weight: 700;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.4rem;">👨🏻‍🎨</span>
+              <span><strong>60-79 :</strong> แรงก์ไดม่อน- “จิตรกรยุคฟื้นฟู”</span>
+            </div>
+            <span style="background: rgba(255,255,255,0.7); padding: 3px 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 800;">60-79</span>
+          </div>
+          <!-- 40-59 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: #FEF3C7; color: #92400E; font-weight: 700; border: 1px solid #FCD34D;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.4rem;">🤦🏻‍♂️</span>
+              <span><strong>40-59 :</strong> แรงก์โกลด์ - “เน้นส่ง ไม่เน้นสวย”</span>
+            </div>
+            <span style="background: rgba(0,0,0,0.06); padding: 3px 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 800;">40-59</span>
+          </div>
+          <!-- 20-39 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: #F1F5F9; color: #334155; font-weight: 700; border: 1px solid #CBD5E1;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.4rem;">🪣</span>
+              <span><strong>20-39 :</strong> แรงก์ซิลเวอร์ - “เด็กล้างพู่กัน”</span>
+            </div>
+            <span style="background: rgba(0,0,0,0.06); padding: 3px 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 800;">20-39</span>
+          </div>
+          <!-- 0-19 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: #FFEDD5; color: #9A3412; font-weight: 700; border: 1px solid #FDBA74;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.4rem;">🪠</span>
+              <span><strong>0-19 :</strong> แรงก์บรอนซ์ - “ทาสในเรือนเบี้ย”</span>
+            </div>
+            <span style="background: rgba(0,0,0,0.06); padding: 3px 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 800;">0-19</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 12px 20px;">
+        <button id="okRankCriteriaBtn" class="btn btn-art-primary" style="margin-left: auto;">เข้าใจแล้ว</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toastNotification" class="art-toast hidden">
     <span class="toast-icon">🎨</span>
@@ -1198,10 +1286,9 @@
     <div class="container footer-content">
       <div class="footer-quote-bubble">
         <span class="quote-sparkle">✨</span>
-        <p class="footer-brief-quote">"วาดได้แค่ไหนแค่นั้น ใครวาดสวยให้เด็กทำไป ใครไม่มีใจก็ช่างเขา<br>สำคัญที่สุด คือ มวลประสบการณ์ที่ได้ทดลองลงมือทำ"</p>
+        <p class="footer-brief-quote">"วาดได้แค่ไหนแค่นั้น ใครวาดสวยก็ให้ดูเขาไป ใครไม่มีใจก็ช่างเขา<br>สำคัญที่สุด คือ มวลประสบการณ์ที่ได้ทดลองลงมือทำ"</p>
         <span class="quote-sparkle">✨</span>
       </div>
-      <p class="footer-school-sub"><span id="footerSchoolName">โรงเรียนบริษัทไทยกสิกรสงเคราะห์</span> • วิชาทัศนศิลป์และศิลปะสร้างสรรค์</p>
     </div>
   </footer>
 

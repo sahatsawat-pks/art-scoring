@@ -70,17 +70,20 @@ async function ensureTables() {
     if (!curCfg.schoolName || curCfg.schoolName === 'โรงเรียนสาธิตศิลปวัฒนธรรม') {
       needsConfigUpdate = true;
     }
+    if (curCfg.grades && curCfg.grades.some(g => g.name && g.name.includes('('))) {
+      needsConfigUpdate = true;
+    }
   }
 
   if (existingConfig.length === 0 || needsConfigUpdate) {
     const defaultCfg = {
       grades: [
-        { id: 'p4', name: 'ชั้นประถมศึกษาปีที่ 4 (ป.4)' },
-        { id: 'p5', name: 'ชั้นประถมศึกษาปีที่ 5 (ป.5)' },
-        { id: 'p6', name: 'ชั้นประถมศึกษาปีที่ 6 (ป.6)' },
-        { id: 'm1', name: 'ชั้นมัธยมศึกษาปีที่ 1 (ม.1)' },
-        { id: 'm2', name: 'ชั้นมัธยมศึกษาปีที่ 2 (ม.2)' },
-        { id: 'm3', name: 'ชั้นมัธยมศึกษาปีที่ 3 (ม.3)' }
+        { id: 'p4', name: 'ชั้นประถมศึกษาปีที่ 4' },
+        { id: 'p5', name: 'ชั้นประถมศึกษาปีที่ 5' },
+        { id: 'p6', name: 'ชั้นประถมศึกษาปีที่ 6' },
+        { id: 'm1', name: 'ชั้นมัธยมศึกษาปีที่ 1' },
+        { id: 'm2', name: 'ชั้นมัธยมศึกษาปีที่ 2' },
+        { id: 'm3', name: 'ชั้นมัธยมศึกษาปีที่ 3' }
       ],
       rooms: {
         'p4': ['1', '2', '3'],
