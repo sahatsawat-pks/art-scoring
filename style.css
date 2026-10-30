@@ -2476,7 +2476,8 @@ body {
   margin-left: 6px;
 }
 
-.file-dropzone {
+.file-dropzone,
+.photo-upload-dropzone {
   border: 2px dashed #94A3B8;
   background: #F8FAFC;
   border-radius: var(--radius-md);
@@ -2485,10 +2486,13 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+  overflow: hidden;
 }
 
 .file-dropzone:hover,
-.file-dropzone.drag-active {
+.file-dropzone.drag-active,
+.photo-upload-dropzone:hover,
+.photo-upload-dropzone.drag-active {
   background: #EFF6FF;
   border-color: var(--art-secondary);
 }

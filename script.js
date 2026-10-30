@@ -3261,6 +3261,9 @@ function closeGalleryUploadModal(e) {
   if (fileInput) fileInput.value = '';
   const previewBox = document.getElementById('galleryPreviewContainer');
   if (previewBox) previewBox.classList.add('hidden');
+  const previewImg = document.getElementById('galleryUploadPreviewImg');
+  if (previewImg) previewImg.src = '';
+  artSound.playPop();
 }
 
 async function handleGalleryUploadSubmit(e) {
