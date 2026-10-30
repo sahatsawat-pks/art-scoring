@@ -561,6 +561,40 @@
     </div>
   </div>
 
+  <!-- ================= MODAL 3.5: EDIT TASK POPUP (แก้ไขหัวข้องานและคะแนนเต็ม) ================= -->
+  <div id="editTaskModal" class="modal-overlay hidden" style="z-index: 1100;">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">✏️</span>
+          <h3>แก้ไขหัวข้องาน & คะแนนเต็ม</h3>
+        </div>
+        <button type="button" id="closeEditTaskModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <form id="editTaskForm" class="modal-form">
+        <input type="hidden" id="editTaskId">
+        <div class="form-group">
+          <label for="editTaskTitleInput">ชื่อ / หัวข้อชิ้นงาน *</label>
+          <input type="text" id="editTaskTitleInput" required placeholder="เช่น งาน 1: การไล่เฉดสีน้ำ">
+        </div>
+
+        <div class="form-group">
+          <label for="editTaskMaxScoreInput">คะแนนเต็มของชิ้นงานนี้ *</label>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="number" id="editTaskMaxScoreInput" min="1" max="100" required style="width: 140px; font-weight: 700;">
+            <span style="color: #64748B; font-weight: 600;">คะแนน</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelEditTaskBtn" class="btn btn-outline">ยกเลิก</button>
+          <button type="submit" class="btn btn-art-primary">💾 บันทึกการแก้ไข</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ================= MODAL 4: ROOM & CLASS CONFIGURATION (จัดการห้องเรียน) ================= -->
   <div id="roomConfigModal" class="modal-overlay hidden">
     <div class="modal-card">
