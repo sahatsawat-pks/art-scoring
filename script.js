@@ -70,71 +70,133 @@ function clearLoggedInTeacher() {
   sessionStorage.removeItem(SESSION_AUTH_KEY);
 }
 
-// Default Configuration with Dynamic Assignments
+// Default Configuration with Dynamic Assignments, Grades & Galleries
 const DEFAULT_CONFIG = {
+  schoolName: "โรงเรียนบริษัทไทยกสิกรสงเคราะห์",
+  schoolLogo: "assets/school_logo.png",
+  semester: "1",
+  academicYear: "2567",
+  bgTheme: "theme-pastel",
+  customBgUrl: "",
+  roomPasscodes: {
+    "p4_1": "1234",
+    "p4_2": "1234",
+    "p4_3": "1234",
+    "default": "1234"
+  },
   grades: [
-    { id: 'p1', name: 'ชั้นประถมศึกษาปีที่ 1 (ป.1)' },
-    { id: 'p2', name: 'ชั้นประถมศึกษาปีที่ 2 (ป.2)' },
-    { id: 'p3', name: 'ชั้นประถมศึกษาปีที่ 3 (ป.3)' },
     { id: 'p4', name: 'ชั้นประถมศึกษาปีที่ 4 (ป.4)' },
     { id: 'p5', name: 'ชั้นประถมศึกษาปีที่ 5 (ป.5)' },
-    { id: 'p6', name: 'ชั้นประถมศึกษาปีที่ 6 (ป.6)' }
+    { id: 'p6', name: 'ชั้นประถมศึกษาปีที่ 6 (ป.6)' },
+    { id: 'm1', name: 'ชั้นมัธยมศึกษาปีที่ 1 (ม.1)' },
+    { id: 'm2', name: 'ชั้นมัธยมศึกษาปีที่ 2 (ม.2)' },
+    { id: 'm3', name: 'ชั้นมัธยมศึกษาปีที่ 3 (ม.3)' }
   ],
   rooms: {
-    'p1': ['1', '2', '3'],
-    'p2': ['1', '2', '3'],
-    'p3': ['1', '2', '3'],
     'p4': ['1', '2', '3'],
     'p5': ['1', '2', '3'],
-    'p6': ['1', '2', '3']
+    'p6': ['1', '2', '3'],
+    'm1': ['1', '2', '3'],
+    'm2': ['1', '2', '3'],
+    'm3': ['1', '2', '3']
   },
-  // Dynamic Assignment List (สามารถเพิ่ม/ลด/แก้ไขได้อิสระ)
+  // 5 Active Assignments as specified in briefs
   assignments: [
-    { id: 'task_1', title: 'งานที่ 1: การไล่เฉดสีน้ำและเทคนิคเปียกบนเปียก', maxScore: 25 },
-    { id: 'task_2', title: 'งานที่ 2: วาดภาพสัตว์ในจินตนาการ (สีโปสเตอร์)', maxScore: 25 },
-    { id: 'task_3', title: 'งานที่ 3: ภาพพิมพ์และงานสร้างสรรค์คอลลาจ', maxScore: 25 },
-    { id: 'task_4', title: 'งานที่ 4: การแรเงาเส้นและน้ำหนักแสงเงา', maxScore: 25 }
-  ]
+    { id: 'task_1', title: 'งาน 1: การไล่เฉดสีน้ำและเทคนิคเปียกบนเปียก', maxScore: 25 },
+    { id: 'task_2', title: 'งาน 2: วาดภาพสัตว์ในจินตนาการ (สีโปสเตอร์)', maxScore: 25 },
+    { id: 'task_3', title: 'งาน 3: ภาพพิมพ์และงานสร้างสรรค์คอลลาจ', maxScore: 25 },
+    { id: 'task_4', title: 'งาน 4: การแรเงาเส้นและน้ำหนักแสงเงา', maxScore: 25 },
+    { id: 'task_5', title: 'งาน 5: ออกแบบประติมากรรมสร้างสรรค์', maxScore: 20 }
+  ],
+  magazine: {
+    head1: "ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ",
+    copy1: "ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี",
+    pic1: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80",
+    pic2: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80",
+    pic3: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80",
+    head2: "เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า",
+    copy2: "เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง",
+    pic4: "https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80",
+    quote: "ศิลปะไม่ใช่แค่ผลงานที่แขวนบนผนัง แต่คือการเดินทางที่เด็กๆ ได้ค้นพบคุณค่าในตัวเอง"
+  },
+  galleries: {
+    "task_1": [
+      { id: "g1_1", title: "การทดลองหยดสีน้ำบนกระดาษเปียกชุ่ม", date: "15 มิ.ย.", url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" },
+      { id: "g1_2", title: "เทคนิคการเว้นแสงเงาและเกลี่ยสีเรียบ", date: "18 มิ.ย.", url: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" },
+      { id: "g1_3", title: "บรรยากาศนักเรียนฝึกคุมน้ำหนักพู่กัน", date: "22 มิ.ย.", url: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" },
+      { id: "g1_4", title: "ผลงานชิ้นเอกการไล่สีท้องฟ้าอัสดง", date: "25 มิ.ย.", url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80" }
+    ],
+    "task_2": [
+      { id: "g2_1", title: "ร่างลายเส้นสัตว์วิเศษในจินตนาการ", date: "5 ก.ค.", url: "https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80" },
+      { id: "g2_2", title: "การผสมสีโปสเตอร์โทนอุ่นและโทนเย็น", date: "8 ก.ค.", url: "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800&auto=format&fit=crop&q=80" },
+      { id: "g2_3", title: "เก็บรายละเอียดลวดลายและแววตาสัตว์", date: "12 ก.ค.", url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" },
+      { id: "g2_4", title: "ผลงานสัตว์แฟนตาซีพร้อมจัดแสดง", date: "15 ก.ค.", url: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" }
+    ],
+    "task_3": [
+      { id: "g3_1", title: "การแกะสลักแม่พิมพ์ฟองน้ำและใบไม้", date: "2 ส.ค.", url: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" },
+      { id: "g3_2", title: "การกดพิมพ์ลายซ้ำสร้างจังหวะภาพ", date: "5 ส.ค.", url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80" },
+      { id: "g3_3", title: "ตัดแปะคอลลาจผสมผสานสื่อผสม", date: "9 ส.ค.", url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" },
+      { id: "g3_4", title: "ผลงานภาพพิมพ์นามธรรมสดใส", date: "12 ส.ค.", url: "https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80" }
+    ],
+    "task_4": [
+      { id: "g4_1", title: "การแรเงาเส้นไขว้และไล่น้ำหนัก 7 ระดับ", date: "20 ส.ค.", url: "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800&auto=format&fit=crop&q=80" },
+      { id: "g4_2", title: "สังเกตทิศทางแสงและเงาตกกระทบ", date: "24 ส.ค.", url: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" },
+      { id: "g4_3", title: "วาดหุ่นนิ่งรูปทรงเรขาคณิตสามมิติ", date: "28 ส.ค.", url: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" },
+      { id: "g4_4", title: "ผลงานแรเงาวัตถุมีมิติเสมือนจริง", date: "2 ก.ย.", url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80" }
+    ],
+    "task_5": [
+      { id: "g5_1", title: "ขึ้นโครงสร้างประติมากรรมกระดาษอัด", date: "10 ก.ย.", url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" },
+      { id: "g5_2", title: "ปั้นแต่งพื้นผิวด้วยดินเยื่อกระดาษ", date: "14 ก.ย.", url: "https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80" },
+      { id: "g5_3", title: "ลงสีอะคริลิกเคลือบเงาชิ้นงาน", date: "18 ก.ย.", url: "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800&auto=format&fit=crop&q=80" },
+      { id: "g5_4", title: "นิทรรศการประติมากรรมสามมิติ", date: "22 ก.ย.", url: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" }
+    ]
+  }
 };
 
-// Default Sample Student Dataset (Default Grade 4 Room 1)
+// Default Sample Student Dataset (Default Grade 4 Room 1 matching brief values)
 const DEFAULT_STUDENTS_DATA = {
   "p4_1": [
     {
       id: "p4_1_01",
       no: 1,
-      name: "ด.ช. ธนกร ศิลป์เลิศ",
-      nickname: "อาร์ต",
-      avatar: "👦",
-      scores: { task_1: 24, task_2: 25, task_3: 24, task_4: 25 },
-      feedback: "ส่งงานตรงเวลาครบทุกชิ้น มีความรับผิดชอบและทักษะการคุมสีน้ำยอดเยี่ยม"
+      name: "ด.ช. ปัณณธร ลายเส้นทอง",
+      nickname: "วินเนอร์",
+      avatar: "🦁",
+      scores: { task_1: 22, task_2: 24, task_3: 23, task_4: 24, task_5: 10, examScore: 20 },
+      portfolio: [
+        { id: "art_1", title: "พญาราชสีห์ในม่านหมอก", technique: "สีโปสเตอร์บนผ้าใบ", date: "2026-10-15", url: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" }
+      ]
     },
     {
       id: "p4_1_02",
       no: 2,
-      name: "ด.ญ. พิมพ์มาดา วาดวิจิตร",
-      nickname: "พู่กัน",
-      avatar: "👧",
-      scores: { task_1: 24, task_2: 25, task_3: 23, task_4: 24 },
-      feedback: "งานสร้างสรรค์สัตว์ในจินตนาการไอเดียแปลกใหม่มาก ลายเส้นสดใส"
+      name: "ด.ช. ธนกร ศิลป์เลิศ",
+      nickname: "อาร์ต",
+      avatar: "👦",
+      scores: { task_1: 23, task_2: 25, task_3: 24, task_4: 25, task_5: 0, examScore: 20 },
+      portfolio: [
+        { id: "art_2", title: "ธารน้ำไหลใต้ร่มเงาไม้", technique: "สีน้ำเปียกบนเปียก", date: "2026-10-18", url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" }
+      ]
     },
     {
       id: "p4_1_03",
       no: 3,
-      name: "ด.ญ. กัญญาพัชร สีสันดี",
-      nickname: "สายรุ้ง",
-      avatar: "🦄",
-      scores: { task_1: 23, task_2: 24, task_3: 24, task_4: 23 },
-      feedback: "การเลือกคู่สีพาสเทลลงตัว ชิ้นงานคอลลาจมีความละเอียดประณีต"
+      name: "ด.ญ. พิมพ์มาดา วาดวิจิตร",
+      nickname: "พู่กัน",
+      avatar: "👧",
+      scores: { task_1: 24, task_2: 25, task_3: 23, task_4: 24, task_5: 0, examScore: 19 },
+      portfolio: [
+        { id: "art_3", title: "มวลดอกไม้ในความฝัน", technique: "ภาพพิมพ์และคอลลาจ", date: "2026-10-20", url: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" }
+      ]
     },
     {
       id: "p4_1_04",
       no: 4,
-      name: "ด.ช. ปัณณธร ลายเส้นทอง",
-      nickname: "วินเนอร์",
-      avatar: "🦁",
-      scores: { task_1: 22, task_2: 24, task_3: 23, task_4: 24 },
-      feedback: "การแรเงาแสงเงามีมิติชัดเจนมาก กล้าใช้น้ำหนักเข้ม"
+      name: "ด.ญ. กัญญาพัชร สีสันดี",
+      nickname: "สายรุ้ง",
+      avatar: "🦄",
+      scores: { task_1: 23, task_2: 24, task_3: 24, task_4: 23, task_5: 15, examScore: 18 },
+      portfolio: []
     },
     {
       id: "p4_1_05",
@@ -142,8 +204,8 @@ const DEFAULT_STUDENTS_DATA = {
       name: "ด.ญ. อลินดา มโนภาพ",
       nickname: "ลินิน",
       avatar: "🐱",
-      scores: { task_1: 23, task_2: 22, task_3: 23, task_4: 22 },
-      feedback: "มีพัฒนาการที่ดีขึ้นต่อเนื่อง การเกลี่ยสีน้ำเริ่มนุ่มนวล"
+      scores: { task_1: 23, task_2: 22, task_3: 23, task_4: 22, task_5: 14, examScore: 17 },
+      portfolio: []
     },
     {
       id: "p4_1_06",
@@ -151,8 +213,8 @@ const DEFAULT_STUDENTS_DATA = {
       name: "ด.ช. ชนนนท์ นักวาด",
       nickname: "นนท์",
       avatar: "🦊",
-      scores: { task_1: 21, task_2: 23, task_3: 24, task_4: 20 },
-      feedback: "งานภาพพิมพ์ทำออกมาได้น่าสนใจมาก ไอเดียสร้างสรรค์ไม่ซ้ำใคร"
+      scores: { task_1: 21, task_2: 23, task_3: 24, task_4: 20, task_5: 12, examScore: 18 },
+      portfolio: []
     },
     {
       id: "p4_1_07",
@@ -160,8 +222,8 @@ const DEFAULT_STUDENTS_DATA = {
       name: "ด.ญ. รินรดา สดใสศิลป์",
       nickname: "มินนี่",
       avatar: "👧",
-      scores: { task_1: 22, task_2: 21, task_3: 21, task_4: 22 },
-      feedback: "ตั้งใจทำงานอย่างสม่ำเสมอ ฝึกการเน้นขอบเส้นจะช่วยให้ภาพคมชัดยิ่งขึ้น"
+      scores: { task_1: 22, task_2: 21, task_3: 21, task_4: 22, task_5: 15, examScore: 16 },
+      portfolio: []
     },
     {
       id: "p4_1_08",
@@ -169,8 +231,8 @@ const DEFAULT_STUDENTS_DATA = {
       name: "ด.ช. ภัทรดนัย จินตนาการ",
       nickname: "ข้าวกล้อง",
       avatar: "🐼",
-      scores: { task_1: 20, task_2: 22, task_3: 21, task_4: 21 },
-      feedback: "รายละเอียดในชิ้นงานดีมาก รักษาความสะอาดของกระดาษได้ดี"
+      scores: { task_1: 20, task_2: 22, task_3: 21, task_4: 21, task_5: 14, examScore: 17 },
+      portfolio: []
     },
     {
       id: "p4_1_09",
@@ -178,8 +240,8 @@ const DEFAULT_STUDENTS_DATA = {
       name: "ด.ช. วชิรวิทย์ ประณีตงาม",
       nickname: "เต้",
       avatar: "👦",
-      scores: { task_1: 20, task_2: 20, task_3: 21, task_4: 20 },
-      feedback: "งานเรียบร้อย ส่งตรงเวลา ควรฝึกเรื่องการผสมคู่สีตรงข้ามเพิ่มเติม"
+      scores: { task_1: 20, task_2: 20, task_3: 21, task_4: 20, task_5: 10, examScore: 16 },
+      portfolio: []
     },
     {
       id: "p4_1_10",
@@ -187,8 +249,8 @@ const DEFAULT_STUDENTS_DATA = {
       name: "ด.ญ. ณิชาภัทร อารมณ์ศิลป์",
       nickname: "ณิชา",
       avatar: "👧",
-      scores: { task_1: 19, task_2: 21, task_3: 20, task_4: 19 },
-      feedback: "เส้นร่างบางเบาสะอาดตา เพิ่มความกล้าในการลงสีเข้มจะสมบูรณ์แบบ"
+      scores: { task_1: 19, task_2: 21, task_3: 20, task_4: 19, task_5: 10, examScore: 15 },
+      portfolio: []
     },
     {
       id: "p4_1_11",
@@ -196,8 +258,8 @@ const DEFAULT_STUDENTS_DATA = {
       name: "ด.ช. กิตติพงษ์ มือศิลป์",
       nickname: "กาย",
       avatar: "🦖",
-      scores: { task_1: 18, task_2: 20, task_3: 19, task_4: 19 },
-      feedback: "มีความกล้าแสดงออกในการลงสี ควรเพิ่มความใจเย็นในขั้นตอนเก็บรายละเอียด"
+      scores: { task_1: 18, task_2: 20, task_3: 19, task_4: 19, task_5: 8, examScore: 14 },
+      portfolio: []
     },
     {
       id: "p4_1_12",
@@ -205,39 +267,8 @@ const DEFAULT_STUDENTS_DATA = {
       name: "ด.ญ. วรินทร สุขภาพใจ",
       nickname: "เอย",
       avatar: "🐰",
-      scores: { task_1: 18, task_2: 19, task_3: 18, task_4: 18 },
-      feedback: "ส่งงานครบทุกชิ้น มีความพยายามที่ดีมาก ขอให้ฝึกฝนบ่อย ๆ นะครับ"
-    }
-  ],
-  "p4_2": [
-    {
-      id: "p4_2_01",
-      no: 1,
-      name: "ด.ช. ปิติพล แต้มสี",
-      nickname: "มิกซ์",
-      avatar: "👦",
-      scores: { task_1: 23, task_2: 24, task_3: 24, task_4: 24 },
-      feedback: "งานสวยสดใส มีพลังและส่งงานตรงเวลา"
-    },
-    {
-      id: "p4_2_02",
-      no: 2,
-      name: "ด.ญ. ชนิกานต์ ดวงดาว",
-      nickname: "ดาว",
-      avatar: "🦄",
-      scores: { task_1: 22, task_2: 23, task_3: 22, task_4: 23 },
-      feedback: "ระบายสีได้กลมกลืนและสะอาดตามาก"
-    }
-  ],
-  "p5_1": [
-    {
-      id: "p5_1_01",
-      no: 1,
-      name: "ด.ญ. ศศิธร แสงจันทร์",
-      nickname: "จันทร์เจ้า",
-      avatar: "👧",
-      scores: { task_1: 25, task_2: 25, task_3: 25, task_4: 24 },
-      feedback: "ผลงานดีเด่นทุกชิ้น ความคิดสร้างสรรค์ระดับยอดเยี่ยม"
+      scores: { task_1: 18, task_2: 19, task_3: 18, task_4: 18, task_5: 10, examScore: 13 },
+      portfolio: []
     }
   ]
 };
@@ -247,9 +278,11 @@ let appData = {};
 let appConfig = {};
 let currentGrade = 'p4';
 let currentRoom = '1';
-let currentView = 'leaderboard';
+let currentView = 'home'; // Starts at Page 1 (THE ART TIME)
 let soundEnabled = true;
 let stagedImportStudents = [];
+let unlockedRooms = new Set();
+let activeGalleryTaskId = 'task_1';
 
 // ==========================================
 // 2. AUDIO SYNTHESIS ENGINE (Web Audio API)
@@ -334,6 +367,77 @@ class ArtSoundPlayer {
         osc.start(this.ctx.currentTime + (idx * 0.08));
         osc.stop(this.ctx.currentTime + (idx * 0.08) + 0.26);
       });
+    } catch (e) {
+      console.warn("Audio error:", e);
+    }
+  }
+
+  playUnlock() {
+    if (!soundEnabled) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const notes = [440, 554.37, 659.25, 880];
+      notes.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime + (idx * 0.06));
+
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime + (idx * 0.06));
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + (idx * 0.06) + 0.2);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(this.ctx.currentTime + (idx * 0.06));
+        osc.stop(this.ctx.currentTime + (idx * 0.06) + 0.21);
+      });
+    } catch (e) {
+      console.warn("Audio error:", e);
+    }
+  }
+
+  playError() {
+    if (!soundEnabled) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.18);
+
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.21);
+    } catch (e) {
+      console.warn("Audio error:", e);
+    }
+  }
+
+  playCamera() {
+    if (!soundEnabled) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.05);
+
+      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.06);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.07);
     } catch (e) {
       console.warn("Audio error:", e);
     }
@@ -539,7 +643,7 @@ function getTotalMaxScore() {
   return tasks.reduce((sum, t) => sum + (Number(t.maxScore) || 0), 0);
 }
 
-function calcStudentTotalScore(student) {
+function calcStudentRawAssignmentScore(student) {
   const tasks = getActiveAssignments();
   const scores = student.scores || {};
   let total = 0;
@@ -548,6 +652,41 @@ function calcStudentTotalScore(student) {
     if (!isNaN(val)) total += val;
   });
   return total;
+}
+
+function calcStudentAssignmentScore80(student) {
+  const totalMax = getTotalMaxScore();
+  if (totalMax <= 0) return 0;
+  const raw = calcStudentRawAssignmentScore(student);
+  return Math.round((raw / totalMax) * 80 * 10) / 10;
+}
+
+function calcStudentExamScore(student) {
+  const scores = student.scores || {};
+  return Number(scores.examScore ?? student.examScore ?? 0);
+}
+
+function calcStudentTotal100(student) {
+  const sc80 = calcStudentAssignmentScore80(student);
+  const exam = calcStudentExamScore(student);
+  return Math.min(100, Math.round((sc80 + exam) * 10) / 10);
+}
+
+// Backward compatibility alias
+function calcStudentTotalScore(student) {
+  return calcStudentTotal100(student);
+}
+
+function calculateGrade(total100) {
+  const s = Math.round(Number(total100 || 0) * 10) / 10;
+  if (s >= 80) return "4";
+  if (s >= 75) return "3.5";
+  if (s >= 70) return "3";
+  if (s >= 65) return "2.5";
+  if (s >= 60) return "2";
+  if (s >= 55) return "1.5";
+  if (s >= 50) return "1";
+  return "0";
 }
 
 function getSubmittedTasksCount(student) {
@@ -562,23 +701,11 @@ function getSubmittedTasksCount(student) {
   return count;
 }
 
-function getLetterGrade(score, maxScore) {
-  if (maxScore <= 0) return { grade: "-", label: "-" };
-  const pct = (score / maxScore) * 100;
-  if (pct >= 90) return { grade: "A+", label: "ยอดเยี่ยมเป็นเลิศ (Masterpiece)" };
-  if (pct >= 80) return { grade: "A", label: "ดีเยี่ยม (Excellent)" };
-  if (pct >= 75) return { grade: "B+", label: "ดีมาก (Very Good)" };
-  if (pct >= 70) return { grade: "B", label: "ดี (Good)" };
-  if (pct >= 60) return { grade: "C+", label: "ปานกลาง (Satisfactory)" };
-  if (pct >= 50) return { grade: "C", label: "ผ่านเกณฑ์ (Pass)" };
-  return { grade: "D", label: "ควรพัฒนาและส่งงานเพิ่ม (Needs Improvement)" };
-}
-
 function getRankedStudents(grade = currentGrade, room = currentRoom) {
   const list = [...getStudentsList(grade, room)];
   return list.sort((a, b) => {
-    const scoreA = calcStudentTotalScore(a);
-    const scoreB = calcStudentTotalScore(b);
+    const scoreA = calcStudentTotal100(a);
+    const scoreB = calcStudentTotal100(b);
     if (scoreB !== scoreA) {
       return scoreB - scoreA;
     }
@@ -593,14 +720,16 @@ function getRankedStudents(grade = currentGrade, room = currentRoom) {
   });
 }
 
-function getArtRankTier(score, rank, maxScore) {
-  const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
-  if (rank === 1) return { title: "👑 แปรงทองคำ", class: "tier-gold" };
-  if (rank === 2) return { title: "🥈 แปรงเงินสุกสว่าง", class: "tier-silver" };
-  if (rank === 3) return { title: "🥉 แปรงทองแดงศิลป์", class: "tier-bronze" };
-  if (pct >= 85) return { title: "🌟 จิตรกรเอก", class: "tier-star" };
-  if (pct >= 75) return { title: "🎨 ศิลปินดาวรุ่ง", class: "tier-star" };
-  return { title: "🌈 นักสร้างสรรค์", class: "tier-pass" };
+// 7 HILARIOUS RANK TIERS as specified in brief
+function getArtRankTier(total100) {
+  const s = Math.round(Number(total100 || 0));
+  if (s >= 100) return { title: "มหาเทพไร้พ่าย ก็มาดิครับ", rankName: "แรงก์เลเจนดารี", class: "tier-legendary", icon: "👑" };
+  if (s >= 90) return { title: "ร่างทรงแวนโก๊ะ", rankName: "แรงก์มาสเตอร์", class: "tier-master", icon: "🌟" };
+  if (s >= 80) return { title: "มือขวาปีกัสโซ่", rankName: "แรงก์อีลิต", class: "tier-elite", icon: "🎨" };
+  if (s >= 60) return { title: "จิตรกรหยุดฟัน", rankName: "แรงก์ไดมอนด์", class: "tier-diamond", icon: "💎" };
+  if (s >= 40) return { title: "เน้นส่ง ไม่เน้นสวย", rankName: "แรงก์โกลด์", class: "tier-gold", icon: "🥇" };
+  if (s >= 20) return { title: "เด็กล้างพู่กัน", rankName: "แรงก์ซิลเวอร์", class: "tier-silver", icon: "🥈" };
+  return { title: "ทาสในเรือนเบี้ย", rankName: "แรงก์บรอนซ์", class: "tier-bronze", icon: "🥉" };
 }
 
 function getGradeLabel(gradeKey) {
@@ -611,29 +740,94 @@ function getGradeLabel(gradeKey) {
 // ==========================================
 // 5. DROPDOWN POPULATION & SYNC
 // ==========================================
+// ==========================================
+// 5. HELPER: CLIENT-SIDE CANVAS IMAGE RESIZING
+// ==========================================
+function resizeImageToCanvas(file, maxWidth = 300, maxHeight = 300, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith('image/')) {
+      reject(new Error("ไฟล์ที่เลือกไม่ใช่รูปภาพ"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error("ไม่สามารถอ่านรูปภาพได้"));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error("การอ่านไฟล์ล้มเหลว"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function applyBackgroundTheme() {
+  const customUrl = appConfig.customBgUrl || '';
+  const theme = appConfig.bgTheme || 'theme-pastel';
+  const bgCanvas = document.getElementById('artBgCanvas');
+
+  if (customUrl.trim()) {
+    document.body.style.backgroundImage = `linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.92)), url("${customUrl.trim()}")`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.style.backgroundPosition = 'center';
+    if (bgCanvas) bgCanvas.style.opacity = '0.35';
+  } else {
+    document.body.style.backgroundImage = 'linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.92)), url("assets/school_bg.jpg")';
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.style.backgroundPosition = '28% top';
+    document.body.className = theme;
+    if (bgCanvas) bgCanvas.style.opacity = '0.4';
+  }
+}
+
+// ==========================================
+// 6. DROPDOWN POPULATION & SYNC
+// ==========================================
 function populateGradeDropdowns() {
-  const gradeSelect = document.getElementById('gradeSelect');
+  const homeGradeSelect = document.getElementById('homeGradeSelect');
   const teacherGradeSelect = document.getElementById('teacherGradeSelect');
   const configNewRoomGrade = document.getElementById('configNewRoomGrade');
 
-  const optionsHtml = appConfig.grades.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+  const optionsHtml = (appConfig.grades || []).map(g => `<option value="${g.id}">${g.name}</option>`).join('');
 
-  if (gradeSelect) gradeSelect.innerHTML = optionsHtml;
+  if (homeGradeSelect) homeGradeSelect.innerHTML = optionsHtml;
   if (teacherGradeSelect) teacherGradeSelect.innerHTML = optionsHtml;
   if (configNewRoomGrade) configNewRoomGrade.innerHTML = optionsHtml;
 
-  gradeSelect.value = currentGrade;
-  teacherGradeSelect.value = currentGrade;
+  if (homeGradeSelect) homeGradeSelect.value = currentGrade;
+  if (teacherGradeSelect) teacherGradeSelect.value = currentGrade;
   if (configNewRoomGrade) configNewRoomGrade.value = currentGrade;
 
   populateRoomDropdowns();
 }
 
 function populateRoomDropdowns() {
-  const roomSelect = document.getElementById('roomSelect');
+  const homeRoomSelect = document.getElementById('homeRoomSelect');
   const teacherRoomSelect = document.getElementById('teacherRoomSelect');
 
-  const availableRooms = (appConfig.rooms && appConfig.rooms[currentGrade]) || ['1'];
+  const availableRooms = (appConfig.rooms && appConfig.rooms[currentGrade]) || ['1', '2', '3'];
 
   if (!availableRooms.includes(currentRoom)) {
     currentRoom = availableRooms[0] || '1';
@@ -645,9 +839,9 @@ function populateRoomDropdowns() {
     return `<option value="${r}">${label}</option>`;
   }).join('');
 
-  if (roomSelect) {
-    roomSelect.innerHTML = optionsHtml;
-    roomSelect.value = currentRoom;
+  if (homeRoomSelect) {
+    homeRoomSelect.innerHTML = optionsHtml;
+    homeRoomSelect.value = currentRoom;
   }
   if (teacherRoomSelect) {
     teacherRoomSelect.innerHTML = optionsHtml;
@@ -656,139 +850,152 @@ function populateRoomDropdowns() {
 }
 
 // ==========================================
-// 6. STUDENT FULL DETAILS / PORTFOLIO MODAL
+// 7. VIEW RENDERING: HOME & THE ART TIME MAGAZINE
 // ==========================================
-function openStudentDetailModal(student, rank = null) {
-  const modal = document.getElementById('studentDetailModal');
-  const container = document.getElementById('studentDetailContent');
+function renderHomeView() {
+  const schoolName = appConfig.schoolName || "โรงเรียนบริษัทไทยกสิกรสงเคราะห์";
+  const schoolLogo = appConfig.schoolLogo || "assets/school_logo.png";
+  const semester = appConfig.semester || "1";
+  const academicYear = appConfig.academicYear || "2567";
 
-  const ranked = getRankedStudents(currentGrade, currentRoom);
-  const actualRank = rank !== null ? rank : (ranked.findIndex(s => s.id === student.id) + 1);
-  const total = calcStudentTotalScore(student);
-  const totalMax = getTotalMaxScore();
-  const tier = getArtRankTier(total, actualRank, totalMax);
-  const tasks = getActiveAssignments();
+  const nameElem = document.getElementById('schoolNameDisplay');
+  const footerNameElem = document.getElementById('footerSchoolName');
+  const logoElem = document.getElementById('schoolLogoDisplay');
+  const logoImg = document.getElementById('schoolLogoImg');
+  const stripLogo = document.querySelector('.school-strip-logo');
+  const termBadge = document.getElementById('semesterYearBadge');
+  const magDate = document.getElementById('magazineIssueDate');
 
-  // Class comparison stats
-  const scores = ranked.map(s => calcStudentTotalScore(s));
-  const avgScore = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : 0;
-  const maxScore = scores.length > 0 ? Math.max(...scores) : total;
+  if (nameElem) nameElem.textContent = schoolName;
+  if (footerNameElem) footerNameElem.textContent = schoolName;
 
-  let rankChipIcon = '🎖️';
-  if (actualRank === 1) rankChipIcon = '👑 อันดับ 1 (ทอง)';
-  else if (actualRank === 2) rankChipIcon = '🥈 อันดับ 2 (เงิน)';
-  else if (actualRank === 3) rankChipIcon = '🥉 อันดับ 3 (ทองแดง)';
-  else rankChipIcon = `อันดับที่ #${actualRank}`;
+  const isImg = schoolLogo.includes('/') || schoolLogo.startsWith('data:image');
+  if (isImg) {
+    if (logoImg) {
+      logoImg.src = schoolLogo;
+      logoImg.classList.remove('hidden');
+    }
+    if (logoElem) logoElem.classList.add('hidden');
+    if (stripLogo) stripLogo.src = schoolLogo;
+  } else {
+    if (logoElem) {
+      logoElem.textContent = schoolLogo;
+      logoElem.classList.remove('hidden');
+    }
+    if (logoImg) logoImg.classList.add('hidden');
+  }
 
-  // Build task score rows
-  const taskRowsHtml = tasks.map((task, idx) => {
-    const rawVal = (student.scores && student.scores[task.id]);
-    const isSubmitted = rawVal !== undefined && rawVal !== null && rawVal !== '';
-    const scoreVal = isSubmitted ? Number(rawVal) : 0;
-    const pct = task.maxScore > 0 ? Math.min(100, (scoreVal / task.maxScore) * 100) : 0;
+  if (termBadge) termBadge.textContent = `ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
+  if (magDate) magDate.textContent = `ฉบับพิเศษ • ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
 
-    const statusBadge = isSubmitted
-      ? `<span class="passport-task-status status-submitted">✓ ส่งแล้ว (${scoreVal}/${task.maxScore})</span>`
-      : `<span class="passport-task-status status-pending">⏳ ยังไม่ส่ง</span>`;
+  // Populate Magazine from appConfig.magazine
+  const mag = appConfig.magazine || {};
+  if (mag.head1 && document.getElementById('magHead1')) document.getElementById('magHead1').textContent = mag.head1;
+  if (mag.copy1 && document.getElementById('magCopy1')) document.getElementById('magCopy1').textContent = mag.copy1;
+  if (mag.pic1 && document.getElementById('magPic1')) document.getElementById('magPic1').src = mag.pic1;
+  if (mag.pic2 && document.getElementById('magPic2')) document.getElementById('magPic2').src = mag.pic2;
+  if (mag.pic3 && document.getElementById('magPic3')) document.getElementById('magPic3').src = mag.pic3;
+  if (mag.head2 && document.getElementById('magHead2')) document.getElementById('magHead2').textContent = mag.head2;
+  if (mag.copy2 && document.getElementById('magCopy2')) document.getElementById('magCopy2').textContent = mag.copy2;
+  if (mag.pic4 && document.getElementById('magPic4')) document.getElementById('magPic4').src = mag.pic4;
+  if (mag.quote && document.getElementById('magQuoteText')) document.getElementById('magQuoteText').textContent = mag.quote;
 
-    return `
-      <div class="passport-task-row">
-        <div class="passport-task-header">
-          <span>${task.title}</span>
-          ${statusBadge}
-        </div>
-        <div class="meter-bar">
-          <div class="meter-fill" style="width: ${pct}%"></div>
-        </div>
-      </div>
-    `;
-  }).join('');
+  applyBackgroundTheme();
+}
 
-  container.innerHTML = `
-    <div class="passport-hero-banner">
-      <div class="passport-student-header">
-        <div class="passport-avatar-box">
-          ${student.avatar || '🎨'}
-        </div>
-        <div class="passport-info">
-          <h3>${student.name}</h3>
-          <p>น้อง${student.nickname || '-'} • เลขที่ ${student.no} • ${getGradeLabel(currentGrade)} ห้อง ${currentRoom}</p>
-          <div class="passport-rank-chip">
-            <span>${rankChipIcon}</span>
-            <span>• ${tier.title}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+// Room Passcode Handler
+let pendingPasscodeGrade = null;
+let pendingPasscodeRoom = null;
 
-    <div class="passport-body-content">
-      <!-- Total Score Summary Card -->
-      <div class="passport-scores-card">
-        <div class="scores-card-header">
-          <span class="scores-card-title">🎯 คะแนนสะสมรวมตามงาน (${getSubmittedTasksCount(student)}/${tasks.length} ชิ้นงาน)</span>
-          <div class="scores-big-total">
-            ${total} <small>/ ${totalMax} คะแนน</small>
-          </div>
-        </div>
+function requestRoomAccess(targetGrade, targetRoom) {
+  const targetKey = `${targetGrade}_${targetRoom}`;
+  const loggedTeacher = getLoggedInTeacher();
 
-        <!-- Task List Breakdown -->
-        <div class="student-passport-tasks-list">
-          ${taskRowsHtml}
-        </div>
-      </div>
+  // If teacher is logged in or room already unlocked in this session, go directly
+  if (loggedTeacher || unlockedRooms.has(targetKey)) {
+    currentGrade = targetGrade;
+    currentRoom = targetRoom;
+    switchView('leaderboard');
+    return;
+  }
 
-      <!-- Class Stats Comparison -->
-      <div class="passport-stats-compare">
-        <div class="stat-box-mini">
-          <div class="stat-val">${total}</div>
-          <div class="stat-lbl">คะแนนของตนเอง</div>
-        </div>
-        <div class="stat-box-mini">
-          <div class="stat-val" style="color: #64748B;">${avgScore}</div>
-          <div class="stat-lbl">คะแนนเฉลี่ยทั้งห้อง</div>
-        </div>
-        <div class="stat-box-mini">
-          <div class="stat-val" style="color: #D97706;">${maxScore}</div>
-          <div class="stat-lbl">คะแนนสูงสุดประจำห้อง</div>
-        </div>
-      </div>
+  // Open Passcode Modal
+  pendingPasscodeGrade = targetGrade;
+  pendingPasscodeRoom = targetRoom;
+  const modal = document.getElementById('roomPasscodeModal');
+  const targetText = document.getElementById('passcodeTargetClassText');
+  const errAlert = document.getElementById('passcodeErrorAlert');
+  const input = document.getElementById('inputRoomPasscode');
 
-      <!-- Teacher Feedback Callout -->
-      <div class="passport-feedback-quote">
-        <strong>💬 บันทึกติชมและคำแนะนำจากคุณครู:</strong>
-        "${student.feedback || 'ส่งงานตรงเวลา มีความตั้งใจและมีพัฒนาการที่ดี ขอให้รักษาความมุ่งมั่นนี้ต่อไป!'}"
-      </div>
-    </div>
-  `;
-
-  modal.classList.remove('hidden');
+  if (targetText) targetText.textContent = `เข้าสู่ห้องเรียน ${getGradeLabel(targetGrade)} ห้อง ${targetRoom}`;
+  if (errAlert) errAlert.classList.add('hidden');
+  if (input) {
+    input.value = '';
+    setTimeout(() => input.focus(), 150);
+  }
+  if (modal) modal.classList.remove('hidden');
   artSound.playPop();
 }
 
-function closeStudentDetailModal() {
-  document.getElementById('studentDetailModal').classList.add('hidden');
+function closePasscodeModal() {
+  const modal = document.getElementById('roomPasscodeModal');
+  if (modal) modal.classList.add('hidden');
+  pendingPasscodeGrade = null;
+  pendingPasscodeRoom = null;
+}
+
+function handlePasscodeSubmit(e) {
+  e.preventDefault();
+  const input = document.getElementById('inputRoomPasscode');
+  const enteredPass = input ? input.value.trim() : '';
+  const errAlert = document.getElementById('passcodeErrorAlert');
+
+  if (!pendingPasscodeGrade || !pendingPasscodeRoom) return;
+
+  const targetKey = `${pendingPasscodeGrade}_${pendingPasscodeRoom}`;
+  const passcodes = appConfig.roomPasscodes || {};
+  const correctPass = passcodes[targetKey] || passcodes['default'] || "1234";
+
+  if (enteredPass === correctPass) {
+    unlockedRooms.add(targetKey);
+    currentGrade = pendingPasscodeGrade;
+    currentRoom = pendingPasscodeRoom;
+    closePasscodeModal();
+    switchView('leaderboard');
+    artSound.playUnlock();
+    showToast(`ปลดล็อกเข้าสู่ ${getGradeLabel(currentGrade)} ห้อง ${currentRoom} สำเร็จ! 🎨`);
+    confettiEngine.fire(50);
+  } else {
+    artSound.playError();
+    if (errAlert) errAlert.classList.remove('hidden');
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
 }
 
 // ==========================================
-// 7. VIEW RENDERING: PODIUM & LEADERBOARD
+// 8. VIEW RENDERING: ROOM LEADERBOARD & PODIUM
 // ==========================================
 function renderLeaderboardView() {
   const ranked = getRankedStudents(currentGrade, currentRoom);
   const tasks = getActiveAssignments();
-  const totalMax = getTotalMaxScore();
 
-  const titleElem = document.getElementById('currentClassTitle');
-  const countElem = document.getElementById('studentCountChip');
-  const taskChip = document.getElementById('taskSummaryChip');
-  const subtitle = document.getElementById('tableHeaderSubtitle');
+  const titleElem = document.getElementById('currentRoomDisplayTitle');
+  const countElem = document.getElementById('roomStudentsCountBadge');
+  const termBadge = document.getElementById('podiumTermYearDisplay');
 
-  if (titleElem) titleElem.textContent = `กำลังแสดง: ${getGradeLabel(currentGrade)} ห้อง ${currentRoom}`;
+  const semester = appConfig.semester || "1";
+  const academicYear = appConfig.academicYear || "2567";
+
+  if (titleElem) titleElem.textContent = `${getGradeLabel(currentGrade)} / ห้อง ${currentRoom}`;
   if (countElem) countElem.textContent = `${ranked.length} คน`;
-  if (taskChip) taskChip.textContent = `${tasks.length} ชิ้นงาน (เต็ม ${totalMax} คะแนน)`;
-  if (subtitle) subtitle.textContent = `ประเมินคะแนนสะสมตาม ${tasks.length} ชิ้นงานที่สั่ง (คะแนนเต็มรวม ${totalMax} คะแนน)`;
+  if (termBadge) termBadge.textContent = `ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
 
   renderPodium(ranked);
   renderRankTable(ranked);
+  renderClassroomGallery();
 }
 
 function renderPodium(ranked) {
@@ -814,7 +1021,7 @@ function renderPodium(ranked) {
       card.addEventListener('click', () => {
         artSound.playFanfare();
         confettiEngine.fire(60);
-        openStudentDetailModal(item.student, item.rank);
+        openStudentProfileModal(item.student);
       });
     }
   });
@@ -823,7 +1030,6 @@ function renderPodium(ranked) {
 function buildPodiumSlotHtml(student, rank) {
   const badgeEmojis = { 1: '👑', 2: '🥈', 3: '🥉' };
   const stepLabel = rank === 1 ? '1ST PLACE' : rank === 2 ? '2ND PLACE' : '3RD PLACE';
-  const totalMax = getTotalMaxScore();
   const tasks = getActiveAssignments();
 
   if (!student) {
@@ -832,7 +1038,6 @@ function buildPodiumSlotHtml(student, rank) {
         <div class="rank-badge-floater">${badgeEmojis[rank]}</div>
         <div class="avatar-halo">🎨</div>
         <div class="podium-student-name">ยังไม่มีนักเรียน</div>
-        <div class="podium-student-nick">รอผลการกรอกคะแนน</div>
         <div class="podium-score-tag">- <span class="unit">คะแนน</span></div>
       </div>
       <div class="podium-block">
@@ -842,21 +1047,29 @@ function buildPodiumSlotHtml(student, rank) {
     `;
   }
 
-  const total = calcStudentTotalScore(student);
-  const tier = getArtRankTier(total, rank, totalMax);
+  const total100 = calcStudentTotal100(student);
+  const tier = getArtRankTier(total100);
   const submittedCount = getSubmittedTasksCount(student);
 
+  const avatarDisplay = student.avatar && (student.avatar.startsWith('http') || student.avatar.startsWith('data:image'))
+    ? `<img src="${student.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" alt="${student.name}">`
+    : (student.avatar || '🎨');
+
   return `
-    <div class="podium-student-card" title="คลิกเพื่อดูรายละเอียดคะแนนของ ${student.name}">
+    <div class="podium-student-card" title="คลิกเพื่อดูโปรไฟล์และผลงานศิลปะของ ${student.name}">
       <div class="rank-badge-floater" title="อันดับที่ ${rank}">${badgeEmojis[rank]}</div>
-      <div class="avatar-halo">${student.avatar || '🎨'}</div>
+      <div class="avatar-halo">${avatarDisplay}</div>
       <h3 class="podium-student-name">${student.name}</h3>
-      <div class="podium-student-nick">(น้อง${student.nickname || 'ศิลปิน'}) • เลขที่ ${student.no}</div>
       <div class="podium-task-summary">📝 ส่งครบ ${submittedCount}/${tasks.length} งาน</div>
       <div class="podium-score-tag">
-        ${total} <span class="unit">/ ${totalMax}</span>
+        ${total100} <span class="unit">/ 100 คะแนน</span>
       </div>
-      <div class="podium-tier-label ${tier.class}">${tier.title}</div>
+      <div class="podium-tier-label ${tier.class}">
+        <span>${tier.icon}</span> <span>${tier.title}</span>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline" style="margin-top: 8px; font-size: 0.76rem; border-radius: var(--radius-full);">
+        🎨 ดูผลงาน & โปรไฟล์
+      </button>
     </div>
     <div class="podium-block">
       <div class="podium-step-number">${rank}</div>
@@ -872,17 +1085,15 @@ function renderRankTable(ranked) {
   const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
   const emptyState = document.getElementById('noResultsState');
   const tasks = getActiveAssignments();
-  const totalMax = getTotalMaxScore();
 
-  // Dynamic Head Row (หน้าแรกไม่ต้องใส่เกรด)
+  // Dynamic Head Row matching Image 2 brief: อันดับ, ชื่อ-นามสกุล, คะแนนรายชิ้นงาน (5 งาน), คะแนนรวม (100), อันดับแรงก์, โปรไฟล์
   theadRow.innerHTML = `
-    <th class="col-rank">อันดับ</th>
-    <th class="col-id">เลขที่</th>
-    <th class="col-student">ชื่อ-นามสกุล / ชื่อเล่น (คลิกดูคะแนน)</th>
+    <th class="col-rank" style="width: 70px; text-align: center;">อันดับ</th>
+    <th class="col-student" style="min-width: 200px;">ชื่อ-นามสกุล (คลิกดูผลงาน)</th>
     <th>คะแนนรายชิ้นงานที่สั่ง (${tasks.length} งาน)</th>
-    <th class="col-score">คะแนนรวม (${totalMax})</th>
-    <th class="col-badge">ฉายาทางศิลปะ</th>
-    <th class="col-action">ดูคะแนนละเอียด</th>
+    <th class="col-score" style="width: 110px; text-align: center;">คะแนนรวม (100)</th>
+    <th class="col-badge" style="width: 180px; text-align: center;">อันดับแรงก์</th>
+    <th class="col-action" style="width: 130px; text-align: center;">ดูผลงาน & โปรไฟล์</th>
   `;
 
   tbody.innerHTML = '';
@@ -904,8 +1115,8 @@ function renderRankTable(ranked) {
 
   filtered.forEach(student => {
     const actualRank = ranked.findIndex(item => item.id === student.id) + 1;
-    const total = calcStudentTotalScore(student);
-    const tier = getArtRankTier(total, actualRank, totalMax);
+    const total100 = calcStudentTotal100(student);
+    const tier = getArtRankTier(total100);
 
     let rankBadgeClass = 'rank-badge-other';
     let rankBadgeContent = actualRank;
@@ -929,18 +1140,21 @@ function renderRankTable(ranked) {
       `;
     }).join('');
 
+    const avatarDisplay = student.avatar && (student.avatar.startsWith('http') || student.avatar.startsWith('data:image'))
+      ? `<img src="${student.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" alt="${student.name}">`
+      : (student.avatar || '🎨');
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="col-rank">
+      <td class="col-rank" style="text-align: center;">
         <span class="rank-badge ${rankBadgeClass}">${rankBadgeContent}</span>
       </td>
-      <td style="font-weight: 700; color: #64748B;">#${student.no}</td>
       <td>
-        <div class="student-cell-clickable" title="คลิกเพื่อดูรายละเอียดคะแนนของ ${student.name}">
-          <div class="student-table-avatar">${student.avatar || '🎨'}</div>
+        <div class="student-cell-clickable" title="คลิกเพื่อดูโปรไฟล์และผลงานของ ${student.name}">
+          <div class="student-table-avatar">${avatarDisplay}</div>
           <div class="student-table-details">
             <span class="student-table-name">${student.name}</span>
-            <span class="student-table-nick">น้อง${student.nickname || '-'} (คลิกดูคะแนน 🔍)</span>
+            <span class="student-table-nick">เลขที่ ${student.no} • ดูโปรไฟล์ & ผลงาน 🎨</span>
           </div>
         </div>
       </td>
@@ -949,31 +1163,412 @@ function renderRankTable(ranked) {
           ${chipsHtml}
         </div>
       </td>
-      <td>
+      <td style="text-align: center;">
         <div class="score-cell-badge">
-          ${total} <span class="total-max">/${totalMax}</span>
+          ${total100} <span class="total-max">/100</span>
         </div>
       </td>
-      <td>
-        <span class="art-tier-badge ${tier.class}">${tier.title}</span>
+      <td style="text-align: center;">
+        <span class="art-tier-badge ${tier.class}">
+          <span>${tier.icon}</span> <span>${tier.title}</span>
+        </span>
       </td>
-      <td>
-        <button class="btn-view-art" data-id="${student.id}">
-          🔍 ดูคะแนน
+      <td style="text-align: center;">
+        <button class="btn btn-sm btn-art-primary btn-view-profile" data-id="${student.id}">
+          <span>🎨 ผลงาน & โปรไฟล์</span>
         </button>
       </td>
     `;
 
-    const openHandler = () => openStudentDetailModal(student, actualRank);
+    const openHandler = () => openStudentProfileModal(student);
     tr.querySelector('.student-cell-clickable').addEventListener('click', openHandler);
-    tr.querySelector('.btn-view-art').addEventListener('click', openHandler);
+    tr.querySelector('.btn-view-profile').addEventListener('click', openHandler);
 
     tbody.appendChild(tr);
   });
 }
 
 // ==========================================
-// 8. TEACHER PORTAL & SCORING TABLE
+// 9. CLASSROOM ACTIVITY & ARTWORK GALLERY
+// ==========================================
+function renderClassroomGallery() {
+  const tabsContainer = document.getElementById('galleryTasksTabs');
+  const photosGrid = document.getElementById('galleryPhotosGrid');
+  const teacherActions = document.getElementById('galleryHeaderActions');
+  const tasks = getActiveAssignments();
+
+  if (!tabsContainer || !photosGrid) return;
+
+  if (tasks.length === 0) {
+    tabsContainer.innerHTML = '';
+    photosGrid.innerHTML = `<div style="text-align: center; color: #94A3B8; padding: 30px;">ยังไม่มีหัวข้องานที่สั่ง</div>`;
+    return;
+  }
+
+  if (!appConfig.galleries) appConfig.galleries = {};
+  if (!activeGalleryTaskId || !tasks.some(t => t.id === activeGalleryTaskId)) {
+    activeGalleryTaskId = tasks[0].id;
+  }
+
+  // Render Tabs
+  tabsContainer.innerHTML = tasks.map(t => {
+    const count = (appConfig.galleries[t.id] || []).length;
+    const isActive = t.id === activeGalleryTaskId;
+    return `
+      <button class="gallery-task-tab ${isActive ? 'active' : ''}" data-task-id="${t.id}">
+        ${t.title} (${count} ภาพ)
+      </button>
+    `;
+  }).join('');
+
+  tabsContainer.querySelectorAll('.gallery-task-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      activeGalleryTaskId = tab.getAttribute('data-task-id');
+      artSound.playPop();
+      renderClassroomGallery();
+    });
+  });
+
+  // Render Teacher Upload Button if Logged In
+  const loggedTeacher = getLoggedInTeacher();
+  if (teacherActions) {
+    if (loggedTeacher) {
+      teacherActions.innerHTML = `
+        <button id="quickUploadGalleryBtn" class="btn btn-sm btn-emerald">
+          <span>➕ อัปโหลดภาพกิจกรรม</span>
+        </button>
+      `;
+      document.getElementById('quickUploadGalleryBtn').addEventListener('click', () => {
+        openGalleryUploadModal(activeGalleryTaskId);
+      });
+    } else {
+      teacherActions.innerHTML = '';
+    }
+  }
+
+  // Render Photos for Active Assignment
+  const photos = appConfig.galleries[activeGalleryTaskId] || [];
+
+  if (photos.length === 0) {
+    photosGrid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #94A3B8; background: #F8FAFC; border-radius: 16px;">
+        📷 ยังไม่มีภาพกิจกรรมสำหรับชิ้นงานนี้ คุณครูสามารถอัปโหลดภาพกิจกรรมในห้องพักครูได้
+      </div>
+    `;
+    return;
+  }
+
+  photosGrid.innerHTML = photos.map(p => `
+    <div class="gallery-photo-card" data-photo-id="${p.id}" data-photo-url="${p.url}" data-photo-title="${p.title}">
+      <div class="photo-img-wrap">
+        <img src="${p.url}" alt="${p.title}" loading="lazy">
+      </div>
+      <div class="gallery-photo-info">
+        <div class="gallery-photo-title">${p.title}</div>
+        <div class="gallery-photo-meta">
+          <span class="gallery-photo-tag">${p.date || 'กิจกรรมในห้องเรียน'}</span>
+          <span class="btn-view-photo-sm">🔍 ดูรูปขยาย / ดาวน์โหลด</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  photosGrid.querySelectorAll('.gallery-photo-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const url = card.getAttribute('data-photo-url');
+      const title = card.getAttribute('data-photo-title');
+      openPhotoLightbox(url, title, `ชิ้นงาน: ${getAssignmentTitle(activeGalleryTaskId)}`);
+    });
+  });
+}
+
+function getAssignmentTitle(taskId) {
+  const t = (appConfig.assignments || []).find(item => item.id === taskId);
+  return t ? t.title : taskId;
+}
+
+function openPhotoLightbox(imgUrl, title, caption) {
+  const modal = document.getElementById('galleryPhotoModal');
+  const img = document.getElementById('lightboxImg');
+  const titleEl = document.getElementById('lightboxTitle');
+  const captionEl = document.getElementById('lightboxCaption');
+  const downloadBtn = document.getElementById('downloadPhotoBtn');
+
+  if (img) img.src = imgUrl;
+  if (titleEl) titleEl.textContent = title || "ภาพกิจกรรมศิลปะ";
+  if (captionEl) captionEl.textContent = caption || "";
+  if (downloadBtn) {
+    downloadBtn.href = imgUrl;
+    downloadBtn.download = `art-${Date.now()}.jpg`;
+  }
+
+  if (modal) modal.classList.remove('hidden');
+  artSound.playPop();
+}
+
+function closePhotoLightbox() {
+  const modal = document.getElementById('galleryPhotoModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+// ==========================================
+// 10. STUDENT PROFILE & ARTWORK PORTFOLIO MODAL
+// ==========================================
+let currentProfileStudent = null;
+
+function openStudentProfileModal(student) {
+  currentProfileStudent = student;
+  const modal = document.getElementById('studentProfileModal');
+  const content = document.getElementById('studentProfileContent');
+  if (!modal || !content) return;
+
+  const total100 = calcStudentTotal100(student);
+  const sc80 = calcStudentAssignmentScore80(student);
+  const exam = calcStudentExamScore(student);
+  const gradeVal = calculateGrade(total100);
+  const tier = getArtRankTier(total100);
+  const tasks = getActiveAssignments();
+  const portfolios = student.portfolio || [];
+
+  const avatarDisplay = student.avatar && (student.avatar.startsWith('http') || student.avatar.startsWith('data:image'))
+    ? `<img src="${student.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 24px;" alt="${student.name}">`
+    : (student.avatar || '🎨');
+
+  // Task rows
+  const taskRowsHtml = tasks.map((task, idx) => {
+    const rawVal = student.scores && student.scores[task.id];
+    const isSubmitted = rawVal !== undefined && rawVal !== null && rawVal !== '';
+    const scoreVal = isSubmitted ? Number(rawVal) : 0;
+    const pct = task.maxScore > 0 ? Math.min(100, (scoreVal / task.maxScore) * 100) : 0;
+    return `
+      <div class="passport-task-row">
+        <div class="passport-task-header">
+          <span>${task.title}</span>
+          <span style="font-weight: 800; color: #4F46E5;">${scoreVal} / ${task.maxScore}</span>
+        </div>
+        <div class="meter-bar">
+          <div class="meter-fill" style="width: ${pct}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Portfolios HTML
+  const portfolioHtml = portfolios.length > 0 ? portfolios.map((art, idx) => `
+    <div class="portfolio-art-card">
+      <div class="portfolio-art-img-wrap">
+        <img src="${art.url}" alt="${art.title}">
+      </div>
+      <div class="portfolio-art-info">
+        <div class="portfolio-art-title">${art.title}</div>
+        <div class="portfolio-art-technique">${art.technique || 'ภาพวาดสร้างสรรค์'} • ${art.date || ''}</div>
+        <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
+          <a href="${art.url}" download="${art.title}.jpg" class="btn btn-sm btn-outline" style="font-size: 0.72rem; padding: 2px 8px;">
+            📥 ดาวน์โหลด
+          </a>
+          <button class="btn btn-sm btn-outline-danger delete-art-btn" data-art-index="${idx}" style="font-size: 0.72rem; padding: 2px 6px;">
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('') : `
+    <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #94A3B8; background: #F8FAFC; border-radius: 14px;">
+      🎨 ยังไม่มีภาพผลงานในคลัง คลิกปุ่ม "+ อัปโหลดผลงานศิลปะ" ด้านบนเพื่อเริ่มสร้างแกลเลอรีของน้อง
+    </div>
+  `;
+
+  content.innerHTML = `
+    <div class="passport-hero-banner">
+      <div class="passport-student-header">
+        <div class="passport-avatar-box" id="profileAvatarBox" style="position: relative; cursor: pointer;" title="คลิกเพื่อเปลี่ยนรูปถ่าย">
+          ${avatarDisplay}
+          <div style="position: absolute; bottom: -6px; right: -6px; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 1rem;">📷</div>
+        </div>
+        <div class="passport-info">
+          <h3>${student.name}</h3>
+          <p>เลขที่ ${student.no} • ${getGradeLabel(currentGrade)} ห้อง ${currentRoom}</p>
+          <div class="passport-rank-chip" style="margin-top: 6px;">
+            <span>${tier.icon}</span> <span>${tier.title}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="passport-body-content">
+      
+      <!-- Total Score Card (คะแนนเก็บ 80 + สอบ 20 = 100) -->
+      <div class="passport-scores-card">
+        <div class="scores-card-header">
+          <span class="scores-card-title">🎯 คะแนนประเมินรวม</span>
+          <div class="scores-big-total">
+            ${total100} <small>/ 100 คะแนน</small>
+            <span class="art-tier-badge ${tier.class}" style="margin-left: 8px;">เกรด ${gradeVal}</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+          <div class="stat-box-mini" style="flex: 1;">
+            <div class="stat-val" style="color: #4F46E5;">${sc80} / 80</div>
+            <div class="stat-lbl">คะแนนเก็บตามชิ้นงาน</div>
+          </div>
+          <div class="stat-box-mini" style="flex: 1;">
+            <div class="stat-val" style="color: #059669;">${exam} / 20</div>
+            <div class="stat-lbl">คะแนนสอบประเมิน</div>
+          </div>
+        </div>
+
+        <!-- Task List Breakdown -->
+        <div class="student-passport-tasks-list">
+          ${taskRowsHtml}
+        </div>
+      </div>
+
+      <!-- Student Artwork Portfolio Section (อัปรูปผลงานของตัวเองได้) -->
+      <div class="passport-scores-card">
+        <div class="scores-card-header">
+          <div>
+            <h4 style="font-size: 1.05rem; font-weight: 800; color: #1E293B;">🖼️ คลังผลงานศิลปะของ ${student.name}</h4>
+            <p style="font-size: 0.8rem; color: #64748B;">แสดงผลงานสร้างสรรค์ที่ภาคภูมิใจของนักเรียน</p>
+          </div>
+          <button type="button" id="uploadMyArtworkBtn" class="btn btn-sm btn-art-primary">
+            <span>➕ อัปโหลดผลงานศิลปะ</span>
+          </button>
+        </div>
+
+        <div class="portfolio-artworks-grid">
+          ${portfolioHtml}
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  // Hidden File input for changing Avatar
+  const avatarFileHidden = document.createElement('input');
+  avatarFileHidden.type = 'file';
+  avatarFileHidden.accept = 'image/*';
+  avatarFileHidden.style.display = 'none';
+  document.body.appendChild(avatarFileHidden);
+
+  content.querySelector('#profileAvatarBox').addEventListener('click', () => {
+    avatarFileHidden.click();
+  });
+
+  avatarFileHidden.addEventListener('change', async (e) => {
+    if (e.target.files.length > 0) {
+      try {
+        const resizedBase64 = await resizeImageToCanvas(e.target.files[0], 250, 250, 0.85);
+        student.avatar = resizedBase64;
+        saveDataToStorage();
+        apiPost({
+          action: 'save_student',
+          grade: currentGrade,
+          room: currentRoom,
+          student: student
+        });
+        artSound.playCamera();
+        showToast(`อัปเดตรูปถ่ายของ ${student.name} เรียบร้อยแล้ว! 📸`);
+        openStudentProfileModal(student);
+        if (currentView === 'leaderboard') renderLeaderboardView();
+        else if (currentView === 'teacher') renderTeacherView();
+      } catch (err) {
+        alert("ไม่สามารถบันทึกรูปภาพได้: " + err.message);
+      }
+    }
+    avatarFileHidden.remove();
+  });
+
+  // Upload Artwork Listener
+  content.querySelector('#uploadMyArtworkBtn').addEventListener('click', () => {
+    const artFileHidden = document.createElement('input');
+    artFileHidden.type = 'file';
+    artFileHidden.accept = 'image/*';
+    artFileHidden.style.display = 'none';
+    document.body.appendChild(artFileHidden);
+
+    artFileHidden.click();
+
+    artFileHidden.addEventListener('change', async (e) => {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        const title = prompt("ระบุชื่อผลงานศิลปะชิ้นนี้:", file.name.replace(/\.[^/.]+$/, ""));
+        if (!title || !title.trim()) {
+          artFileHidden.remove();
+          return;
+        }
+        const technique = prompt("ระบุเทคนิคหรือสื่อที่ใช้ (เช่น สีน้ำ, สีโปสเตอร์, คอลลาจ):", "สีน้ำบนกระดาษวาดเขียน");
+
+        try {
+          const resizedUrl = await resizeImageToCanvas(file, 700, 700, 0.8);
+          if (!student.portfolio) student.portfolio = [];
+          student.portfolio.push({
+            id: `art_${Date.now()}`,
+            title: title.trim(),
+            technique: (technique || 'สื่อผสม').trim(),
+            date: new Date().toLocaleDateString('th-TH'),
+            url: resizedUrl
+          });
+
+          saveDataToStorage();
+          apiPost({
+            action: 'save_student',
+            grade: currentGrade,
+            room: currentRoom,
+            student: student
+          });
+
+          artSound.playFanfare();
+          confettiEngine.fire(50);
+          showToast(`เพิ่มผลงาน "${title}" เข้าสู่แกลเลอรีของ ${student.name} แล้ว! 🎨`);
+          openStudentProfileModal(student);
+        } catch (err) {
+          alert("เกิดข้อผิดพลาดในการอัปโหลด: " + err.message);
+        }
+      }
+      artFileHidden.remove();
+    });
+  });
+
+  // Delete Artwork Listener
+  content.querySelectorAll('.delete-art-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.getAttribute('data-art-index'), 10);
+      if (confirm("คุณต้องการลบผลงานศิลปะชิ้นนี้ใช่หรือไม่?")) {
+        student.portfolio.splice(idx, 1);
+        saveDataToStorage();
+        apiPost({
+          action: 'save_student',
+          grade: currentGrade,
+          room: currentRoom,
+          student: student
+        });
+        showToast("ลบผลงานศิลปะเรียบร้อยแล้ว");
+        openStudentProfileModal(student);
+      }
+    });
+  });
+
+  modal.classList.remove('hidden');
+  artSound.playPop();
+}
+
+function closeStudentProfileModal() {
+  const modal = document.getElementById('studentProfileModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+// Backward compatibility
+function openStudentDetailModal(student) {
+  openStudentProfileModal(student);
+}
+function closeStudentDetailModal() {
+  closeStudentProfileModal();
+}
+
+// ==========================================
+// 11. TEACHER PORTAL & SCORING TABLE (ตรงตามบรีฟภาพ 3)
 // ==========================================
 function renderTeacherView() {
   const teacherGradeSelect = document.getElementById('teacherGradeSelect');
@@ -985,28 +1580,30 @@ function renderTeacherView() {
   const students = getStudentsList(currentGrade, currentRoom);
   const sortedByNo = [...students].sort((a, b) => (a.no || 0) - (b.no || 0));
   const tasks = getActiveAssignments();
-  const totalMax = getTotalMaxScore();
 
-  // Dynamic Table Headers
+  // Dynamic Table Headers matching Image 3:
+  // เลขที่, รูปโปรไฟล์, ชื่อ-นามสกุล, งาน 1 (25), งาน 2 (25), งาน 3 (25), งาน 4 (25), งาน 5 (20), คะแนนเก็บ 80, คะแนนสอบ 20, คะแนนรวม 100, เกรด, จัดการ
   const theadRow = document.getElementById('teacherTableHeadRow');
   let headHtml = `
     <th style="width: 50px; text-align: center;">เลขที่</th>
-    <th style="width: 170px;">ชื่อ-นามสกุล</th>
-    <th style="width: 80px;">ชื่อเล่น</th>
+    <th style="width: 60px; text-align: center;">รูปโปรไฟล์</th>
+    <th style="min-width: 170px;">ชื่อ - นามสกุล</th>
   `;
 
   tasks.forEach((task, idx) => {
     headHtml += `
-      <th style="min-width: 95px; text-align: center;" title="${task.title}">
+      <th style="min-width: 90px; text-align: center;" title="${task.title}">
         งาน ${idx + 1} (${task.maxScore})
       </th>
     `;
   });
 
   headHtml += `
-    <th style="width: 90px; text-align: center;">คะแนนรวม (${totalMax})</th>
-    <th style="min-width: 180px;">บันทึกติชมของครู</th>
-    <th style="width: 110px; text-align: center;">จัดการ</th>
+    <th style="min-width: 85px; text-align: center; color: #4F46E5;">คะแนนเก็บ (80)</th>
+    <th style="min-width: 85px; text-align: center; color: #059669;">คะแนนสอบ (20)</th>
+    <th style="min-width: 85px; text-align: center; color: #D97706;">คะแนนรวม (100)</th>
+    <th style="min-width: 65px; text-align: center;">เกรด</th>
+    <th style="width: 90px; text-align: center;">จัดการ</th>
   `;
 
   theadRow.innerHTML = headHtml;
@@ -1014,7 +1611,7 @@ function renderTeacherView() {
   const tbody = document.getElementById('teacherTableBody');
   tbody.innerHTML = '';
 
-  const colSpanCount = 5 + tasks.length;
+  const colSpanCount = 7 + tasks.length;
 
   if (sortedByNo.length === 0) {
     tbody.innerHTML = `
@@ -1037,19 +1634,28 @@ function renderTeacherView() {
 
   sortedByNo.forEach(student => {
     if (!student.scores) student.scores = {};
-    const total = calcStudentTotalScore(student);
+    const sc80 = calcStudentAssignmentScore80(student);
+    const examScore = calcStudentExamScore(student);
+    const total100 = calcStudentTotal100(student);
+    const gradeVal = calculateGrade(total100);
+
+    const avatarDisplay = student.avatar && (student.avatar.startsWith('http') || student.avatar.startsWith('data:image'))
+      ? `<img src="${student.avatar}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 50%;" alt="${student.name}">`
+      : `<span style="font-size: 1.4rem;">${student.avatar || '🎨'}</span>`;
+
     const tr = document.createElement('tr');
     tr.id = `teacher-row-${student.id}`;
 
     let rowHtml = `
       <td style="font-weight: 700; text-align: center;">${student.no}</td>
-      <td>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span>${student.avatar || '🎨'}</span>
-          <strong>${student.name}</strong>
+      <td style="text-align: center;">
+        <div class="teacher-avatar-trigger" data-student-id="${student.id}" style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="คลิกเพื่อเปลี่ยนรูปถ่าย">
+          ${avatarDisplay}
         </div>
       </td>
-      <td>น้อง${student.nickname || '-'}</td>
+      <td>
+        <strong>${student.name}</strong>
+      </td>
     `;
 
     // Dynamic inputs for each task
@@ -1067,18 +1673,27 @@ function renderTeacherView() {
       `;
     });
 
+    // Auto-calculated columns as requested in brief Image 3
     rowHtml += `
-      <td class="table-row-total" id="total-val-${student.id}">
-        ${total}
+      <td style="text-align: center; font-weight: 700; color: #4F46E5;">
+        <span id="score80-${student.id}">${sc80}</span>
       </td>
-      <td>
-        <input type="text" class="comment-input-inline input-feedback" 
-          value="${student.feedback || ''}" 
-          placeholder="พิมพ์คำติชมเพื่อให้นักเรียนพัฒนา...">
+      <td style="text-align: center;">
+        <input type="number" min="0" max="20" 
+          class="score-input-inline exam-score-input" 
+          data-student-id="${student.id}" 
+          value="${examScore}" 
+          placeholder="0-20">
+      </td>
+      <td style="text-align: center; font-weight: 800; font-size: 1.05rem; color: #D97706;">
+        <span id="total100-${student.id}">${total100}</span>
+      </td>
+      <td style="text-align: center; font-weight: 800; color: #059669;">
+        <span id="grade-${student.id}" class="badge-grade-auto">${gradeVal}</span>
       </td>
       <td>
         <div class="table-actions-cell">
-          <button class="btn-icon-sm view-profile-btn" title="เปิดดูการ์ดคะแนน">👁️</button>
+          <button class="btn-icon-sm view-profile-btn" title="ดูผลงาน & โปรไฟล์">👁️</button>
           <button class="btn-icon-sm edit-full-btn" title="แก้ไขข้อมูลนักเรียน">✏️</button>
           <button class="btn-icon-sm delete-btn" title="ลบข้อมูล">🗑️</button>
         </div>
@@ -1086,6 +1701,21 @@ function renderTeacherView() {
     `;
 
     tr.innerHTML = rowHtml;
+
+    // Helper to refresh calculated columns in row
+    const refreshRowCalculations = () => {
+      const newSc80 = calcStudentAssignmentScore80(student);
+      const newTotal = calcStudentTotal100(student);
+      const newGrade = calculateGrade(newTotal);
+
+      const el80 = document.getElementById(`score80-${student.id}`);
+      const elTotal = document.getElementById(`total100-${student.id}`);
+      const elGrade = document.getElementById(`grade-${student.id}`);
+
+      if (el80) el80.textContent = newSc80;
+      if (elTotal) elTotal.textContent = newTotal;
+      if (elGrade) elGrade.textContent = newGrade;
+    };
 
     // Attach inline score listeners
     const scoreInputs = tr.querySelectorAll('.task-score-input');
@@ -1108,30 +1738,73 @@ function renderTeacherView() {
           student: student
         });
 
-        const newTotal = calcStudentTotalScore(student);
-        document.getElementById(`total-val-${student.id}`).textContent = newTotal;
-        showToast(`บันทึกคะแนน ${student.name} แล้ว (${newTotal}/${totalMax})`);
+        refreshRowCalculations();
+        showToast(`บันทึกคะแนน ${student.name} แล้ว!`);
         artSound.playSaveChime();
       });
     });
 
-    // Feedback input listener
-    const feedInput = tr.querySelector('.input-feedback');
-    feedInput.addEventListener('change', (e) => {
-      student.feedback = e.target.value;
-      saveDataToStorage();
-      apiPost({
-        action: 'save_student',
-        grade: currentGrade,
-        room: currentRoom,
-        student: student
+    // Attach exam score listener
+    const examInput = tr.querySelector('.exam-score-input');
+    if (examInput) {
+      examInput.addEventListener('change', () => {
+        let val = parseInt(examInput.value, 10);
+        if (isNaN(val) || val < 0) val = 0;
+        if (val > 20) val = 20;
+        examInput.value = val;
+
+        student.scores.examScore = val;
+        student.examScore = val;
+        saveDataToStorage();
+        apiPost({
+          action: 'save_student',
+          grade: currentGrade,
+          room: currentRoom,
+          student: student
+        });
+
+        refreshRowCalculations();
+        showToast(`บันทึกคะแนนสอบ ${student.name} (${val}/20) แล้ว!`);
+        artSound.playSaveChime();
       });
-      showToast(`บันทึกคำติชมสำหรับ ${student.name} แล้ว`);
+    }
+
+    // Teacher Change Profile Photo Listener
+    tr.querySelector('.teacher-avatar-trigger').addEventListener('click', () => {
+      const fileInp = document.createElement('input');
+      fileInp.type = 'file';
+      fileInp.accept = 'image/*';
+      fileInp.style.display = 'none';
+      document.body.appendChild(fileInp);
+
+      fileInp.click();
+
+      fileInp.addEventListener('change', async (e) => {
+        if (e.target.files.length > 0) {
+          try {
+            const base64 = await resizeImageToCanvas(e.target.files[0], 250, 250, 0.85);
+            student.avatar = base64;
+            saveDataToStorage();
+            apiPost({
+              action: 'save_student',
+              grade: currentGrade,
+              room: currentRoom,
+              student: student
+            });
+            artSound.playCamera();
+            showToast(`เปลี่ยนรูปถ่ายของ ${student.name} สำเร็จ! 📸`);
+            renderTeacherView();
+          } catch (err) {
+            alert("ไม่สามารถบันทึกรูปภาพได้: " + err.message);
+          }
+        }
+        fileInp.remove();
+      });
     });
 
     // Row action buttons
     tr.querySelector('.view-profile-btn').addEventListener('click', () => {
-      openStudentDetailModal(student);
+      openStudentProfileModal(student);
     });
 
     tr.querySelector('.edit-full-btn').addEventListener('click', () => {
@@ -1935,22 +2608,27 @@ function showToast(message) {
 // ==========================================
 function switchView(viewName) {
   currentView = viewName;
+  const hmBtn = document.getElementById('viewHomeBtn');
   const lbBtn = document.getElementById('viewLeaderboardBtn');
   const tcBtn = document.getElementById('viewTeacherBtn');
+
+  const hmSec = document.getElementById('homeView');
   const lbSec = document.getElementById('leaderboardView');
   const tcSec = document.getElementById('teacherView');
 
-  if (viewName === 'leaderboard') {
-    lbBtn.classList.add('active');
-    tcBtn.classList.remove('active');
-    lbSec.classList.add('active-view');
-    tcSec.classList.remove('active-view');
+  if (hmBtn) hmBtn.classList.toggle('active', viewName === 'home');
+  if (lbBtn) lbBtn.classList.toggle('active', viewName === 'leaderboard');
+  if (tcBtn) tcBtn.classList.toggle('active', viewName === 'teacher');
+
+  if (hmSec) hmSec.classList.toggle('active-view', viewName === 'home');
+  if (lbSec) lbSec.classList.toggle('active-view', viewName === 'leaderboard');
+  if (tcSec) tcSec.classList.toggle('active-view', viewName === 'teacher');
+
+  if (viewName === 'home') {
+    renderHomeView();
+  } else if (viewName === 'leaderboard') {
     renderLeaderboardView();
-  } else {
-    tcBtn.classList.add('active');
-    lbBtn.classList.remove('active');
-    tcSec.classList.add('active-view');
-    lbSec.classList.remove('active-view');
+  } else if (viewName === 'teacher') {
     renderTeacherView();
   }
 }
@@ -1963,6 +2641,7 @@ function updateTeacherAuthUI(user = null) {
   const chip = document.getElementById('loggedInUserChip');
   const headerBadge = document.getElementById('headerTeacherBadge');
   const headerName = document.getElementById('headerTeacherName');
+  const headerLoginBtn = document.getElementById('headerLoginBtn');
 
   if (current) {
     const displayName = current.displayName || current.username;
@@ -1976,6 +2655,9 @@ function updateTeacherAuthUI(user = null) {
     if (headerBadge) {
       headerBadge.classList.remove('hidden');
     }
+    if (headerLoginBtn) {
+      headerLoginBtn.classList.add('hidden');
+    }
   } else {
     if (chip) {
       chip.textContent = '👤 ครูผู้ดูแลระบบ';
@@ -1983,6 +2665,9 @@ function updateTeacherAuthUI(user = null) {
     }
     if (headerBadge) {
       headerBadge.classList.add('hidden');
+    }
+    if (headerLoginBtn) {
+      headerLoginBtn.classList.remove('hidden');
     }
   }
 }
@@ -2416,6 +3101,305 @@ async function executeAcademicPromotion() {
   showToast(message);
 }
 
+// ==========================================
+// 14. CLASSROOM GALLERY UPLOAD SYSTEM
+// ==========================================
+let currentGalleryUploadBase64 = null;
+
+function openGalleryUploadModal(selectedTaskId = null) {
+  const modal = document.getElementById('galleryUploadModal');
+  const taskSelect = document.getElementById('galleryTaskSelect');
+  const previewBox = document.getElementById('galleryPreviewContainer');
+  const previewImg = document.getElementById('galleryUploadPreviewImg');
+  const titleInput = document.getElementById('galleryPhotoTitle');
+  const fileInput = document.getElementById('galleryFileInput');
+
+  const tasks = getActiveAssignments();
+  if (taskSelect) {
+    taskSelect.innerHTML = tasks.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
+    if (selectedTaskId) taskSelect.value = selectedTaskId;
+  }
+
+  if (titleInput) titleInput.value = '';
+  if (fileInput) fileInput.value = '';
+  currentGalleryUploadBase64 = null;
+  if (previewBox) previewBox.classList.add('hidden');
+  if (previewImg) previewImg.src = '';
+
+  if (modal) modal.classList.remove('hidden');
+  artSound.playPop();
+}
+
+function closeGalleryUploadModal() {
+  const modal = document.getElementById('galleryUploadModal');
+  if (modal) modal.classList.add('hidden');
+  currentGalleryUploadBase64 = null;
+}
+
+async function handleGalleryUploadSubmit(e) {
+  e.preventDefault();
+  const taskSelect = document.getElementById('galleryTaskSelect');
+  const titleInput = document.getElementById('galleryPhotoTitle');
+  const taskId = taskSelect ? taskSelect.value : activeGalleryTaskId;
+  const title = (titleInput ? titleInput.value : '').trim();
+
+  if (!currentGalleryUploadBase64) {
+    alert("กรุณาเลือกหรืออัปโหลดรูปภาพกิจกรรม");
+    return;
+  }
+
+  if (!appConfig.galleries) appConfig.galleries = {};
+  if (!appConfig.galleries[taskId]) appConfig.galleries[taskId] = [];
+
+  const newPhoto = {
+    id: `photo_${Date.now()}`,
+    title: title || 'บรรยากาศกิจกรรมสร้างสรรค์',
+    date: new Date().toLocaleDateString('th-TH'),
+    url: currentGalleryUploadBase64
+  };
+
+  appConfig.galleries[taskId].push(newPhoto);
+  saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
+
+  artSound.playFanfare();
+  confettiEngine.fire(60);
+  showToast("บันทึกภาพกิจกรรมเข้าสู่แกลเลอรีเรียบร้อยแล้ว! 📸");
+  closeGalleryUploadModal();
+  renderClassroomGallery();
+}
+
+function initGalleryUploadDropzone() {
+  const dropzone = document.getElementById('galleryDropzone');
+  const fileInput = document.getElementById('galleryFileInput');
+  const previewBox = document.getElementById('galleryPreviewContainer');
+  const previewImg = document.getElementById('galleryUploadPreviewImg');
+
+  if (!dropzone || !fileInput) return;
+
+  dropzone.addEventListener('click', () => fileInput.click());
+
+  const handleFile = async (file) => {
+    if (!file || !file.type.startsWith('image/')) {
+      alert("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
+      return;
+    }
+    try {
+      currentGalleryUploadBase64 = await resizeImageToCanvas(file, 900, 900, 0.85);
+      if (previewImg) previewImg.src = currentGalleryUploadBase64;
+      if (previewBox) previewBox.classList.remove('hidden');
+      artSound.playCamera();
+    } catch (err) {
+      alert("ไม่สามารถอ่านรูปภาพได้: " + err.message);
+    }
+  };
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) handleFile(e.target.files[0]);
+  });
+
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('drag-active');
+  });
+
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('drag-active');
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-active');
+    if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+  });
+}
+
+// ==========================================
+// 14.2 SCHOOL SETTINGS & ROOM PASSCODES
+// ==========================================
+function openSchoolSettingsModal() {
+  const modal = document.getElementById('schoolSettingsModal');
+  const nameInput = document.getElementById('settingSchoolName');
+  const logoInput = document.getElementById('settingSchoolLogo');
+  const semInput = document.getElementById('settingSemester');
+  const yearInput = document.getElementById('settingAcademicYear');
+  const bgUrlInput = document.getElementById('settingCustomBgUrl');
+
+  if (nameInput) nameInput.value = appConfig.schoolName || "โรงเรียนสาธิตศิลปวัฒนธรรม";
+  if (logoInput) logoInput.value = appConfig.schoolLogo || "🎨";
+  if (semInput) semInput.value = appConfig.semester || "1";
+  if (yearInput) yearInput.value = appConfig.academicYear || "2567";
+  if (bgUrlInput) bgUrlInput.value = appConfig.customBgUrl || "";
+
+  const theme = appConfig.bgTheme || 'theme-pastel';
+  const radio = document.querySelector(`input[name="bgThemeRadio"][value="${theme}"]`);
+  if (radio) radio.checked = true;
+
+  renderSettingsPasscodesTable();
+
+  if (modal) modal.classList.remove('hidden');
+  artSound.playPop();
+}
+
+function closeSchoolSettingsModal() {
+  const modal = document.getElementById('schoolSettingsModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function renderSettingsPasscodesTable() {
+  const tbody = document.getElementById('settingsPasscodesTableBody');
+  if (!tbody) return;
+
+  const passcodes = appConfig.roomPasscodes || {};
+  let rowsHtml = `
+    <tr style="background: #F8FAFC;">
+      <td><strong>ทุกห้อง (Default Passcode)</strong></td>
+      <td>
+        <input type="text" class="score-input-inline passcode-input" data-key="default" value="${passcodes['default'] || '1234'}" maxlength="8">
+      </td>
+    </tr>
+  `;
+
+  (appConfig.grades || []).forEach(g => {
+    const rooms = (appConfig.rooms && appConfig.rooms[g.id]) || ['1', '2', '3'];
+    rooms.forEach(r => {
+      const key = `${g.id}_${r}`;
+      const code = passcodes[key] || passcodes['default'] || "1234";
+      rowsHtml += `
+        <tr>
+          <td>${g.name} ห้อง ${r}</td>
+          <td>
+            <input type="text" class="score-input-inline passcode-input" data-key="${key}" value="${code}" maxlength="8">
+          </td>
+        </tr>
+      `;
+    });
+  });
+
+  tbody.innerHTML = rowsHtml;
+}
+
+function handleSchoolSettingsSubmit(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('settingSchoolName');
+  const logoInput = document.getElementById('settingSchoolLogo');
+  const semInput = document.getElementById('settingSemester');
+  const yearInput = document.getElementById('settingAcademicYear');
+  const bgUrlInput = document.getElementById('settingCustomBgUrl');
+  const checkedTheme = document.querySelector('input[name="bgThemeRadio"]:checked');
+
+  if (nameInput) appConfig.schoolName = nameInput.value.trim();
+  if (logoInput) appConfig.schoolLogo = logoInput.value.trim();
+  if (semInput) appConfig.semester = semInput.value.trim();
+  if (yearInput) appConfig.academicYear = yearInput.value.trim();
+  if (bgUrlInput) appConfig.customBgUrl = bgUrlInput.value.trim();
+  if (checkedTheme) appConfig.bgTheme = checkedTheme.value;
+
+  if (!appConfig.roomPasscodes) appConfig.roomPasscodes = {};
+  document.querySelectorAll('.passcode-input').forEach(inp => {
+    const key = inp.getAttribute('data-key');
+    const val = inp.value.trim();
+    if (key && val) {
+      appConfig.roomPasscodes[key] = val;
+    }
+  });
+
+  saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
+
+  const schoolDisplay = document.getElementById('schoolNameDisplay');
+  const schoolLogo = document.getElementById('schoolLogoDisplay');
+  const logoImg = document.getElementById('schoolLogoImg');
+  const stripLogo = document.querySelector('.school-strip-logo');
+  const semBadge = document.getElementById('semesterYearBadge');
+  const footerSchool = document.getElementById('footerSchoolName');
+
+  if (schoolDisplay) schoolDisplay.textContent = appConfig.schoolName;
+  if (semBadge) semBadge.textContent = `ภาคเรียนที่ ${appConfig.semester} ปีการศึกษา ${appConfig.academicYear}`;
+  if (footerSchool) footerSchool.textContent = appConfig.schoolName;
+
+  const isImg = (appConfig.schoolLogo || '').includes('/') || (appConfig.schoolLogo || '').startsWith('data:image');
+  if (isImg) {
+    if (logoImg) {
+      logoImg.src = appConfig.schoolLogo;
+      logoImg.classList.remove('hidden');
+    }
+    if (schoolLogo) schoolLogo.classList.add('hidden');
+    if (stripLogo) stripLogo.src = appConfig.schoolLogo;
+  } else {
+    if (schoolLogo) {
+      schoolLogo.textContent = appConfig.schoolLogo;
+      schoolLogo.classList.remove('hidden');
+    }
+    if (logoImg) logoImg.classList.add('hidden');
+  }
+
+  applyBackgroundTheme();
+  closeSchoolSettingsModal();
+  artSound.playSaveChime();
+  showToast("บันทึกการตั้งค่าโรงเรียนและรหัสผ่านเรียบร้อยแล้ว!");
+  if (currentView === 'home') renderHomeView();
+  else if (currentView === 'leaderboard') renderLeaderboardView();
+  else renderTeacherView();
+}
+
+// ==========================================
+// 14.3 THE ART TIME MAGAZINE EDIT
+// ==========================================
+function openMagazineModal() {
+  const modal = document.getElementById('magazineEditModal');
+  const mag = appConfig.magazine || {};
+
+  const h1 = document.getElementById('editMagHead1');
+  const c1 = document.getElementById('editMagCopy1');
+  const p1 = document.getElementById('editMagPic1');
+  const h2 = document.getElementById('editMagHead2');
+  const c2 = document.getElementById('editMagCopy2');
+  const p4 = document.getElementById('editMagPic4');
+
+  if (h1) h1.value = mag.head1 || '';
+  if (c1) c1.value = mag.copy1 || '';
+  if (p1) p1.value = mag.pic1 || '';
+  if (h2) h2.value = mag.head2 || '';
+  if (c2) c2.value = mag.copy2 || '';
+  if (p4) p4.value = mag.pic4 || '';
+
+  if (modal) modal.classList.remove('hidden');
+  artSound.playPop();
+}
+
+function closeMagazineModal() {
+  const modal = document.getElementById('magazineEditModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleMagazineSubmit(e) {
+  e.preventDefault();
+  if (!appConfig.magazine) appConfig.magazine = {};
+
+  const h1 = document.getElementById('editMagHead1');
+  const c1 = document.getElementById('editMagCopy1');
+  const p1 = document.getElementById('editMagPic1');
+  const h2 = document.getElementById('editMagHead2');
+  const c2 = document.getElementById('editMagCopy2');
+  const p4 = document.getElementById('editMagPic4');
+
+  if (h1) appConfig.magazine.head1 = h1.value.trim();
+  if (c1) appConfig.magazine.copy1 = c1.value.trim();
+  if (p1) appConfig.magazine.pic1 = p1.value.trim();
+  if (h2) appConfig.magazine.head2 = h2.value.trim();
+  if (c2) appConfig.magazine.copy2 = c2.value.trim();
+  if (p4) appConfig.magazine.pic4 = p4.value.trim();
+
+  saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
+
+  renderHomeView();
+  closeMagazineModal();
+  artSound.playSaveChime();
+  showToast("บันทึกเนื้อหา THE ART TIME สำเร็จแล้ว!");
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Initialize Storage & Dropdowns
   loadStorage();
@@ -2494,6 +3478,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 5. Navigation Tabs
+  const viewHomeBtn = document.getElementById('viewHomeBtn');
+  if (viewHomeBtn) {
+    viewHomeBtn.addEventListener('click', () => {
+      artSound.playPop();
+      switchView('home');
+    });
+  }
+
+  const backToHomeBtn = document.getElementById('backToHomeBtn');
+  if (backToHomeBtn) {
+    backToHomeBtn.addEventListener('click', () => {
+      artSound.playPop();
+      switchView('home');
+    });
+  }
+
   document.getElementById('viewLeaderboardBtn').addEventListener('click', () => {
     artSound.playPop();
     switchView('leaderboard');
@@ -2509,6 +3509,166 @@ document.addEventListener('DOMContentLoaded', () => {
       openTeacherLoginModal();
     }
   });
+
+  // Direct Header Login & Logout Buttons
+  const headerLoginBtn = document.getElementById('headerLoginBtn');
+  if (headerLoginBtn) {
+    headerLoginBtn.addEventListener('click', () => {
+      artSound.playPop();
+      openTeacherLoginModal();
+    });
+  }
+
+  const headerLogoutBtn = document.getElementById('headerLogoutBtn');
+  if (headerLogoutBtn) {
+    headerLogoutBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      artSound.playPop();
+      openLogoutConfirmModal();
+    });
+  }
+
+  // Home Single Line Class Picker
+  const homeGradeSelect = document.getElementById('homeGradeSelect');
+  if (homeGradeSelect) {
+    homeGradeSelect.addEventListener('change', () => {
+      currentGrade = homeGradeSelect.value;
+      populateRoomDropdowns();
+      artSound.playPop();
+    });
+  }
+
+  const homeClassSelectForm = document.getElementById('homeClassSelectForm');
+  if (homeClassSelectForm) {
+    homeClassSelectForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const g = document.getElementById('homeGradeSelect')?.value || currentGrade;
+      const r = document.getElementById('homeRoomSelect')?.value || currentRoom;
+      requestRoomAccess(g, r);
+    });
+  }
+
+  // Room Passcode Modal Listeners
+  const roomPasscodeForm = document.getElementById('roomPasscodeForm');
+  if (roomPasscodeForm) {
+    roomPasscodeForm.addEventListener('submit', handlePasscodeSubmit);
+  }
+  const cancelPasscodeBtn = document.getElementById('cancelPasscodeBtn');
+  if (cancelPasscodeBtn) {
+    cancelPasscodeBtn.addEventListener('click', closePasscodeModal);
+  }
+  const roomPasscodeModal = document.getElementById('roomPasscodeModal');
+  if (roomPasscodeModal) {
+    roomPasscodeModal.addEventListener('click', (e) => {
+      if (e.target.id === 'roomPasscodeModal') closePasscodeModal();
+    });
+  }
+
+  // Student Profile & Artwork Portfolio Modal Listeners
+  const closeProfileModalBtn = document.getElementById('closeProfileModalBtn');
+  if (closeProfileModalBtn) {
+    closeProfileModalBtn.addEventListener('click', closeStudentProfileModal);
+  }
+  const studentProfileModal = document.getElementById('studentProfileModal');
+  if (studentProfileModal) {
+    studentProfileModal.addEventListener('click', (e) => {
+      if (e.target.id === 'studentProfileModal') closeStudentProfileModal();
+    });
+  }
+
+  // Classroom Photo Lightbox Listeners
+  const closeLightboxBtn = document.getElementById('closeLightboxBtn');
+  if (closeLightboxBtn) {
+    closeLightboxBtn.addEventListener('click', closePhotoLightbox);
+  }
+  const galleryPhotoModal = document.getElementById('galleryPhotoModal');
+  if (galleryPhotoModal) {
+    galleryPhotoModal.addEventListener('click', (e) => {
+      if (e.target.id === 'galleryPhotoModal') closePhotoLightbox();
+    });
+  }
+
+  // Classroom Gallery Upload Listeners & Dropzone
+  initGalleryUploadDropzone();
+  const openGalleryManagerBtn = document.getElementById('openGalleryManagerBtn');
+  if (openGalleryManagerBtn) {
+    openGalleryManagerBtn.addEventListener('click', () => {
+      artSound.playPop();
+      openGalleryUploadModal();
+    });
+  }
+  const closeGalleryUploadBtn = document.getElementById('closeGalleryUploadBtn');
+  if (closeGalleryUploadBtn) {
+    closeGalleryUploadBtn.addEventListener('click', closeGalleryUploadModal);
+  }
+  const cancelGalleryUploadBtn = document.getElementById('cancelGalleryUploadBtn');
+  if (cancelGalleryUploadBtn) {
+    cancelGalleryUploadBtn.addEventListener('click', closeGalleryUploadModal);
+  }
+  const galleryUploadForm = document.getElementById('galleryUploadForm');
+  if (galleryUploadForm) {
+    galleryUploadForm.addEventListener('submit', handleGalleryUploadSubmit);
+  }
+  const galleryUploadModal = document.getElementById('galleryUploadModal');
+  if (galleryUploadModal) {
+    galleryUploadModal.addEventListener('click', (e) => {
+      if (e.target.id === 'galleryUploadModal') closeGalleryUploadModal();
+    });
+  }
+
+  // School Settings & Room Passcode Management Listeners
+  const openSchoolSettingsBtn = document.getElementById('openSchoolSettingsBtn');
+  if (openSchoolSettingsBtn) {
+    openSchoolSettingsBtn.addEventListener('click', () => {
+      artSound.playPop();
+      openSchoolSettingsModal();
+    });
+  }
+  const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+  if (closeSettingsModalBtn) {
+    closeSettingsModalBtn.addEventListener('click', closeSchoolSettingsModal);
+  }
+  const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+  if (cancelSettingsBtn) {
+    cancelSettingsBtn.addEventListener('click', closeSchoolSettingsModal);
+  }
+  const schoolSettingsForm = document.getElementById('schoolSettingsForm');
+  if (schoolSettingsForm) {
+    schoolSettingsForm.addEventListener('submit', handleSchoolSettingsSubmit);
+  }
+  const schoolSettingsModal = document.getElementById('schoolSettingsModal');
+  if (schoolSettingsModal) {
+    schoolSettingsModal.addEventListener('click', (e) => {
+      if (e.target.id === 'schoolSettingsModal') closeSchoolSettingsModal();
+    });
+  }
+
+  // THE ART TIME Magazine Management Listeners
+  const openMagazineManagerBtn = document.getElementById('openMagazineManagerBtn');
+  if (openMagazineManagerBtn) {
+    openMagazineManagerBtn.addEventListener('click', () => {
+      artSound.playPop();
+      openMagazineModal();
+    });
+  }
+  const closeMagazineModalBtn = document.getElementById('closeMagazineModalBtn');
+  if (closeMagazineModalBtn) {
+    closeMagazineModalBtn.addEventListener('click', closeMagazineModal);
+  }
+  const cancelMagazineBtn = document.getElementById('cancelMagazineBtn');
+  if (cancelMagazineBtn) {
+    cancelMagazineBtn.addEventListener('click', closeMagazineModal);
+  }
+  const magazineEditForm = document.getElementById('magazineEditForm');
+  if (magazineEditForm) {
+    magazineEditForm.addEventListener('submit', handleMagazineSubmit);
+  }
+  const magazineEditModal = document.getElementById('magazineEditModal');
+  if (magazineEditModal) {
+    magazineEditModal.addEventListener('click', (e) => {
+      if (e.target.id === 'magazineEditModal') closeMagazineModal();
+    });
+  }
 
   // Auth & Account Modal Listeners
   document.getElementById('closeLoginModalBtn').addEventListener('click', closeTeacherLoginModal);
@@ -2761,7 +3921,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 15. Initial Render, Auth State & Cloud DB Sync
   updateTeacherAuthUI();
-  renderLeaderboardView();
+  switchView('home');
   checkAndSyncCloudDb();
   setTimeout(() => confettiEngine.fire(50), 400);
 });

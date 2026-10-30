@@ -34,32 +34,41 @@
   <!-- Confetti Canvas for Celebrations -->
   <canvas id="confettiCanvas"></canvas>
 
+  <!-- Top School Neon Banner (ชื่อโรงเรียนพร้อมแถบไฟดูทันสมัย) -->
+  <div class="school-top-strip">
+    <div class="container school-strip-container">
+      <div class="school-brand-glow">
+        <span class="school-glow-dot"></span>
+        <img src="assets/school_logo.png" class="school-strip-logo" alt="ตราโรงเรียน">
+        <span id="schoolNameDisplay" class="school-name-text">โรงเรียนบริษัทไทยกสิกรสงเคราะห์</span>
+        <span class="school-tag-chip">(ศ.ท.ส.) • ART CREATIVE</span>
+      </div>
+      <div class="school-strip-right">
+        <span class="semester-academic-badge" id="semesterYearBadge">ภาคเรียนที่ 1 ปีการศึกษา 2567</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Navigation / Header -->
   <header class="app-header">
     <div class="container header-container">
       <div class="brand-group">
         <div class="palette-logo" id="logoInteractive" title="คลิกเพื่อสาดสี!">
-          <span class="logo-emoji">🎨</span>
+          <img src="assets/school_logo.png" id="schoolLogoImg" class="school-header-logo" alt="ตราโรงเรียน">
+          <span class="logo-emoji hidden" id="schoolLogoDisplay">🎨</span>
           <span class="sparkle-spark">✨</span>
         </div>
         <div class="brand-text">
-          <span class="badge-sub">วิชาทัศนศิลป์และศิลปะสร้างสรรค์</span>
+          <div class="brand-badge-row">
+            <span class="badge-sub">วิชาทัศนศิลป์และศิลปะสร้างสรรค์</span>
+            <span class="artist-badge">Artist.</span>
+          </div>
           <h1 class="brand-title">Art Classroom Leaderboard</h1>
           <p class="brand-caption">ระบบบันทึกคะแนนเก็บตามชิ้นงาน & ทำเนียบจิตรกรน้อย</p>
         </div>
       </div>
 
       <div class="header-actions">
-        <!-- Logged-in Teacher Header Badge -->
-        <div id="headerTeacherBadge" class="header-teacher-badge hidden" title="คุณครูที่กำลังเข้าสู่ระบบ (คลิกเพื่อเข้าสู่ห้องพักครู)">
-          <div class="teacher-badge-avatar">👩‍🏫</div>
-          <div class="teacher-badge-info">
-            <span class="teacher-badge-role">เข้าสู่ระบบโดย</span>
-            <span id="headerTeacherName" class="teacher-badge-name">คุณครู</span>
-          </div>
-          <span class="teacher-status-dot" title="ออนไลน์"></span>
-        </div>
-
         <!-- Sound FX Toggle -->
         <button id="soundToggleBtn" class="btn-icon" title="เปิด/ปิดเสียงเอฟเฟกต์">
           <span class="sound-icon">🔊</span>
@@ -68,14 +77,34 @@
 
         <!-- Mode Switcher Tabs -->
         <div class="view-switch-nav">
-          <button id="viewLeaderboardBtn" class="nav-tab active">
+          <button id="viewHomeBtn" class="nav-tab active" title="หน้าหลัก & THE ART TIME">
+            <span class="tab-icon">📰</span>
+            <span class="tab-text">THE ART TIME</span>
+          </button>
+          <button id="viewLeaderboardBtn" class="nav-tab" title="ดูทำเนียบแรงกิ้งและคะแนนประจำห้อง">
             <span class="tab-icon">🏆</span>
             <span class="tab-text">ทำเนียบแรงกิ้ง</span>
           </button>
-          <button id="viewTeacherBtn" class="nav-tab">
+          <button id="viewTeacherBtn" class="nav-tab" title="เข้าสู่ห้องพักครู">
             <span class="tab-icon">👩‍🏫</span>
-            <span class="tab-text">ห้องพักครู (จัดการระบบ)</span>
+            <span class="tab-text">ห้องพักครู</span>
           </button>
+        </div>
+
+        <!-- Direct Login / Logout Button in Header (log in/out แก้เป็นปุ่มนี้เลย) -->
+        <div id="headerAuthArea" class="header-auth-area">
+          <button id="headerLoginBtn" class="btn btn-sm btn-art-primary" title="เข้าสู่ระบบห้องพักครู">
+            <span>🔐 เข้าสู่ระบบครู</span>
+          </button>
+          <div id="headerTeacherBadge" class="header-teacher-badge hidden" title="คุณครูที่กำลังเข้าสู่ระบบ">
+            <div class="teacher-badge-avatar">👩‍🏫</div>
+            <div class="teacher-badge-info">
+              <span class="teacher-badge-role">เข้าสู่ระบบโดย</span>
+              <span id="headerTeacherName" class="teacher-badge-name">คุณครู</span>
+            </div>
+            <span class="teacher-status-dot" title="ออนไลน์"></span>
+            <button id="headerLogoutBtn" class="btn-header-logout" title="ออกจากระบบ">&times;</button>
+          </div>
         </div>
       </div>
     </div>
@@ -83,54 +112,128 @@
 
   <main class="main-content container">
 
-    <!-- ==================== VIEW 1: STUDENT LEADERBOARD ==================== -->
-    <section id="leaderboardView" class="view-section active-view">
+    <!-- ==================== VIEW 1: HOME PAGE & THE ART TIME MAGAZINE ==================== -->
+    <section id="homeView" class="view-section active-view">
       
-      <!-- Class Selector Banner -->
-      <div class="class-picker-card">
-        <div class="picker-intro">
-          <div class="easel-icon-tag">🎨</div>
-          <div>
-            <h2 class="picker-title">เลือกห้องเรียนศิลปะ</h2>
-            <p class="picker-subtitle">ดูแรงกิ้งคะแนนสะสมตามชิ้นงานที่สั่ง (คลิกที่ชื่อเพื่อดูคะแนนแต่ละงาน)</p>
+      <!-- Single Line Class & Room Selector (เปลี่ยนให้อยู่บรรทัดเดียวกัน พร้อมรหัสป้องกัน) -->
+      <div class="class-picker-single-card">
+        <div class="picker-single-left">
+          <div class="picker-art-tag">🎨</div>
+          <div class="picker-text-wrap">
+            <h2 class="picker-title-inline">เลือกระดับชั้นและห้อง</h2>
+            <p class="picker-sub-inline">เพื่อดูคะแนนและทำเนียบผลงาน (มีรหัสประจำห้องเพื่อความปลอดภัย)</p>
           </div>
         </div>
 
-        <div class="selectors-wrapper">
-          <div class="select-group">
-            <label for="gradeSelect"><span class="label-icon">🎒</span> ระดับชั้น:</label>
-            <div class="custom-select-box">
-              <select id="gradeSelect">
-                <!-- Dynamically populated from config -->
+        <form id="homeClassSelectForm" class="picker-single-form">
+          <div class="inline-select-group">
+            <label for="homeGradeSelect"><span class="label-icon">🎒</span> ชั้น:</label>
+            <div class="custom-select-box select-box-sm">
+              <select id="homeGradeSelect">
+                <!-- Dynamically populated (ป.4 - ม.3) -->
               </select>
             </div>
           </div>
 
-          <div class="select-group">
-            <label for="roomSelect"><span class="label-icon">🚪</span> ห้องเรียน:</label>
-            <div class="custom-select-box">
-              <select id="roomSelect">
-                <!-- Dynamically populated from config -->
+          <div class="inline-select-group">
+            <label for="homeRoomSelect"><span class="label-icon">🚪</span> ห้อง:</label>
+            <div class="custom-select-box select-box-sm">
+              <select id="homeRoomSelect">
+                <!-- Dynamically populated (ห้อง 1, 2, 3) -->
               </select>
             </div>
           </div>
 
-          <button id="celebrateBtn" class="btn btn-bounce" title="จุดพลุฉลองผลงานยอดเยี่ยม">
-            <span>🎉 จุดพลุยินดี</span>
+          <button type="submit" id="homeEnterClassBtn" class="btn btn-art-primary btn-enter-room" title="เข้าสู่ห้องเรียน">
+            <span>🔒 เปิดดูห้องเรียน</span>
           </button>
-        </div>
+        </form>
       </div>
 
-      <!-- Current Class Banner Bar -->
-      <div class="current-class-badge-strip">
-        <div class="strip-left">
-          <span class="paint-dot"></span>
-          <span class="strip-title" id="currentClassTitle">กำลังแสดง: ชั้นประถมศึกษาปีที่ 4 ห้อง 1</span>
-          <span class="student-count-chip" id="studentCountChip">12 คน</span>
-          <span class="task-summary-chip" id="taskSummaryChip">4 ชิ้นงาน (เต็ม 100 คะแนน)</span>
+      <!-- ================= THE ART TIME MAGAZINE SECTION ================= -->
+      <section class="art-magazine-container">
+        <!-- Magazine Header Masthead -->
+        <div class="magazine-masthead">
+          <div class="masthead-badge">ART & CREATIVE QUARTERLY</div>
+          <h2 class="magazine-main-title">THE ART TIME</h2>
+          <div class="masthead-meta">
+            <span id="magazineIssueDate">ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567</span>
+            <span class="masthead-sep">•</span>
+            <span>บันทึกแรงบันดาลใจและพื้นที่สร้างสรรค์ของจิตรกรน้อย</span>
+          </div>
         </div>
-        <div class="strip-right">
-          <span class="hint-clickable">💡 คลิกที่ชื่อนักเรียนเพื่อดู <strong>คะแนนเก็บแยกตามชิ้นงานฉบับเต็ม</strong></span>
+
+        <!-- Editorial Grid Layout matching Brief: SubHead, Picture, Copy, Picture, Picture, SubHead, Copy -->
+        <div class="magazine-editorial-grid" id="magazineEditorialGrid">
+          
+          <!-- Column 1: Feature Lead -->
+          <article class="mag-card mag-lead">
+            <div class="mag-subhead-pill">🌟 SPECIAL STORY</div>
+            <h3 class="mag-headline" id="magHead1">ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ</h3>
+            <p class="mag-copy" id="magCopy1">
+              ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี
+            </p>
+            <div class="mag-photo-wrap">
+              <img id="magPic1" class="mag-photo" src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" alt="ศิลปะสร้างสรรค์">
+              <span class="mag-photo-caption">🎨 การทดลองผสมสีน้ำสร้างโทนสีแห่งความสุข</span>
+            </div>
+          </article>
+
+          <!-- Column 2: Photo Collage & Process -->
+          <div class="mag-column-duo">
+            <article class="mag-card mag-visual">
+              <div class="mag-photo-wrap h-lg">
+                <img id="magPic2" class="mag-photo" src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" alt="ผลงานภาพพิมพ์">
+                <span class="mag-photo-caption">🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ</span>
+              </div>
+            </article>
+
+            <article class="mag-card mag-visual">
+              <div class="mag-photo-wrap h-lg">
+                <img id="magPic3" class="mag-photo" src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" alt="ภาพวาดสัตว์ในจินตนาการ">
+                <span class="mag-photo-caption">🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด</span>
+              </div>
+            </article>
+          </div>
+
+          <!-- Column 3: Secondary Editorial & Quote -->
+          <article class="mag-card mag-insight">
+            <div class="mag-photo-wrap h-md">
+              <img id="magPic4" class="mag-photo" src="https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80" alt="ห้องเรียนศิลปะ">
+            </div>
+            <div class="mag-subhead-pill pill-purple">💡 ARTIST MINDSET</div>
+            <h3 class="mag-headline" id="magHead2">เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า</h3>
+            <p class="mag-copy" id="magCopy2">
+              เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง
+            </p>
+            <div class="mag-quote-box">
+              <span class="quote-mark">“</span>
+              <p class="quote-text" id="magQuoteText">ศิลปะไม่ใช่แค่ผลงานที่แขวนบนผนัง แต่คือการเดินทางที่เด็กๆ ได้ค้นพบคุณค่าในตัวเอง</p>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+    </section>
+
+    <!-- ==================== VIEW 2: STUDENT LEADERBOARD & ROOM PORTAL ==================== -->
+    <section id="leaderboardView" class="view-section">
+      
+      <!-- Top Room Navigation Bar -->
+      <div class="room-nav-banner">
+        <button id="backToHomeBtn" class="btn btn-outline btn-back-home" title="กลับหน้าแรก THE ART TIME">
+          <span>⬅️ กลับหน้าหลัก (THE ART TIME)</span>
+        </button>
+
+        <div class="current-room-badge-group">
+          <span class="room-online-tag">🟢 ห้องเรียนปัจจุบัน</span>
+          <span class="current-room-name" id="currentRoomDisplayTitle">ชั้นประถมศึกษาปีที่ 4 / ห้อง 1</span>
+          <span class="room-students-count" id="roomStudentsCountBadge">12 คน</span>
+        </div>
+
+        <div class="room-academic-meta">
+          <span class="meta-term" id="podiumTermYearDisplay">ภาคเรียนที่ 1 ปีการศึกษา 2567</span>
         </div>
       </div>
 
@@ -138,8 +241,8 @@
       <div class="podium-area-wrapper">
         <div class="podium-header-banner">
           <div class="sparkle-line"></div>
-          <h2 class="podium-title">👑 ทำเนียบ 3 ยอดจิตรกรเอก 👑</h2>
-          <p class="podium-desc">ผู้มีคะแนนสะสมรวมจากชิ้นงานศิลปะสูงสุดประจำห้อง</p>
+          <h2 class="podium-title">👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑</h2>
+          <p class="podium-desc">ทำเนียบยอดจิตรกรน้อยผู้ทำคะแนนรวมสูงสุดประจำห้อง</p>
           <div class="sparkle-line"></div>
         </div>
 
@@ -160,15 +263,18 @@
         <div class="list-card-header">
           <div class="header-left">
             <h3 class="list-title">📋 รายชื่อนักเรียนทุกคนเรียงลำดับคะแนนรวม</h3>
-            <span class="list-subtitle" id="tableHeaderSubtitle">คะแนนประเมินตามชิ้นงานที่สั่ง</span>
+            <span class="list-subtitle" id="tableHeaderSubtitle">คะแนนเก็บ 80 คะแนนสอบ 20 รวม 100 คะแนน</span>
           </div>
 
           <div class="header-tools">
             <div class="search-input-box">
               <span class="search-icon">🔍</span>
-              <input type="text" id="studentSearchInput" placeholder="ค้นหาชื่อ, เลขที่ หรือชื่อเล่น...">
+              <input type="text" id="studentSearchInput" placeholder="ค้นหาชื่อนักเรียน...">
               <button id="clearSearchBtn" class="clear-search-btn" title="ล้างการค้นหา">&times;</button>
             </div>
+            <button id="celebrateBtn" class="btn btn-bounce" title="จุดพลุฉลองผลงานยอดเยี่ยม">
+              <span>🎉 จุดพลุยินดี</span>
+            </button>
           </div>
         </div>
 
@@ -177,7 +283,7 @@
           <table class="art-rank-table" id="rankTable">
             <thead>
               <tr id="rankTableHeadRow">
-                <!-- Dynamically rendered based on active assignments -->
+                <!-- Dynamically rendered (อันดับ, รูป/ชื่อ-นามสกุล, คะแนนรายชิ้นงาน 5 งาน, คะแนนรวม 100, อันดับแรงก์, โปรไฟล์) -->
               </tr>
             </thead>
             <tbody id="rankTableBody">
@@ -193,9 +299,36 @@
           <p>ลองค้นหาด้วยคำอื่น หรือเพิ่มรายชื่อในห้องพักครู</p>
         </div>
       </div>
+
+      <!-- ================= CLASSROOM ACTIVITY & ARTWORK GALLERY (ด้านล่างหลังจากรายชื่อ) ================= -->
+      <section class="classroom-gallery-section" id="classroomGallerySection">
+        <div class="gallery-section-header">
+          <div class="gallery-title-group">
+            <span class="gallery-header-icon">📸</span>
+            <div>
+              <h3 class="gallery-title">ภาพรวมการเรียนการสอนและผลงานศิลปะประจำชิ้นงาน</h3>
+              <p class="gallery-subtitle">ภาพบรรยากาศห้องเรียน กระบวนการสร้างสรรค์ และผลงานของนักเรียน (ทุกคนเข้าดูและดาวน์โหลดรูปได้)</p>
+            </div>
+          </div>
+          <div class="gallery-header-actions" id="galleryHeaderActions">
+            <!-- Upload button shown for teachers -->
+          </div>
+        </div>
+
+        <!-- Assignment Filter Tabs for Gallery -->
+        <div class="gallery-tasks-tabs" id="galleryTasksTabs">
+          <!-- Dynamically populated per assignment -->
+        </div>
+
+        <!-- Photos Grid (4-6 photos per assignment) -->
+        <div class="gallery-photos-grid" id="galleryPhotosGrid">
+          <!-- Dynamically populated via JavaScript -->
+        </div>
+      </section>
+
     </section>
 
-    <!-- ==================== VIEW 2: TEACHER MANAGEMENT & CONFIG PORTAL ==================== -->
+    <!-- ==================== VIEW 3: TEACHER MANAGEMENT & CONFIG PORTAL ==================== -->
     <section id="teacherView" class="view-section">
       
       <!-- Top Teacher Command Center Banner -->
@@ -217,6 +350,15 @@
               <span>🚪 ออกจากระบบ</span>
             </button>
           </div>
+          <button id="openSchoolSettingsBtn" class="btn btn-secondary-art" title="ตั้งค่าชื่อโรงเรียน โลโก้ ปีการศึกษา พื้นหลัง และรหัสประจำห้อง">
+            <span>⚙️ ตั้งค่าโรงเรียน & รหัสห้อง</span>
+          </button>
+          <button id="openMagazineManagerBtn" class="btn btn-outline" title="แก้ไขบทความและรูปภาพใน THE ART TIME">
+            <span>📰 จัดการ THE ART TIME</span>
+          </button>
+          <button id="openGalleryManagerBtn" class="btn btn-emerald" title="จัดการภาพรวมการเรียนและผลงานในแต่ละชิ้นงาน">
+            <span>📸 จัดการภาพกิจกรรม</span>
+          </button>
           <button id="manageTasksBtn" class="btn btn-purple" title="เพิ่ม/ลด/แก้ไข หัวข้องานที่สั่งและคะแนนเต็ม">
             <span>📝 จัดการหัวข้องาน</span>
           </button>
@@ -790,17 +932,254 @@
     </div>
   </div>
 
+  <!-- ================= MODAL 10: ROOM PASSCODE VERIFICATION ================= -->
+  <div id="roomPasscodeModal" class="modal-overlay hidden">
+    <div class="modal-card modal-passcode-card">
+      <div class="passcode-hero">
+        <div class="passcode-icon-circle">🔒</div>
+        <h3>กรุณากรอกรหัสประจำห้องเรียน</h3>
+        <p class="passcode-subtext" id="passcodeTargetClassText">เข้าสู่ห้องเรียน ป.4/1</p>
+      </div>
+
+      <form id="roomPasscodeForm" class="passcode-form">
+        <div class="form-group">
+          <input type="password" id="inputRoomPasscode" placeholder="กรอกรหัสผ่าน 4 หลัก (ค่าเริ่มต้น: 1234)" autocomplete="off" required>
+        </div>
+
+        <div id="passcodeErrorAlert" class="auth-error-alert hidden">
+          <span>⚠️</span> <span>รหัสไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง หรือติดต่อครูผู้สอน</span>
+        </div>
+
+        <div class="modal-actions-dual">
+          <button type="button" id="cancelPasscodeBtn" class="btn btn-outline">ยกเลิก</button>
+          <button type="submit" class="btn btn-art-primary">🔓 เข้าสู่ห้องเรียน</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 11: STUDENT PROFILE & ARTWORK PORTFOLIO ================= -->
+  <div id="studentProfileModal" class="modal-overlay hidden">
+    <div class="modal-card modal-student-passport">
+      <button id="closeProfileModalBtn" class="close-modal-btn">&times;</button>
+      <div id="studentProfileContent">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 12: CLASSROOM GALLERY PHOTO LIGHTBOX ================= -->
+  <div id="galleryPhotoModal" class="modal-overlay hidden">
+    <div class="modal-card modal-lightbox-card">
+      <button id="closeLightboxBtn" class="close-modal-btn">&times;</button>
+      <div class="lightbox-img-wrap">
+        <img id="lightboxImg" src="" alt="ภาพกิจกรรมขนาดเต็ม">
+      </div>
+      <div class="lightbox-meta-bar">
+        <div class="lightbox-info">
+          <h4 id="lightboxTitle">ภาพกิจกรรมการเรียนการสอนศิลปะ</h4>
+          <p id="lightboxCaption">ผลงานและการทดลองสร้างสรรค์ของนักเรียน</p>
+        </div>
+        <a id="downloadPhotoBtn" href="#" download="art-classroom-photo.jpg" class="btn btn-emerald btn-download-photo">
+          <span>📥 ดาวน์โหลดรูปภาพ</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 13: TEACHER GALLERY UPLOAD ================= -->
+  <div id="galleryUploadModal" class="modal-overlay hidden">
+    <div class="modal-card modal-gallery-upload">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">📸</span>
+          <h3>อัปโหลดภาพกิจกรรมการเรียนรู้</h3>
+        </div>
+        <button id="closeGalleryUploadBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <form id="galleryUploadForm" class="modal-form">
+        <div class="form-group">
+          <label for="galleryTaskSelect">เลือกชิ้นงาน / หัวข้อการเรียนรู้ *</label>
+          <select id="galleryTaskSelect" required>
+            <!-- Dynamically populated with active assignments -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="galleryPhotoTitle">คำอธิบายภาพ / บรรยากาศ *</label>
+          <input type="text" id="galleryPhotoTitle" placeholder="เช่น บรรยากาศการทดลองเกลี่ยสีน้ำเปียกบนเปียก" required>
+        </div>
+
+        <div class="form-group">
+          <label>เลือกรูปภาพกิจกรรม (ประมาณ 4-6 รูปต่อชิ้นงาน) *</label>
+          <div class="photo-upload-dropzone" id="galleryDropzone">
+            <span class="dropzone-icon">📷</span>
+            <p>คลิกเพื่อเลือกรูปภาพ หรือลากไฟล์มาวางที่นี่</p>
+            <input type="file" id="galleryFileInput" accept="image/*" class="hidden-file-input">
+          </div>
+          <div id="galleryPreviewContainer" class="gallery-upload-preview-box hidden">
+            <img id="galleryUploadPreviewImg" src="" alt="พรีวิว">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelGalleryUploadBtn" class="btn btn-outline">ยกเลิก</button>
+          <button type="submit" class="btn btn-emerald">📸 บันทึกเข้าแกลเลอรี</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 14: SCHOOL SETTINGS & PASSCODES ================= -->
+  <div id="schoolSettingsModal" class="modal-overlay hidden">
+    <div class="modal-card modal-settings-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">⚙️</span>
+          <h3>ตั้งค่าโรงเรียน ภาพพื้นหลัง & รหัสผ่านประจำห้อง</h3>
+        </div>
+        <button id="closeSettingsModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <form id="schoolSettingsForm" class="modal-form">
+        <div class="form-row">
+          <div class="form-group col-8">
+            <label for="settingSchoolName">ชื่อโรงเรียน *</label>
+            <input type="text" id="settingSchoolName" value="โรงเรียนสาธิตศิลปวัฒนธรรม" required>
+          </div>
+          <div class="form-group col-4">
+            <label for="settingSchoolLogo">อิโมจิ / โลโก้ *</label>
+            <input type="text" id="settingSchoolLogo" value="🎨" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="settingSemester">ภาคเรียนที่</label>
+            <input type="text" id="settingSemester" value="1" placeholder="เช่น 1 หรือ 2">
+          </div>
+          <div class="form-group col-6">
+            <label for="settingAcademicYear">ปีการศึกษา</label>
+            <input type="text" id="settingAcademicYear" value="2567" placeholder="เช่น 2567">
+          </div>
+        </div>
+
+        <!-- Background Customization (เปลี่ยนภาพพื้นหลังเองได้) -->
+        <div class="form-group">
+          <label>🎨 ภาพพื้นหลังเว็บไซต์ (Background Style)</label>
+          <div class="bg-theme-picker">
+            <label class="theme-option">
+              <input type="radio" name="bgThemeRadio" value="theme-pastel" checked>
+              <span class="theme-sample sample-pastel">Pastel Art</span>
+            </label>
+            <label class="theme-option">
+              <input type="radio" name="bgThemeRadio" value="theme-indigo">
+              <span class="theme-sample sample-indigo">Deep Indigo</span>
+            </label>
+            <label class="theme-option">
+              <input type="radio" name="bgThemeRadio" value="theme-mint">
+              <span class="theme-sample sample-mint">Fresh Mint</span>
+            </label>
+            <label class="theme-option">
+              <input type="radio" name="bgThemeRadio" value="theme-sunset">
+              <span class="theme-sample sample-sunset">Warm Sunset</span>
+            </label>
+          </div>
+          <div style="margin-top: 8px;">
+            <input type="text" id="settingCustomBgUrl" placeholder="หรือใส่ URL ภาพพื้นหลังของคุณครูเอง (เช่น https://...)" class="form-input-sm">
+          </div>
+        </div>
+
+        <!-- Room Passcodes Settings (อยากมีรหัสประจำห้องเพื่อกันชั้นอื่นมาดู) -->
+        <div class="form-group">
+          <label>🔒 รหัสผ่านเข้าห้องเรียน (Default Passcode: 1234)</label>
+          <div class="passcode-table-wrap">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>ระดับชั้น / ห้อง</th>
+                  <th>รหัสผ่าน 4 หลัก</th>
+                </tr>
+              </thead>
+              <tbody id="settingsPasscodesTableBody">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelSettingsBtn" class="btn btn-outline">ยกเลิก</button>
+          <button type="submit" class="btn btn-art-primary">💾 บันทึกการตั้งค่า</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 15: EDIT THE ART TIME MAGAZINE ================= -->
+  <div id="magazineEditModal" class="modal-overlay hidden">
+    <div class="modal-card modal-settings-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">📰</span>
+          <h3>จัดการเนื้อหา & รูปภาพ THE ART TIME</h3>
+        </div>
+        <button id="closeMagazineModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <form id="magazineEditForm" class="modal-form">
+        <div class="form-group">
+          <label for="editMagHead1">หัวข้อบทความหลัก 1</label>
+          <input type="text" id="editMagHead1" required>
+        </div>
+        <div class="form-group">
+          <label for="editMagCopy1">เนื้อหาบทความหลัก 1</label>
+          <textarea id="editMagCopy1" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="editMagPic1">URL รูปภาพบทความหลัก 1</label>
+          <input type="text" id="editMagPic1" required>
+        </div>
+
+        <hr style="margin: 16px 0; border: none; border-top: 1px dashed #CBD5E1;">
+
+        <div class="form-group">
+          <label for="editMagHead2">หัวข้อบทความรอง 2</label>
+          <input type="text" id="editMagHead2" required>
+        </div>
+        <div class="form-group">
+          <label for="editMagCopy2">เนื้อหาบทความรอง 2</label>
+          <textarea id="editMagCopy2" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="editMagPic4">URL รูปภาพบทความรอง 2</label>
+          <input type="text" id="editMagPic4" required>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelMagazineBtn" class="btn btn-outline">ยกเลิก</button>
+          <button type="submit" class="btn btn-art-primary">💾 บันทึกเนื้อหาแมกกาซีน</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toastNotification" class="art-toast hidden">
     <span class="toast-icon">🎨</span>
     <span class="toast-message" id="toastMessage">บันทึกข้อมูลสำเร็จแล้ว!</span>
   </div>
 
-  <!-- Footer -->
+  <!-- Footer with Requested Brief Art Quote (วาดได้แค่ไหนแค่นั้น...) -->
   <footer class="app-footer">
     <div class="container footer-content">
-      <p>🎨 เว็บไซต์การจัดการห้องเรียนศิลปะและแรงกิ้งคะแนนสะสมตามชิ้นงาน | Art Classroom Management System</p>
-      <p class="footer-sub">สนับสนุนการเรียนรู้ที่สนุกสนานและการชื่นชมพัฒนาการของเด็กทุกคน ✨</p>
+      <div class="footer-quote-bubble">
+        <span class="quote-sparkle">✨</span>
+        <p class="footer-brief-quote">"วาดได้แค่ไหนแค่นั้น ใครวาดสวยให้เด็กทำไป ใครไม่มีใจก็ช่างเขา<br>สำคัญที่สุด คือ มวลประสบการณ์ที่ได้ทดลองลงมือทำ"</p>
+        <span class="quote-sparkle">✨</span>
+      </div>
+      <p class="footer-school-sub"><span id="footerSchoolName">โรงเรียนบริษัทไทยกสิกรสงเคราะห์</span> • วิชาทัศนศิลป์และศิลปะสร้างสรรค์</p>
     </div>
   </footer>
 

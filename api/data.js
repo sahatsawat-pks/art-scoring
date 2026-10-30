@@ -33,8 +33,9 @@ module.exports = async (req, res) => {
           name: s.name,
           nickname: s.nickname,
           avatar: s.avatar,
-          scores: typeof s.scores === 'string' ? JSON.parse(s.scores) : s.scores,
-          feedback: s.feedback
+          scores: typeof s.scores === 'string' ? JSON.parse(s.scores) : (s.scores || {}),
+          feedback: s.feedback,
+          portfolio: typeof s.portfolio === 'string' ? JSON.parse(s.portfolio) : (s.portfolio || [])
         });
       });
 
@@ -56,9 +57,10 @@ module.exports = async (req, res) => {
       if (action === 'save_student') {
         const { grade, room, student } = body;
         const scoresJson = JSON.stringify(student.scores || {});
+        const portfolioJson = JSON.stringify(student.portfolio || []);
         await sql`
-          INSERT INTO art_students (id, grade_id, room_id, no, name, nickname, avatar, scores, feedback, updated_at)
-          VALUES (${student.id}, ${grade}, ${room}, ${student.no}, ${student.name}, ${student.nickname}, ${student.avatar}, ${scoresJson}::jsonb, ${student.feedback}, NOW())
+          INSERT INTO art_students (id, grade_id, room_id, no, name, nickname, avatar, scores, feedback, portfolio, updated_at)
+          VALUES (${student.id}, ${grade}, ${room}, ${student.no}, ${student.name}, ${student.nickname}, ${student.avatar}, ${scoresJson}::jsonb, ${student.feedback || ''}, ${portfolioJson}::jsonb, NOW())
           ON CONFLICT (id) DO UPDATE SET
             no = EXCLUDED.no,
             name = EXCLUDED.name,
@@ -66,6 +68,7 @@ module.exports = async (req, res) => {
             avatar = EXCLUDED.avatar,
             scores = EXCLUDED.scores,
             feedback = EXCLUDED.feedback,
+            portfolio = EXCLUDED.portfolio,
             updated_at = NOW();
         `;
         return res.status(200).json({ success: true });
@@ -115,9 +118,10 @@ module.exports = async (req, res) => {
         }
         for (const s of students) {
           const scoresJson = JSON.stringify(s.scores || {});
+          const portfolioJson = JSON.stringify(s.portfolio || []);
           await sql`
-            INSERT INTO art_students (id, grade_id, room_id, no, name, nickname, avatar, scores, feedback, updated_at)
-            VALUES (${s.id}, ${grade}, ${room}, ${s.no}, ${s.name}, ${s.nickname}, ${s.avatar}, ${scoresJson}::jsonb, ${s.feedback}, NOW())
+            INSERT INTO art_students (id, grade_id, room_id, no, name, nickname, avatar, scores, feedback, portfolio, updated_at)
+            VALUES (${s.id}, ${grade}, ${room}, ${s.no}, ${s.name}, ${s.nickname}, ${s.avatar}, ${scoresJson}::jsonb, ${s.feedback || ''}, ${portfolioJson}::jsonb, NOW())
             ON CONFLICT (id) DO UPDATE SET
               no = EXCLUDED.no,
               name = EXCLUDED.name,
@@ -125,6 +129,7 @@ module.exports = async (req, res) => {
               avatar = EXCLUDED.avatar,
               scores = EXCLUDED.scores,
               feedback = EXCLUDED.feedback,
+              portfolio = EXCLUDED.portfolio,
               updated_at = NOW();
           `;
         }

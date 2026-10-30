@@ -40,41 +40,79 @@ async function ensureTables() {
       no INT NOT NULL,
       name VARCHAR(150) NOT NULL,
       nickname VARCHAR(50),
-      avatar VARCHAR(20) DEFAULT '🎨',
+      avatar TEXT DEFAULT '🎨',
       scores JSONB DEFAULT '{}'::jsonb,
       feedback TEXT,
+      portfolio JSONB DEFAULT '[]'::jsonb,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `;
 
-  // Check if art_config has default config
+  // Auto-migrate avatar to TEXT and add portfolio column if not exist
+  try {
+    await sql`ALTER TABLE art_students ALTER COLUMN avatar TYPE TEXT;`;
+  } catch (err) {}
+  try {
+    await sql`ALTER TABLE art_students ADD COLUMN IF NOT EXISTS portfolio JSONB DEFAULT '[]'::jsonb;`;
+  } catch (err) {}
+
+  // Check if art_config has default config or needs migration to ป.4 - ม.3 and 5 tasks
   const existingConfig = await sql`SELECT * FROM art_config WHERE key = 'app_config'`;
-  if (existingConfig.length === 0) {
+  let needsConfigUpdate = false;
+  if (existingConfig.length > 0) {
+    const curCfg = existingConfig[0].data || {};
+    if (curCfg.grades && curCfg.grades.some(g => g.id === 'p1')) {
+      needsConfigUpdate = true;
+    }
+    if (!curCfg.assignments || curCfg.assignments.length < 5) {
+      needsConfigUpdate = true;
+    }
+    if (!curCfg.schoolName || curCfg.schoolName === 'โรงเรียนสาธิตศิลปวัฒนธรรม') {
+      needsConfigUpdate = true;
+    }
+  }
+
+  if (existingConfig.length === 0 || needsConfigUpdate) {
     const defaultCfg = {
       grades: [
-        { id: 'p1', name: 'ชั้นประถมศึกษาปีที่ 1 (ป.1)' },
-        { id: 'p2', name: 'ชั้นประถมศึกษาปีที่ 2 (ป.2)' },
-        { id: 'p3', name: 'ชั้นประถมศึกษาปีที่ 3 (ป.3)' },
         { id: 'p4', name: 'ชั้นประถมศึกษาปีที่ 4 (ป.4)' },
         { id: 'p5', name: 'ชั้นประถมศึกษาปีที่ 5 (ป.5)' },
-        { id: 'p6', name: 'ชั้นประถมศึกษาปีที่ 6 (ป.6)' }
+        { id: 'p6', name: 'ชั้นประถมศึกษาปีที่ 6 (ป.6)' },
+        { id: 'm1', name: 'ชั้นมัธยมศึกษาปีที่ 1 (ม.1)' },
+        { id: 'm2', name: 'ชั้นมัธยมศึกษาปีที่ 2 (ม.2)' },
+        { id: 'm3', name: 'ชั้นมัธยมศึกษาปีที่ 3 (ม.3)' }
       ],
       rooms: {
-        'p1': ['1', '2', '3'],
-        'p2': ['1', '2', '3'],
-        'p3': ['1', '2', '3'],
         'p4': ['1', '2', '3'],
         'p5': ['1', '2', '3'],
-        'p6': ['1', '2', '3']
+        'p6': ['1', '2', '3'],
+        'm1': ['1', '2', '3'],
+        'm2': ['1', '2', '3'],
+        'm3': ['1', '2', '3']
       },
       assignments: [
-        { id: 'task_1', title: 'งานที่ 1: การไล่เฉดสีน้ำและเทคนิคเปียกบนเปียก', maxScore: 25 },
-        { id: 'task_2', title: 'งานที่ 2: วาดภาพสัตว์ในจินตนาการ (สีโปสเตอร์)', maxScore: 25 },
-        { id: 'task_3', title: 'งานที่ 3: ภาพพิมพ์และงานสร้างสรรค์คอลลาจ', maxScore: 25 },
-        { id: 'task_4', title: 'งานที่ 4: การแรเงาเส้นและน้ำหนักแสงเงา', maxScore: 25 }
-      ]
+        { id: 'task_1', title: 'งาน 1: การไล่เฉดสีน้ำและเทคนิคเปียกบนเปียก', maxScore: 25 },
+        { id: 'task_2', title: 'งาน 2: วาดภาพสัตว์ในจินตนาการ (สีโปสเตอร์)', maxScore: 25 },
+        { id: 'task_3', title: 'งาน 3: ภาพพิมพ์และงานสร้างสรรค์คอลลาจ', maxScore: 25 },
+        { id: 'task_4', title: 'งาน 4: การแรเงาเส้นและน้ำหนักแสงเงา', maxScore: 25 },
+        { id: 'task_5', title: 'งาน 5: ออกแบบประติมากรรมสร้างสรรค์', maxScore: 20 }
+      ],
+      schoolName: "โรงเรียนบริษัทไทยกสิกรสงเคราะห์",
+      schoolLogo: "assets/school_logo.png",
+      semester: "1",
+      academicYear: "2567",
+      roomPasscodes: {
+        "p4_1": "1234",
+        "p4_2": "1234",
+        "p4_3": "1234",
+        "default": "1234"
+      }
     };
-    await sql`INSERT INTO art_config (key, data) VALUES ('app_config', ${JSON.stringify(defaultCfg)})`;
+    if (existingConfig.length === 0) {
+      await sql`INSERT INTO art_config (key, data) VALUES ('app_config', ${JSON.stringify(defaultCfg)})`;
+    } else {
+      await sql`UPDATE art_config SET data = ${JSON.stringify(defaultCfg)} WHERE key = 'app_config'`;
+    }
   }
 
   // Check if admin account exists
