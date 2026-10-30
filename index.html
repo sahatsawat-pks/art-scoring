@@ -1176,50 +1176,56 @@
           <small style="color: #64748B;">* แก้ไขได้ที่เมนูตั้งค่าปีการศึกษาในห้องพักครู</small>
         </div>
 
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+          <button type="button" id="fillDefaultMagBtn" class="btn btn-outline" style="font-size: 0.82rem; padding: 6px 14px; border-radius: 9999px; border-color: #CBD5E1; color: #475569;">
+            📋 เติมข้อความหน้าแรกเป็นค่าเริ่มต้นลงในช่อง
+          </button>
+        </div>
+
         <h4 style="color: #4F46E5; font-size: 0.95rem; margin-bottom: 8px;">🌟 คอลัมน์ที่ 1: บทความหลัก (Lead Story)</h4>
         <div class="form-group">
-          <label for="editMagHead1">หัวข้อบทความหลัก 1 *</label>
-          <input type="text" id="editMagHead1" required>
+          <label for="editMagHead1">หัวข้อบทความหลัก 1</label>
+          <input type="text" id="editMagHead1" placeholder="เช่น ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ">
         </div>
         <div class="form-group">
-          <label for="editMagCopy1">เนื้อหาบทความหลัก 1 *</label>
-          <textarea id="editMagCopy1" rows="3" required></textarea>
+          <label for="editMagCopy1">เนื้อหาบทความหลัก 1</label>
+          <textarea id="editMagCopy1" rows="3" placeholder="เช่น ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี"></textarea>
         </div>
         <div class="form-group">
-          <label for="editMagPic1">URL รูปภาพบทความหลัก 1 *</label>
-          <input type="text" id="editMagPic1" required>
+          <label for="editMagPic1">URL รูปภาพบทความหลัก 1</label>
+          <input type="text" id="editMagPic1" placeholder="เช่น https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80">
         </div>
 
         <hr style="margin: 16px 0; border: none; border-top: 1px dashed #CBD5E1;">
 
         <h4 style="color: #059669; font-size: 0.95rem; margin-bottom: 8px;">🖼️ คอลัมน์ที่ 2: ภาพไฮไลต์ตรงกลาง (Photo Highlights)</h4>
         <div class="form-group">
-          <label for="editMagPic2">URL รูปภาพกลางบน 2 *</label>
-          <input type="text" id="editMagPic2" required>
+          <label for="editMagPic2">URL รูปภาพกลางบน 2</label>
+          <input type="text" id="editMagPic2" placeholder="เช่น https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80">
         </div>
         <div class="form-group">
-          <label for="editMagPic3">URL รูปภาพกลางล่าง 3 *</label>
-          <input type="text" id="editMagPic3" required>
+          <label for="editMagPic3">URL รูปภาพกลางล่าง 3</label>
+          <input type="text" id="editMagPic3" placeholder="เช่น https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80">
         </div>
 
         <hr style="margin: 16px 0; border: none; border-top: 1px dashed #CBD5E1;">
 
         <h4 style="color: #9333EA; font-size: 0.95rem; margin-bottom: 8px;">💡 คอลัมน์ที่ 3: แง่คิดศิลปะ & โควท (Artist Mindset)</h4>
         <div class="form-group">
-          <label for="editMagHead2">หัวข้อบทความรอง 2 *</label>
-          <input type="text" id="editMagHead2" required>
+          <label for="editMagHead2">หัวข้อบทความรอง 2</label>
+          <input type="text" id="editMagHead2" placeholder="เช่น เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า">
         </div>
         <div class="form-group">
-          <label for="editMagCopy2">เนื้อหาบทความรอง 2 *</label>
-          <textarea id="editMagCopy2" rows="3" required></textarea>
+          <label for="editMagCopy2">เนื้อหาบทความรอง 2</label>
+          <textarea id="editMagCopy2" rows="3" placeholder="เช่น เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง"></textarea>
         </div>
         <div class="form-group">
-          <label for="editMagPic4">URL รูปภาพบทความรอง 4 *</label>
-          <input type="text" id="editMagPic4" required>
+          <label for="editMagPic4">URL รูปภาพบทความรอง 4</label>
+          <input type="text" id="editMagPic4" placeholder="เช่น https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80">
         </div>
         <div class="form-group">
-          <label for="editMagQuote">ข้อความโควทแรงบันดาลใจ *</label>
-          <textarea id="editMagQuote" rows="2" required></textarea>
+          <label for="editMagQuote">ข้อความโควทแรงบันดาลใจ</label>
+          <textarea id="editMagQuote" rows="2" placeholder="เช่น ศิลปะไม่ใช่แค่ผลงานที่แขวนบนผนัง แต่คือการเดินทางที่เด็กๆ ได้ค้นพบคุณค่าในตัวเอง"></textarea>
         </div>
 
         <div class="modal-footer">

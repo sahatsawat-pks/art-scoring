@@ -3515,11 +3515,22 @@ function handleSchoolSettingsSubmit(e) {
 // ==========================================
 // 14.3 THE ART TIME MAGAZINE EDIT
 // ==========================================
+const DEFAULT_MAGAZINE_DATA = {
+  head1: "ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ",
+  copy1: "ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี",
+  pic1: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80",
+  pic2: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80",
+  pic3: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80",
+  head2: "เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า",
+  copy2: "เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง",
+  pic4: "https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80",
+  quote: "ศิลปะไม่ใช่แค่ผลงานที่แขวนบนผนัง แต่คือการเดินทางที่เด็กๆ ได้ค้นพบคุณค่าในตัวเอง"
+};
+
 function openMagazineModal() {
   const modal = document.getElementById('magazineEditModal');
   const mag = appConfig.magazine || {};
 
-  const issueDateInp = document.getElementById('editMagIssueDate');
   const h1 = document.getElementById('editMagHead1');
   const c1 = document.getElementById('editMagCopy1');
   const p1 = document.getElementById('editMagPic1');
@@ -3548,6 +3559,30 @@ function openMagazineModal() {
   artSound.playPop();
 }
 
+function fillDefaultMagazineValues() {
+  const h1 = document.getElementById('editMagHead1');
+  const c1 = document.getElementById('editMagCopy1');
+  const p1 = document.getElementById('editMagPic1');
+  const p2 = document.getElementById('editMagPic2');
+  const p3 = document.getElementById('editMagPic3');
+  const h2 = document.getElementById('editMagHead2');
+  const c2 = document.getElementById('editMagCopy2');
+  const p4 = document.getElementById('editMagPic4');
+  const quote = document.getElementById('editMagQuote');
+
+  if (h1) h1.value = DEFAULT_MAGAZINE_DATA.head1;
+  if (c1) c1.value = DEFAULT_MAGAZINE_DATA.copy1;
+  if (p1) p1.value = DEFAULT_MAGAZINE_DATA.pic1;
+  if (p2) p2.value = DEFAULT_MAGAZINE_DATA.pic2;
+  if (p3) p3.value = DEFAULT_MAGAZINE_DATA.pic3;
+  if (h2) h2.value = DEFAULT_MAGAZINE_DATA.head2;
+  if (c2) c2.value = DEFAULT_MAGAZINE_DATA.copy2;
+  if (p4) p4.value = DEFAULT_MAGAZINE_DATA.pic4;
+  if (quote) quote.value = DEFAULT_MAGAZINE_DATA.quote;
+  artSound.playChime();
+  showToast("📋 ดึงข้อมูลตัวอย่างหน้าแรกมาใส่ในช่องเรียบร้อยแล้ว");
+}
+
 function closeMagazineModal() {
   const modal = document.getElementById('magazineEditModal');
   if (modal) modal.classList.add('hidden');
@@ -3567,15 +3602,15 @@ function handleMagazineSubmit(e) {
   const p4 = document.getElementById('editMagPic4');
   const quote = document.getElementById('editMagQuote');
 
-  if (h1) appConfig.magazine.head1 = h1.value.trim();
-  if (c1) appConfig.magazine.copy1 = c1.value.trim();
-  if (p1) appConfig.magazine.pic1 = p1.value.trim();
-  if (p2) appConfig.magazine.pic2 = p2.value.trim();
-  if (p3) appConfig.magazine.pic3 = p3.value.trim();
-  if (h2) appConfig.magazine.head2 = h2.value.trim();
-  if (c2) appConfig.magazine.copy2 = c2.value.trim();
-  if (p4) appConfig.magazine.pic4 = p4.value.trim();
-  if (quote) appConfig.magazine.quote = quote.value.trim();
+  appConfig.magazine.head1 = (h1 && h1.value.trim()) ? h1.value.trim() : (appConfig.magazine.head1 || DEFAULT_MAGAZINE_DATA.head1);
+  appConfig.magazine.copy1 = (c1 && c1.value.trim()) ? c1.value.trim() : (appConfig.magazine.copy1 || DEFAULT_MAGAZINE_DATA.copy1);
+  appConfig.magazine.pic1 = (p1 && p1.value.trim()) ? p1.value.trim() : (appConfig.magazine.pic1 || DEFAULT_MAGAZINE_DATA.pic1);
+  appConfig.magazine.pic2 = (p2 && p2.value.trim()) ? p2.value.trim() : (appConfig.magazine.pic2 || DEFAULT_MAGAZINE_DATA.pic2);
+  appConfig.magazine.pic3 = (p3 && p3.value.trim()) ? p3.value.trim() : (appConfig.magazine.pic3 || DEFAULT_MAGAZINE_DATA.pic3);
+  appConfig.magazine.head2 = (h2 && h2.value.trim()) ? h2.value.trim() : (appConfig.magazine.head2 || DEFAULT_MAGAZINE_DATA.head2);
+  appConfig.magazine.copy2 = (c2 && c2.value.trim()) ? c2.value.trim() : (appConfig.magazine.copy2 || DEFAULT_MAGAZINE_DATA.copy2);
+  appConfig.magazine.pic4 = (p4 && p4.value.trim()) ? p4.value.trim() : (appConfig.magazine.pic4 || DEFAULT_MAGAZINE_DATA.pic4);
+  appConfig.magazine.quote = (quote && quote.value.trim()) ? quote.value.trim() : (appConfig.magazine.quote || DEFAULT_MAGAZINE_DATA.quote);
 
   saveConfigToStorage();
   apiPost({ action: 'save_config', config: appConfig });
@@ -3898,6 +3933,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const magazineEditForm = document.getElementById('magazineEditForm');
   if (magazineEditForm) {
     magazineEditForm.addEventListener('submit', handleMagazineSubmit);
+  }
+  const fillDefaultMagBtn = document.getElementById('fillDefaultMagBtn');
+  if (fillDefaultMagBtn) {
+    fillDefaultMagBtn.addEventListener('click', fillDefaultMagazineValues);
   }
   const magazineEditModal = document.getElementById('magazineEditModal');
   if (magazineEditModal) {
