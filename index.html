@@ -1166,9 +1166,14 @@
       </div>
 
       <form id="magazineEditForm" class="modal-form">
-        <div class="form-group" style="background: #FFF1F2; padding: 12px; border-radius: 12px; border: 1.5px solid #FECDD3;">
-          <label for="editMagIssueDate" style="color: #BE123C; font-weight: 700;">📅 ป้ายฉบับ & ปีการศึกษา (แก้ไขได้เองทุกปี) *</label>
-          <input type="text" id="editMagIssueDate" placeholder="เช่น ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567" required>
+        <div class="form-group" style="background: #FFF1F2; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #FECDD3; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <span style="font-size: 0.82rem; color: #9F1239; font-weight: 700;">📅 ป้ายประจำฉบับ (อ้างอิงอัตโนมัติจากการตั้งค่าปีการศึกษา):</span>
+            <div id="magEditCurrentTermLabel" style="font-size: 0.95rem; font-weight: 800; color: #BE123C; margin-top: 2px;">
+              ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567
+            </div>
+          </div>
+          <small style="color: #64748B;">* แก้ไขได้ที่เมนูตั้งค่าปีการศึกษาในห้องพักครู</small>
         </div>
 
         <h4 style="color: #4F46E5; font-size: 0.95rem; margin-bottom: 8px;">🌟 คอลัมน์ที่ 1: บทความหลัก (Lead Story)</h4>

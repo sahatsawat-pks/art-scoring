@@ -953,7 +953,7 @@ function renderHomeView() {
   }
 
   if (termBadge) termBadge.textContent = `ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
-  if (magDate) magDate.textContent = mag.issueDate || `ฉบับพิเศษ • ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
+  if (magDate) magDate.textContent = `ฉบับพิเศษ • ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
 
   // Populate Magazine from appConfig.magazine
   const mag = appConfig.magazine || {};
@@ -3529,8 +3529,11 @@ function openMagazineModal() {
   const c2 = document.getElementById('editMagCopy2');
   const p4 = document.getElementById('editMagPic4');
   const quote = document.getElementById('editMagQuote');
+  const currentTermElem = document.getElementById('magEditCurrentTermLabel');
 
-  if (issueDateInp) issueDateInp.value = mag.issueDate || "ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567";
+  if (currentTermElem) {
+    currentTermElem.textContent = `ฉบับพิเศษ • ภาคเรียนที่ ${appConfig.semester || '1'} ปีการศึกษา ${appConfig.academicYear || '2567'}`;
+  }
   if (h1) h1.value = mag.head1 || '';
   if (c1) c1.value = mag.copy1 || '';
   if (p1) p1.value = mag.pic1 || '';
@@ -3554,7 +3557,6 @@ function handleMagazineSubmit(e) {
   e.preventDefault();
   if (!appConfig.magazine) appConfig.magazine = {};
 
-  const issueDateInp = document.getElementById('editMagIssueDate');
   const h1 = document.getElementById('editMagHead1');
   const c1 = document.getElementById('editMagCopy1');
   const p1 = document.getElementById('editMagPic1');
@@ -3565,7 +3567,6 @@ function handleMagazineSubmit(e) {
   const p4 = document.getElementById('editMagPic4');
   const quote = document.getElementById('editMagQuote');
 
-  if (issueDateInp) appConfig.magazine.issueDate = issueDateInp.value.trim();
   if (h1) appConfig.magazine.head1 = h1.value.trim();
   if (c1) appConfig.magazine.copy1 = c1.value.trim();
   if (p1) appConfig.magazine.pic1 = p1.value.trim();
