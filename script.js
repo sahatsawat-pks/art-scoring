@@ -1426,6 +1426,9 @@ function openStudentProfileModal(student) {
     `;
   }).join('');
 
+  const loggedTeacher = getLoggedInTeacher();
+  const isTeacher = !!loggedTeacher;
+
   // Portfolios HTML
   const portfolioHtml = portfolios.length > 0 ? portfolios.map((art, idx) => `
     <div class="portfolio-art-card">
@@ -1439,24 +1442,26 @@ function openStudentProfileModal(student) {
           <a href="${art.url}" download="${art.title}.jpg" class="btn btn-sm btn-outline" style="font-size: 0.72rem; padding: 2px 8px;">
             📥 ดาวน์โหลด
           </a>
-          <button class="btn btn-sm btn-outline-danger delete-art-btn" data-art-index="${idx}" style="font-size: 0.72rem; padding: 2px 6px;">
-            🗑️
-          </button>
+          ${isTeacher ? `
+            <button class="btn btn-sm btn-outline-danger delete-art-btn" data-art-index="${idx}" style="font-size: 0.72rem; padding: 2px 6px;" title="ลบผลงาน (อาจารย์เท่านั้น)">
+              🗑️
+            </button>
+          ` : ''}
         </div>
       </div>
     </div>
   `).join('') : `
     <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #94A3B8; background: #F8FAFC; border-radius: 14px;">
-      🎨 ยังไม่มีภาพผลงานในคลัง คลิกปุ่ม "+ อัปโหลดผลงานศิลปะ" ด้านบนเพื่อเริ่มสร้างแกลเลอรีของน้อง
+      🎨 ยังไม่มีภาพผลงานในคลัง ${isTeacher ? 'คลิกปุ่ม "+ อัปโหลดผลงานศิลปะ" ด้านบนเพื่อเริ่มสร้างแกลเลอรีของน้อง' : '(อาจารย์ผู้สอนเป็นผู้อัปโหลดผลงาน)'}
     </div>
   `;
 
   content.innerHTML = `
     <div class="passport-hero-banner">
       <div class="passport-student-header">
-        <div class="passport-avatar-box" id="profileAvatarBox" style="position: relative; cursor: pointer;" title="คลิกเพื่อเปลี่ยนรูปถ่าย">
+        <div class="passport-avatar-box" id="profileAvatarBox" style="position: relative; cursor: ${isTeacher ? 'pointer' : 'default'};" title="${isTeacher ? 'คลิกเพื่อเปลี่ยนรูปถ่าย' : student.name}">
           ${avatarDisplay}
-          <div style="position: absolute; bottom: -6px; right: -6px; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 1rem;">📷</div>
+          ${isTeacher ? '<div style="position: absolute; bottom: -6px; right: -6px; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 1rem;">📷</div>' : ''}
         </div>
         <div class="passport-info">
           <h3>${student.name}</h3>
@@ -1497,16 +1502,22 @@ function openStudentProfileModal(student) {
         </div>
       </div>
 
-      <!-- Student Artwork Portfolio Section (อัปรูปผลงานของตัวเองได้) -->
+      <!-- Student Artwork Portfolio Section (อาจารย์อัปได้เท่านั้น) -->
       <div class="passport-scores-card">
         <div class="scores-card-header">
           <div>
             <h4 style="font-size: 1.05rem; font-weight: 800; color: #1E293B;">🖼️ คลังผลงานศิลปะของ ${student.name}</h4>
             <p style="font-size: 0.8rem; color: #64748B;">แสดงผลงานสร้างสรรค์ที่ภาคภูมิใจของนักเรียน</p>
           </div>
-          <button type="button" id="uploadMyArtworkBtn" class="btn btn-sm btn-art-primary">
-            <span>➕ อัปโหลดผลงานศิลปะ</span>
-          </button>
+          ${isTeacher ? `
+            <button type="button" id="uploadMyArtworkBtn" class="btn btn-sm btn-art-primary">
+              <span>➕ อัปโหลดผลงานศิลปะ</span>
+            </button>
+          ` : `
+            <span style="font-size: 0.8rem; color: #64748B; background: #F1F5F9; padding: 4px 12px; border-radius: 9999px; border: 1px solid #E2E8F0;">
+              🔒 อาจารย์อัปได้เท่านั้น
+            </span>
+          `}
         </div>
 
         <div class="portfolio-artworks-grid">
@@ -1525,6 +1536,10 @@ function openStudentProfileModal(student) {
   document.body.appendChild(avatarFileHidden);
 
   content.querySelector('#profileAvatarBox').addEventListener('click', () => {
+    if (!getLoggedInTeacher()) {
+      showToast("🔒 สำหรับอาจารย์ผู้สอนเท่านั้น กรุณาเข้าสู่ระบบครูเพื่อเปลี่ยนรูปถ่าย");
+      return;
+    }
     avatarFileHidden.click();
   });
 
@@ -1552,56 +1567,63 @@ function openStudentProfileModal(student) {
     avatarFileHidden.remove();
   });
 
-  // Upload Artwork Listener
-  content.querySelector('#uploadMyArtworkBtn').addEventListener('click', () => {
-    const artFileHidden = document.createElement('input');
-    artFileHidden.type = 'file';
-    artFileHidden.accept = 'image/*';
-    artFileHidden.style.display = 'none';
-    document.body.appendChild(artFileHidden);
-
-    artFileHidden.click();
-
-    artFileHidden.addEventListener('change', async (e) => {
-      if (e.target.files.length > 0) {
-        const file = e.target.files[0];
-        const title = prompt("ระบุชื่อผลงานศิลปะชิ้นนี้:", file.name.replace(/\.[^/.]+$/, ""));
-        if (!title || !title.trim()) {
-          artFileHidden.remove();
-          return;
-        }
-        const technique = prompt("ระบุเทคนิคหรือสื่อที่ใช้ (เช่น สีน้ำ, สีโปสเตอร์, คอลลาจ):", "สีน้ำบนกระดาษวาดเขียน");
-
-        try {
-          const resizedUrl = await resizeImageToCanvas(file, 700, 700, 0.8);
-          if (!student.portfolio) student.portfolio = [];
-          student.portfolio.push({
-            id: `art_${Date.now()}`,
-            title: title.trim(),
-            technique: (technique || 'สื่อผสม').trim(),
-            date: new Date().toLocaleDateString('th-TH'),
-            url: resizedUrl
-          });
-
-          saveDataToStorage();
-          apiPost({
-            action: 'save_student',
-            grade: currentGrade,
-            room: currentRoom,
-            student: student
-          });
-
-          artSound.playFanfare();
-          confettiEngine.fire(50);
-          showToast(`เพิ่มผลงาน "${title}" เข้าสู่แกลเลอรีของ ${student.name} แล้ว! 🎨`);
-          openStudentProfileModal(student);
-        } catch (err) {
-          alert("เกิดข้อผิดพลาดในการอัปโหลด: " + err.message);
-        }
+  // Upload Artwork Listener (Teacher Only)
+  const uploadArtBtn = content.querySelector('#uploadMyArtworkBtn');
+  if (uploadArtBtn) {
+    uploadArtBtn.addEventListener('click', () => {
+      if (!getLoggedInTeacher()) {
+        showToast("🔒 สำหรับอาจารย์ผู้สอนเท่านั้น กรุณาเข้าสู่ระบบครู");
+        return;
       }
-      artFileHidden.remove();
+      const artFileHidden = document.createElement('input');
+      artFileHidden.type = 'file';
+      artFileHidden.accept = 'image/*';
+      artFileHidden.style.display = 'none';
+      document.body.appendChild(artFileHidden);
+
+      artFileHidden.click();
+
+      artFileHidden.addEventListener('change', async (e) => {
+        if (e.target.files.length > 0) {
+          const file = e.target.files[0];
+          const title = prompt("ระบุชื่อผลงานศิลปะชิ้นนี้:", file.name.replace(/\.[^/.]+$/, ""));
+          if (!title || !title.trim()) {
+            artFileHidden.remove();
+            return;
+          }
+          const technique = prompt("ระบุเทคนิคหรือสื่อที่ใช้ (เช่น สีน้ำ, สีโปสเตอร์, คอลลาจ):", "สีน้ำบนกระดาษวาดเขียน");
+
+          try {
+            const resizedUrl = await resizeImageToCanvas(file, 700, 700, 0.8);
+            if (!student.portfolio) student.portfolio = [];
+            student.portfolio.push({
+              id: `art_${Date.now()}`,
+              title: title.trim(),
+              technique: (technique || 'สื่อผสม').trim(),
+              date: new Date().toLocaleDateString('th-TH'),
+              url: resizedUrl
+            });
+
+            saveDataToStorage();
+            apiPost({
+              action: 'save_student',
+              grade: currentGrade,
+              room: currentRoom,
+              student: student
+            });
+
+            artSound.playFanfare();
+            confettiEngine.fire(50);
+            showToast(`เพิ่มผลงาน "${title}" เข้าสู่แกลเลอรีของ ${student.name} แล้ว! 🎨`);
+            openStudentProfileModal(student);
+          } catch (err) {
+            alert("เกิดข้อผิดพลาดในการอัปโหลด: " + err.message);
+          }
+        }
+        artFileHidden.remove();
+      });
     });
-  });
+  }
 
   // Delete Artwork Listener
   content.querySelectorAll('.delete-art-btn').forEach(btn => {
