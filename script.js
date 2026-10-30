@@ -296,11 +296,21 @@ class ArtSoundPlayer {
     if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
       this.ctx = new (window.AudioContext || window.webkitAudioContext)();
     }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
+  }
+
+  ensureActive() {
+    this.init();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
   }
 
   playPop() {
     if (!soundEnabled) return;
-    this.init();
+    this.ensureActive();
     if (!this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
@@ -323,7 +333,7 @@ class ArtSoundPlayer {
 
   playFanfare() {
     if (!soundEnabled) return;
-    this.init();
+    this.ensureActive();
     if (!this.ctx) return;
     try {
       const notes = [523.25, 659.25, 783.99, 1046.50];
@@ -349,7 +359,7 @@ class ArtSoundPlayer {
 
   playSaveChime() {
     if (!soundEnabled) return;
-    this.init();
+    this.ensureActive();
     if (!this.ctx) return;
     try {
       const notes = [587.33, 880.00];
@@ -374,7 +384,7 @@ class ArtSoundPlayer {
 
   playUnlock() {
     if (!soundEnabled) return;
-    this.init();
+    this.ensureActive();
     if (!this.ctx) return;
     try {
       const notes = [440, 554.37, 659.25, 880];
@@ -399,7 +409,7 @@ class ArtSoundPlayer {
 
   playError() {
     if (!soundEnabled) return;
-    this.init();
+    this.ensureActive();
     if (!this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
@@ -422,7 +432,7 @@ class ArtSoundPlayer {
 
   playCamera() {
     if (!soundEnabled) return;
-    this.init();
+    this.ensureActive();
     if (!this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
@@ -3406,21 +3416,36 @@ document.addEventListener('DOMContentLoaded', () => {
   confettiEngine = new ConfettiManager('confettiCanvas');
   populateGradeDropdowns();
 
-  // 2. Sound Switch
-  const savedSound = localStorage.getItem(SOUND_KEY);
-  if (savedSound !== null) soundEnabled = savedSound === 'true';
+  // 2. Sound Switch (Always ON by default: "เสียงเอฟเฟคให้มีตลอด")
+  soundEnabled = true;
+  localStorage.setItem(SOUND_KEY, 'true');
   const soundBtn = document.getElementById('soundToggleBtn');
   if (soundBtn) {
-    soundBtn.classList.toggle('active', soundEnabled);
-    soundBtn.querySelector('.sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
+    soundBtn.classList.add('active');
+    const soundIcon = soundBtn.querySelector('.sound-icon');
+    if (soundIcon) soundIcon.textContent = '🔊';
     soundBtn.addEventListener('click', () => {
       soundEnabled = !soundEnabled;
-      localStorage.setItem(SOUND_KEY, soundEnabled);
+      localStorage.setItem(SOUND_KEY, String(soundEnabled));
       soundBtn.classList.toggle('active', soundEnabled);
-      soundBtn.querySelector('.sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
-      if (soundEnabled) artSound.playPop();
+      if (soundIcon) soundIcon.textContent = soundEnabled ? '🔊' : '🔇';
+      if (soundEnabled) {
+        artSound.ensureActive();
+        artSound.playPop();
+      }
     });
   }
+
+  // Pre-unlock Web AudioContext on first user interaction anywhere
+  const unlockAudioContext = () => {
+    artSound.ensureActive();
+    document.removeEventListener('click', unlockAudioContext);
+    document.removeEventListener('keydown', unlockAudioContext);
+    document.removeEventListener('touchstart', unlockAudioContext);
+  };
+  document.addEventListener('click', unlockAudioContext, { once: true });
+  document.addEventListener('keydown', unlockAudioContext, { once: true });
+  document.addEventListener('touchstart', unlockAudioContext, { once: true });
 
   // 3. Class Selectors in Leaderboard (if present)
   const gradeSelect = document.getElementById('gradeSelect');
