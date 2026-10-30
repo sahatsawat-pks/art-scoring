@@ -154,7 +154,12 @@
       <section class="art-magazine-container">
         <!-- Magazine Header Masthead -->
         <div class="magazine-masthead">
-          <div class="masthead-badge">ART & CREATIVE QUARTERLY</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+            <div class="masthead-badge">ART & CREATIVE QUARTERLY</div>
+            <button type="button" id="openMagEditDirectBtn" class="btn btn-sm btn-art-primary" style="font-size: 0.82rem; padding: 5px 14px; border-radius: var(--radius-full); box-shadow: var(--shadow-sm);" title="แก้ไขข้อความและรูปภาพใน THE ART TIME">
+              <span>✏️ แก้ไขเนื้อหาบทความ & รูปภาพ</span>
+            </button>
+          </div>
           <h2 class="magazine-main-title">THE ART TIME</h2>
           <div class="masthead-meta">
             <span id="magazineIssueDate">ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567</span>
@@ -1129,32 +1134,50 @@
       </div>
 
       <form id="magazineEditForm" class="modal-form">
+        <h4 style="color: #4F46E5; font-size: 0.95rem; margin-bottom: 8px;">🌟 คอลัมน์ที่ 1: บทความหลัก (Lead Story)</h4>
         <div class="form-group">
-          <label for="editMagHead1">หัวข้อบทความหลัก 1</label>
+          <label for="editMagHead1">หัวข้อบทความหลัก 1 *</label>
           <input type="text" id="editMagHead1" required>
         </div>
         <div class="form-group">
-          <label for="editMagCopy1">เนื้อหาบทความหลัก 1</label>
+          <label for="editMagCopy1">เนื้อหาบทความหลัก 1 *</label>
           <textarea id="editMagCopy1" rows="3" required></textarea>
         </div>
         <div class="form-group">
-          <label for="editMagPic1">URL รูปภาพบทความหลัก 1</label>
+          <label for="editMagPic1">URL รูปภาพบทความหลัก 1 *</label>
           <input type="text" id="editMagPic1" required>
         </div>
 
         <hr style="margin: 16px 0; border: none; border-top: 1px dashed #CBD5E1;">
 
+        <h4 style="color: #059669; font-size: 0.95rem; margin-bottom: 8px;">🖼️ คอลัมน์ที่ 2: ภาพไฮไลต์ตรงกลาง (Photo Highlights)</h4>
         <div class="form-group">
-          <label for="editMagHead2">หัวข้อบทความรอง 2</label>
+          <label for="editMagPic2">URL รูปภาพกลางบน 2 *</label>
+          <input type="text" id="editMagPic2" required>
+        </div>
+        <div class="form-group">
+          <label for="editMagPic3">URL รูปภาพกลางล่าง 3 *</label>
+          <input type="text" id="editMagPic3" required>
+        </div>
+
+        <hr style="margin: 16px 0; border: none; border-top: 1px dashed #CBD5E1;">
+
+        <h4 style="color: #9333EA; font-size: 0.95rem; margin-bottom: 8px;">💡 คอลัมน์ที่ 3: แง่คิดศิลปะ & โควท (Artist Mindset)</h4>
+        <div class="form-group">
+          <label for="editMagHead2">หัวข้อบทความรอง 2 *</label>
           <input type="text" id="editMagHead2" required>
         </div>
         <div class="form-group">
-          <label for="editMagCopy2">เนื้อหาบทความรอง 2</label>
+          <label for="editMagCopy2">เนื้อหาบทความรอง 2 *</label>
           <textarea id="editMagCopy2" rows="3" required></textarea>
         </div>
         <div class="form-group">
-          <label for="editMagPic4">URL รูปภาพบทความรอง 2</label>
+          <label for="editMagPic4">URL รูปภาพบทความรอง 4 *</label>
           <input type="text" id="editMagPic4" required>
+        </div>
+        <div class="form-group">
+          <label for="editMagQuote">ข้อความโควทแรงบันดาลใจ *</label>
+          <textarea id="editMagQuote" rows="2" required></textarea>
         </div>
 
         <div class="modal-footer">

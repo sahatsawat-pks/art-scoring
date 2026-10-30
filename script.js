@@ -3363,16 +3363,22 @@ function openMagazineModal() {
   const h1 = document.getElementById('editMagHead1');
   const c1 = document.getElementById('editMagCopy1');
   const p1 = document.getElementById('editMagPic1');
+  const p2 = document.getElementById('editMagPic2');
+  const p3 = document.getElementById('editMagPic3');
   const h2 = document.getElementById('editMagHead2');
   const c2 = document.getElementById('editMagCopy2');
   const p4 = document.getElementById('editMagPic4');
+  const quote = document.getElementById('editMagQuote');
 
   if (h1) h1.value = mag.head1 || '';
   if (c1) c1.value = mag.copy1 || '';
   if (p1) p1.value = mag.pic1 || '';
+  if (p2) p2.value = mag.pic2 || '';
+  if (p3) p3.value = mag.pic3 || '';
   if (h2) h2.value = mag.head2 || '';
   if (c2) c2.value = mag.copy2 || '';
   if (p4) p4.value = mag.pic4 || '';
+  if (quote) quote.value = mag.quote || '';
 
   if (modal) modal.classList.remove('hidden');
   artSound.playPop();
@@ -3390,16 +3396,22 @@ function handleMagazineSubmit(e) {
   const h1 = document.getElementById('editMagHead1');
   const c1 = document.getElementById('editMagCopy1');
   const p1 = document.getElementById('editMagPic1');
+  const p2 = document.getElementById('editMagPic2');
+  const p3 = document.getElementById('editMagPic3');
   const h2 = document.getElementById('editMagHead2');
   const c2 = document.getElementById('editMagCopy2');
   const p4 = document.getElementById('editMagPic4');
+  const quote = document.getElementById('editMagQuote');
 
   if (h1) appConfig.magazine.head1 = h1.value.trim();
   if (c1) appConfig.magazine.copy1 = c1.value.trim();
   if (p1) appConfig.magazine.pic1 = p1.value.trim();
+  if (p2) appConfig.magazine.pic2 = p2.value.trim();
+  if (p3) appConfig.magazine.pic3 = p3.value.trim();
   if (h2) appConfig.magazine.head2 = h2.value.trim();
   if (c2) appConfig.magazine.copy2 = c2.value.trim();
   if (p4) appConfig.magazine.pic4 = p4.value.trim();
+  if (quote) appConfig.magazine.quote = quote.value.trim();
 
   saveConfigToStorage();
   apiPost({ action: 'save_config', config: appConfig });
@@ -3688,6 +3700,19 @@ document.addEventListener('DOMContentLoaded', () => {
     openMagazineManagerBtn.addEventListener('click', () => {
       artSound.playPop();
       openMagazineModal();
+    });
+  }
+
+  const openMagEditDirectBtn = document.getElementById('openMagEditDirectBtn');
+  if (openMagEditDirectBtn) {
+    openMagEditDirectBtn.addEventListener('click', () => {
+      artSound.playPop();
+      const user = getLoggedInTeacher();
+      if (user) {
+        openMagazineModal();
+      } else {
+        openTeacherLoginModal();
+      }
     });
   }
   const closeMagazineModalBtn = document.getElementById('closeMagazineModalBtn');
