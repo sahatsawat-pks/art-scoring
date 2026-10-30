@@ -137,74 +137,95 @@
         </form>
       </div>
 
-      <!-- ================= THE ART TIME MAGAZINE SECTION (PINK THEME LAYOUT) ================= -->
+      <!-- ================= THE ART TIME MAGAZINE SECTION (EXACT PINK WIREFRAME LAYOUT) ================= -->
       <section class="art-magazine-container">
-        <!-- Magazine Header Masthead (Centered) -->
-        <div class="magazine-masthead">
-          <div class="masthead-badge">ART & CREATIVE QUARTERLY</div>
+        <!-- HEADER BOX: THE ART TIME (as drawn) -->
+        <div class="mag-header-box">
           <h2 class="magazine-main-title">THE ART TIME</h2>
           <div class="masthead-meta">
             <span id="magazineIssueDate" class="masthead-meta-chip">ฉบับพิเศษ • ภาคเรียนที่ 1 ปีการศึกษา 2567</span>
           </div>
         </div>
 
-        <!-- Wireframe Pink Layout matching Brief: Top (SubHead+Copy | Picture) & Bottom (Picture+SubHead | Copy | Picture+Copy) -->
+        <!-- Wireframe Pink Grid matching user drawing: -->
         <div class="mag-pink-wireframe" id="magazineEditorialGrid">
           
-          <!-- TOP ROW: 2 Columns (Sub Head + Copy on Left, Picture on Right) -->
+          <!-- ================= ROW 1: TOP SECTION (2 Columns: Left [Sub Head] + [Copy] | Right [Picture]) ================= -->
           <div class="mag-layout-top">
-            <!-- Top Left: Sub Head + Copy -->
-            <article class="mag-card">
-              <div class="mag-subhead-pill">🌟 SPECIAL STORY</div>
-              <h3 class="mag-headline" id="magHead1">ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ</h3>
-              <p class="mag-copy" id="magCopy1">
-                ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี
-              </p>
-            </article>
+            
+            <!-- Left Column: 2 Stacked Boxes -->
+            <div class="mag-col-stacked">
+              <!-- Box 1: Sub Head -->
+              <article class="mag-box mag-box-subhead">
+                <div class="mag-subhead-pill">🌟 SPECIAL STORY</div>
+                <h3 class="mag-headline" id="magHead1">ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ</h3>
+              </article>
 
-            <!-- Top Right: Picture -->
-            <article class="mag-card" style="padding: 12px;">
-              <div class="mag-photo-wrap h-xl">
-                <img id="magPic1" class="mag-photo" src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" alt="ศิลปะสร้างสรรค์">
+              <!-- Box 2: Copy -->
+              <article class="mag-box mag-box-copy">
+                <p class="mag-copy" id="magCopy1">
+                  ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี
+                </p>
+              </article>
+            </div>
+
+            <!-- Right Column: 1 Large Picture Box -->
+            <article class="mag-box mag-box-picture-hero">
+              <div class="mag-photo-wrap-fill">
+                <img id="magPic1" class="mag-photo-hero" src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" alt="ศิลปะสร้างสรรค์">
                 <span class="mag-photo-caption">🎨 การทดลองผสมสีน้ำสร้างโทนสีแห่งความสุข</span>
               </div>
             </article>
+
           </div>
 
-          <!-- BOTTOM ROW: 3 Columns -->
+          <!-- ================= ROW 2: BOTTOM SECTION (3 Columns: Col 1 [Picture]+[Subhead] | Col 2 [Copy] | Col 3 [Picture]+[Copy]) ================= -->
           <div class="mag-layout-bottom">
-            <!-- Col 1: Picture + Sub Head -->
-            <article class="mag-card">
-              <div class="mag-photo-wrap h-md">
-                <img id="magPic2" class="mag-photo" src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" alt="ผลงานภาพพิมพ์">
-                <span class="mag-photo-caption">🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ</span>
-              </div>
-              <div class="mag-subhead-pill pill-purple">💡 ARTIST MINDSET</div>
-              <h3 class="mag-headline" id="magHead2" style="font-size: 1.15rem; margin-bottom: 0;">เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า</h3>
-            </article>
+            
+            <!-- Column 1 (Left): Picture (Top) + Subhead (Bottom) -->
+            <div class="mag-col-stacked">
+              <!-- Box 4: Picture -->
+              <article class="mag-box mag-box-picture-half">
+                <div class="mag-photo-wrap-fill">
+                  <img id="magPic2" class="mag-photo" src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" alt="ผลงานภาพพิมพ์">
+                  <span class="mag-photo-caption">🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ</span>
+                </div>
+              </article>
 
-            <!-- Col 2: Copy -->
-            <article class="mag-card">
+              <!-- Box 5: Subhead -->
+              <article class="mag-box mag-box-subhead">
+                <div class="mag-subhead-pill pill-purple">💡 ARTIST MINDSET</div>
+                <h4 class="mag-headline" id="magHead2">เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า</h4>
+              </article>
+            </div>
+
+            <!-- Column 2 (Center): 1 Tall Copy Box -->
+            <article class="mag-box mag-box-tall-copy">
               <p class="mag-copy" id="magCopy2">
                 เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง
               </p>
-              <div class="mag-quote-box">
-                <span class="quote-mark">“</span>
-                <p class="quote-text" id="magQuoteText">ศิลปะไม่ใช่แค่ผลงานที่แขวนบนผนัง แต่คือการเดินทางที่เด็กๆ ได้ค้นพบคุณค่าในตัวเอง</p>
-              </div>
             </article>
 
-            <!-- Col 3: Picture + Copy -->
-            <article class="mag-card">
-              <div class="mag-photo-wrap h-md">
-                <img id="magPic3" class="mag-photo" src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" alt="ภาพวาดสัตว์ในจินตนาการ">
-                <span class="mag-photo-caption">🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด</span>
-              </div>
-              <div class="mag-photo-wrap h-md" style="margin-bottom: 0;">
-                <img id="magPic4" class="mag-photo" src="https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80" alt="ห้องเรียนศิลปะ">
-                <span class="mag-photo-caption">🏛️ ห้องเรียนศิลปะและพื้นที่ทดลองความคิดสร้างสรรค์</span>
-              </div>
-            </article>
+            <!-- Column 3 (Right): Picture (Top) + Copy (Bottom) -->
+            <div class="mag-col-stacked">
+              <!-- Box 7: Picture -->
+              <article class="mag-box mag-box-picture-half">
+                <div class="mag-photo-wrap-fill">
+                  <img id="magPic3" class="mag-photo" src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" alt="ภาพวาดสัตว์ในจินตนาการ">
+                  <span class="mag-photo-caption">🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด</span>
+                  <img id="magPic4" src="https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80" alt="ห้องเรียนศิลปะ" style="display:none;">
+                </div>
+              </article>
+
+              <!-- Box 8: Copy (Quote / Key Takeaway) -->
+              <article class="mag-box mag-box-copy mag-box-quote">
+                <div class="mag-quote-inner">
+                  <span class="quote-mark">“</span>
+                  <p class="quote-text" id="magQuoteText">ศิลปะไม่ใช่แค่ผลงานที่แขวนบนผนัง แต่คือการเดินทางที่เด็กๆ ได้ค้นพบคุณค่าในตัวเอง</p>
+                </div>
+              </article>
+            </div>
+
           </div>
 
         </div>
