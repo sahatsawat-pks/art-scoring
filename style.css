@@ -3411,6 +3411,44 @@ body {
   gap: 10px;
 }
 
+/* Teacher Class Switcher on Leaderboard */
+.lb-teacher-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFF1F2;
+  border: 1.5px solid #FECDD3;
+  padding: 4px 14px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.08);
+}
+
+.lb-teacher-badge {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #BE123C;
+  white-space: nowrap;
+}
+
+.lb-teacher-select {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1.5px solid #FDA4AF;
+  background: white;
+  color: #9F1239;
+  font-size: 0.82rem;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lb-teacher-select:hover,
+.lb-teacher-select:focus {
+  border-color: #E11D48;
+  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.15);
+}
+
 .room-online-tag {
   font-size: 0.75rem;
   font-weight: 700;

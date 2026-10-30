@@ -876,16 +876,19 @@ function populateGradeDropdowns() {
   const homeGradeSelect = document.getElementById('homeGradeSelect');
   const teacherGradeSelect = document.getElementById('teacherGradeSelect');
   const configNewRoomGrade = document.getElementById('configNewRoomGrade');
+  const leaderboardGradeSelect = document.getElementById('leaderboardGradeSelect');
 
   const optionsHtml = (appConfig.grades || []).map(g => `<option value="${g.id}">${g.name}</option>`).join('');
 
   if (homeGradeSelect) homeGradeSelect.innerHTML = optionsHtml;
   if (teacherGradeSelect) teacherGradeSelect.innerHTML = optionsHtml;
   if (configNewRoomGrade) configNewRoomGrade.innerHTML = optionsHtml;
+  if (leaderboardGradeSelect) leaderboardGradeSelect.innerHTML = optionsHtml;
 
   if (homeGradeSelect) homeGradeSelect.value = currentGrade;
   if (teacherGradeSelect) teacherGradeSelect.value = currentGrade;
   if (configNewRoomGrade) configNewRoomGrade.value = currentGrade;
+  if (leaderboardGradeSelect) leaderboardGradeSelect.value = currentGrade;
 
   populateRoomDropdowns();
 }
@@ -893,6 +896,7 @@ function populateGradeDropdowns() {
 function populateRoomDropdowns() {
   const homeRoomSelect = document.getElementById('homeRoomSelect');
   const teacherRoomSelect = document.getElementById('teacherRoomSelect');
+  const leaderboardRoomSelect = document.getElementById('leaderboardRoomSelect');
 
   const availableRooms = (appConfig.rooms && appConfig.rooms[currentGrade]) || ['1', '2', '3'];
 
@@ -913,6 +917,10 @@ function populateRoomDropdowns() {
   if (teacherRoomSelect) {
     teacherRoomSelect.innerHTML = optionsHtml;
     teacherRoomSelect.value = currentRoom;
+  }
+  if (leaderboardRoomSelect) {
+    leaderboardRoomSelect.innerHTML = optionsHtml;
+    leaderboardRoomSelect.value = currentRoom;
   }
 }
 
@@ -1059,6 +1067,21 @@ function renderLeaderboardView() {
   if (titleElem) titleElem.textContent = `${getGradeLabel(currentGrade)} / ห้อง ${currentRoom}`;
   if (countElem) countElem.textContent = `${ranked.length} คน`;
   if (termBadge) termBadge.textContent = `ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
+
+  // Teacher Class & Room Switcher (Visible only when logged in as teacher)
+  const isTeacher = !!getLoggedInTeacher();
+  const lbTeacherPicker = document.getElementById('leaderboardTeacherClassPicker');
+  if (lbTeacherPicker) {
+    if (isTeacher) {
+      lbTeacherPicker.classList.remove('hidden');
+      const lbGrade = document.getElementById('leaderboardGradeSelect');
+      const lbRoom = document.getElementById('leaderboardRoomSelect');
+      if (lbGrade) lbGrade.value = currentGrade;
+      if (lbRoom) lbRoom.value = currentRoom;
+    } else {
+      lbTeacherPicker.classList.add('hidden');
+    }
+  }
 
   renderPodium(ranked);
   renderRankTable(ranked);
@@ -2826,6 +2849,15 @@ function updateTeacherAuthUI(user = null) {
       headerLoginBtn.classList.remove('hidden');
     }
   }
+
+  // Toggle Leaderboard teacher picker
+  const lbTeacherPicker = document.getElementById('leaderboardTeacherClassPicker');
+  if (lbTeacherPicker) {
+    lbTeacherPicker.classList.toggle('hidden', !current);
+    if (current) {
+      populateGradeDropdowns();
+    }
+  }
 }
 
 function openTeacherLoginModal() {
@@ -3814,6 +3846,26 @@ document.addEventListener('DOMContentLoaded', () => {
       currentGrade = homeGradeSelect.value;
       populateRoomDropdowns();
       artSound.playPop();
+    });
+  }
+
+  // Leaderboard Teacher Class & Room Switcher Listeners
+  const leaderboardGradeSelect = document.getElementById('leaderboardGradeSelect');
+  if (leaderboardGradeSelect) {
+    leaderboardGradeSelect.addEventListener('change', (e) => {
+      currentGrade = e.target.value;
+      populateRoomDropdowns();
+      artSound.playPop();
+      renderLeaderboardView();
+    });
+  }
+
+  const leaderboardRoomSelect = document.getElementById('leaderboardRoomSelect');
+  if (leaderboardRoomSelect) {
+    leaderboardRoomSelect.addEventListener('change', (e) => {
+      currentRoom = e.target.value;
+      artSound.playPop();
+      renderLeaderboardView();
     });
   }
 
