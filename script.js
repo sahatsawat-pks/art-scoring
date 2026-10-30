@@ -1238,7 +1238,7 @@ function renderClassroomGallery() {
           <span>➕ อัปโหลดภาพกิจกรรม</span>
         </button>
       `;
-      document.getElementById('quickUploadGalleryBtn').addEventListener('click', () => {
+      document.getElementById('quickUploadGalleryBtn')?.addEventListener('click', () => {
         openGalleryUploadModal(activeGalleryTaskId);
       });
     } else {
@@ -3422,60 +3422,74 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. Class Selectors in Leaderboard
+  // 3. Class Selectors in Leaderboard (if present)
   const gradeSelect = document.getElementById('gradeSelect');
   const roomSelect = document.getElementById('roomSelect');
 
-  gradeSelect.addEventListener('change', () => {
-    currentGrade = gradeSelect.value;
-    populateRoomDropdowns();
-    artSound.playPop();
-    renderLeaderboardView();
-    confettiEngine.fire(40);
-  });
+  if (gradeSelect) {
+    gradeSelect.addEventListener('change', () => {
+      currentGrade = gradeSelect.value;
+      populateRoomDropdowns();
+      artSound.playPop();
+      renderLeaderboardView();
+      confettiEngine.fire(40);
+    });
+  }
 
-  roomSelect.addEventListener('change', () => {
-    currentRoom = roomSelect.value;
-    artSound.playPop();
-    renderLeaderboardView();
-    confettiEngine.fire(40);
-  });
+  if (roomSelect) {
+    roomSelect.addEventListener('change', () => {
+      currentRoom = roomSelect.value;
+      artSound.playPop();
+      renderLeaderboardView();
+      confettiEngine.fire(40);
+    });
+  }
 
   // 4. Class Selectors in Teacher Portal
   const teacherGradeSelect = document.getElementById('teacherGradeSelect');
   const teacherRoomSelect = document.getElementById('teacherRoomSelect');
 
-  teacherGradeSelect.addEventListener('change', (e) => {
-    currentGrade = e.target.value;
-    gradeSelect.value = currentGrade;
-    populateRoomDropdowns();
-    artSound.playPop();
-    renderTeacherView();
-  });
+  if (teacherGradeSelect) {
+    teacherGradeSelect.addEventListener('change', (e) => {
+      currentGrade = e.target.value;
+      if (gradeSelect) gradeSelect.value = currentGrade;
+      populateRoomDropdowns();
+      artSound.playPop();
+      renderTeacherView();
+    });
+  }
 
-  teacherRoomSelect.addEventListener('change', (e) => {
-    currentRoom = e.target.value;
-    roomSelect.value = currentRoom;
-    artSound.playPop();
-    renderTeacherView();
-  });
+  if (teacherRoomSelect) {
+    teacherRoomSelect.addEventListener('change', (e) => {
+      currentRoom = e.target.value;
+      if (roomSelect) roomSelect.value = currentRoom;
+      artSound.playPop();
+      renderTeacherView();
+    });
+  }
 
   // Quick Action Buttons
-  document.getElementById('quickAddRoomBtn').addEventListener('click', () => {
-    const newRoom = prompt(`กรุณากรอกชื่อหรือเลขห้องใหม่สำหรับ ${getGradeLabel(currentGrade)}:`, `${(appConfig.rooms[currentGrade]?.length || 0) + 1}`);
-    if (newRoom) {
-      addNewRoom(currentGrade, newRoom);
-    }
-  });
+  const quickAddRoomBtn = document.getElementById('quickAddRoomBtn');
+  if (quickAddRoomBtn) {
+    quickAddRoomBtn.addEventListener('click', () => {
+      const newRoom = prompt(`กรุณากรอกชื่อหรือเลขห้องใหม่สำหรับ ${getGradeLabel(currentGrade)}:`, `${(appConfig.rooms[currentGrade]?.length || 0) + 1}`);
+      if (newRoom) {
+        addNewRoom(currentGrade, newRoom);
+      }
+    });
+  }
 
-  document.getElementById('quickAddTaskBtn').addEventListener('click', () => {
-    const nextNo = (appConfig.assignments?.length || 0) + 1;
-    const title = prompt("กรุณาระบุชื่อชิ้นงานใหม่ที่สั่ง:", `งานที่ ${nextNo}: การวาดภาพระบายสีสร้างสรรค์`);
-    if (title) {
-      const maxScore = prompt("ระบุคะแนนเต็มของชิ้นงานนี้:", "20");
-      if (maxScore) addNewAssignment(title, maxScore);
-    }
-  });
+  const quickAddTaskBtn = document.getElementById('quickAddTaskBtn');
+  if (quickAddTaskBtn) {
+    quickAddTaskBtn.addEventListener('click', () => {
+      const nextNo = (appConfig.assignments?.length || 0) + 1;
+      const title = prompt("กรุณาระบุชื่อชิ้นงานใหม่ที่สั่ง:", `งานที่ ${nextNo}: การวาดภาพระบายสีสร้างสรรค์`);
+      if (title) {
+        const maxScore = prompt("ระบุคะแนนเต็มของชิ้นงานนี้:", "20");
+        if (maxScore) addNewAssignment(title, maxScore);
+      }
+    });
+  }
 
   // 5. Navigation Tabs
   const viewHomeBtn = document.getElementById('viewHomeBtn');
@@ -3494,12 +3508,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  document.getElementById('viewLeaderboardBtn').addEventListener('click', () => {
+  document.getElementById('viewLeaderboardBtn')?.addEventListener('click', () => {
     artSound.playPop();
     switchView('leaderboard');
   });
 
-  document.getElementById('viewTeacherBtn').addEventListener('click', () => {
+  document.getElementById('viewTeacherBtn')?.addEventListener('click', () => {
     artSound.playPop();
     const user = getLoggedInTeacher();
     if (user) {
@@ -3671,20 +3685,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Auth & Account Modal Listeners
-  document.getElementById('closeLoginModalBtn').addEventListener('click', closeTeacherLoginModal);
-  document.getElementById('cancelLoginBtn').addEventListener('click', closeTeacherLoginModal);
-  document.getElementById('teacherLoginForm').addEventListener('submit', handleTeacherLoginSubmit);
+  document.getElementById('closeLoginModalBtn')?.addEventListener('click', closeTeacherLoginModal);
+  document.getElementById('cancelLoginBtn')?.addEventListener('click', closeTeacherLoginModal);
+  document.getElementById('teacherLoginForm')?.addEventListener('submit', handleTeacherLoginSubmit);
 
   // Logout Confirmation Modal Listeners
-  document.getElementById('logoutBtn').addEventListener('click', openLogoutConfirmModal);
-  document.getElementById('cancelLogoutBtn').addEventListener('click', closeLogoutConfirmModal);
-  document.getElementById('confirmLogoutActionBtn').addEventListener('click', executeTeacherLogout);
-  document.getElementById('logoutConfirmModal').addEventListener('click', (e) => {
+  document.getElementById('logoutBtn')?.addEventListener('click', openLogoutConfirmModal);
+  document.getElementById('cancelLogoutBtn')?.addEventListener('click', closeLogoutConfirmModal);
+  document.getElementById('confirmLogoutActionBtn')?.addEventListener('click', executeTeacherLogout);
+  document.getElementById('logoutConfirmModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'logoutConfirmModal') closeLogoutConfirmModal();
   });
 
   // Header Teacher Badge Click Listener
-  document.getElementById('headerTeacherBadge').addEventListener('click', () => {
+  document.getElementById('headerTeacherBadge')?.addEventListener('click', () => {
     artSound.playPop();
     const user = getLoggedInTeacher();
     if (user) {
@@ -3693,22 +3707,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.getElementById('manageAccountsBtn').addEventListener('click', () => {
+  document.getElementById('manageAccountsBtn')?.addEventListener('click', () => {
     artSound.playPop();
     openAccountManagerModal();
   });
-  document.getElementById('closeAccountModalBtn').addEventListener('click', closeAccountManagerModal);
-  document.getElementById('closeAccountFooterBtn').addEventListener('click', closeAccountManagerModal);
-  document.getElementById('createAccountForm').addEventListener('submit', handleCreateAccountSubmit);
+  document.getElementById('closeAccountModalBtn')?.addEventListener('click', closeAccountManagerModal);
+  document.getElementById('closeAccountFooterBtn')?.addEventListener('click', closeAccountManagerModal);
+  document.getElementById('createAccountForm')?.addEventListener('submit', handleCreateAccountSubmit);
 
   // 6. Celebrate & Palette Logo
-  document.getElementById('celebrateBtn').addEventListener('click', () => {
+  document.getElementById('celebrateBtn')?.addEventListener('click', () => {
     artSound.playFanfare();
     confettiEngine.fire(90);
     showToast("🎉 ขอแสดงความยินดีกับผลงานสร้างสรรค์ยอดเยี่ยม!");
   });
 
-  document.getElementById('logoInteractive').addEventListener('click', () => {
+  document.getElementById('logoInteractive')?.addEventListener('click', () => {
     artSound.playPop();
     confettiEngine.fire(35);
   });
@@ -3730,35 +3744,35 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 8. Student Detail Modal Events
-  document.getElementById('closeDetailModalBtn').addEventListener('click', closeStudentDetailModal);
-  document.getElementById('studentDetailModal').addEventListener('click', (e) => {
+  document.getElementById('closeDetailModalBtn')?.addEventListener('click', closeStudentDetailModal);
+  document.getElementById('studentDetailModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'studentDetailModal') closeStudentDetailModal();
   });
 
   // 9. Student Add/Edit Modal
-  document.getElementById('addNewStudentBtn').addEventListener('click', () => {
+  document.getElementById('addNewStudentBtn')?.addEventListener('click', () => {
     artSound.playPop();
     openStudentModal();
   });
-  document.getElementById('closeModalBtn').addEventListener('click', closeStudentModal);
-  document.getElementById('cancelModalBtn').addEventListener('click', closeStudentModal);
-  document.getElementById('studentModal').addEventListener('click', (e) => {
+  document.getElementById('closeModalBtn')?.addEventListener('click', closeStudentModal);
+  document.getElementById('cancelModalBtn')?.addEventListener('click', closeStudentModal);
+  document.getElementById('studentModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'studentModal') closeStudentModal();
   });
-  document.getElementById('studentForm').addEventListener('submit', handleStudentFormSubmit);
+  document.getElementById('studentForm')?.addEventListener('submit', handleStudentFormSubmit);
 
   // 10. Assignments Manager Modal
-  document.getElementById('manageTasksBtn').addEventListener('click', () => {
+  document.getElementById('manageTasksBtn')?.addEventListener('click', () => {
     artSound.playPop();
     openTaskManagerModal();
   });
-  document.getElementById('closeTaskManagerModalBtn').addEventListener('click', closeTaskManagerModal);
-  document.getElementById('closeTaskManagerFooterBtn').addEventListener('click', closeTaskManagerModal);
-  document.getElementById('taskManagerModal').addEventListener('click', (e) => {
+  document.getElementById('closeTaskManagerModalBtn')?.addEventListener('click', closeTaskManagerModal);
+  document.getElementById('closeTaskManagerFooterBtn')?.addEventListener('click', closeTaskManagerModal);
+  document.getElementById('taskManagerModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'taskManagerModal') closeTaskManagerModal();
   });
 
-  document.getElementById('submitNewTaskBtn').addEventListener('click', () => {
+  document.getElementById('submitNewTaskBtn')?.addEventListener('click', () => {
     const title = document.getElementById('newTaskTitle').value;
     const maxScore = document.getElementById('newTaskMaxScore').value;
     addNewAssignment(title, maxScore);
@@ -3767,17 +3781,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 11. Room Configuration Modal
-  document.getElementById('manageRoomsBtn').addEventListener('click', () => {
+  document.getElementById('manageRoomsBtn')?.addEventListener('click', () => {
     artSound.playPop();
     openRoomConfigModal();
   });
-  document.getElementById('closeRoomConfigModalBtn').addEventListener('click', closeRoomConfigModal);
-  document.getElementById('closeRoomConfigFooterBtn').addEventListener('click', closeRoomConfigModal);
-  document.getElementById('roomConfigModal').addEventListener('click', (e) => {
+  document.getElementById('closeRoomConfigModalBtn')?.addEventListener('click', closeRoomConfigModal);
+  document.getElementById('closeRoomConfigFooterBtn')?.addEventListener('click', closeRoomConfigModal);
+  document.getElementById('roomConfigModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'roomConfigModal') closeRoomConfigModal();
   });
 
-  document.getElementById('submitNewRoomBtn').addEventListener('click', () => {
+  document.getElementById('submitNewRoomBtn')?.addEventListener('click', () => {
     const gId = document.getElementById('configNewRoomGrade').value;
     const rName = document.getElementById('configNewRoomName').value;
     if (!rName.trim()) {
@@ -3789,26 +3803,26 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 11.5. Academic Year Promotion Modal
-  document.getElementById('openPromoteYearBtn').addEventListener('click', () => {
+  document.getElementById('openPromoteYearBtn')?.addEventListener('click', () => {
     artSound.playPop();
     openPromoteModal();
   });
-  document.getElementById('closePromoteModalBtn').addEventListener('click', closePromoteModal);
-  document.getElementById('cancelPromoteBtn').addEventListener('click', closePromoteModal);
-  document.getElementById('promoteYearModal').addEventListener('click', (e) => {
+  document.getElementById('closePromoteModalBtn')?.addEventListener('click', closePromoteModal);
+  document.getElementById('cancelPromoteBtn')?.addEventListener('click', closePromoteModal);
+  document.getElementById('promoteYearModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'promoteYearModal') closePromoteModal();
   });
 
-  document.getElementById('promoteBackupExcelBtn').addEventListener('click', () => {
+  document.getElementById('promoteBackupExcelBtn')?.addEventListener('click', () => {
     exportAllClasses('xlsx');
     showToast("ดาวน์โหลดไฟล์สำรองคะแนนทั้งหมดเรียบร้อยแล้ว!");
   });
 
-  document.getElementById('promoteScopeSchool').addEventListener('change', () => {
+  document.getElementById('promoteScopeSchool')?.addEventListener('change', () => {
     updatePromoteModeCards();
     renderPromoteStats();
   });
-  document.getElementById('promoteScopeClass').addEventListener('change', () => {
+  document.getElementById('promoteScopeClass')?.addEventListener('change', () => {
     updatePromoteModeCards();
     renderPromoteStats();
   });
@@ -3831,17 +3845,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 12. Import Modal
-  document.getElementById('openImportBtn').addEventListener('click', () => {
+  document.getElementById('openImportBtn')?.addEventListener('click', () => {
     artSound.playPop();
     openImportModal();
   });
-  document.getElementById('closeImportModalBtn').addEventListener('click', closeImportModal);
-  document.getElementById('cancelImportBtn').addEventListener('click', closeImportModal);
-  document.getElementById('importModal').addEventListener('click', (e) => {
+  document.getElementById('closeImportModalBtn')?.addEventListener('click', closeImportModal);
+  document.getElementById('cancelImportBtn')?.addEventListener('click', closeImportModal);
+  document.getElementById('importModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'importModal') closeImportModal();
   });
 
-  document.getElementById('downloadTemplateBtn').addEventListener('click', downloadTemplateCsv);
+  document.getElementById('downloadTemplateBtn')?.addEventListener('click', downloadTemplateCsv);
 
   const fileInput = document.getElementById('fileInputExcel');
   const dropzone = document.getElementById('fileDropzone');
@@ -3869,7 +3883,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.getElementById('confirmImportBtn').addEventListener('click', confirmImport);
+  document.getElementById('confirmImportBtn')?.addEventListener('click', confirmImport);
 
   // 13. Export Dropdown Menu
   const exportBtn = document.getElementById('exportDropdownBtn');
@@ -3884,28 +3898,28 @@ document.addEventListener('DOMContentLoaded', () => {
     exportMenu.classList.add('hidden');
   });
 
-  document.getElementById('exportCurrentExcelBtn').addEventListener('click', (e) => {
+  document.getElementById('exportCurrentExcelBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     exportCurrentClass('xlsx');
   });
 
-  document.getElementById('exportCurrentCsvBtn').addEventListener('click', (e) => {
+  document.getElementById('exportCurrentCsvBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     exportCurrentClass('csv');
   });
 
-  document.getElementById('exportAllExcelBtn').addEventListener('click', (e) => {
+  document.getElementById('exportAllExcelBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     exportAllClasses('xlsx');
   });
 
-  document.getElementById('exportAllCsvBtn').addEventListener('click', (e) => {
+  document.getElementById('exportAllCsvBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     exportAllClasses('csv');
   });
 
   // 14. Reset Data Button
-  document.getElementById('resetSampleDataBtn').addEventListener('click', () => {
+  document.getElementById('resetSampleDataBtn')?.addEventListener('click', () => {
     if (confirm("คุณต้องการรีเซ็ตข้อมูลและห้องเรียนทั้งหมดกลับเป็นค่าเริ่มต้นใช่หรือไม่?")) {
       appData = JSON.parse(JSON.stringify(DEFAULT_STUDENTS_DATA));
       appConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
