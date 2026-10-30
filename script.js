@@ -1935,6 +1935,59 @@ function closeTaskManagerModal() {
   document.getElementById('taskManagerModal').classList.add('hidden');
 }
 
+function openEditTaskModal(task) {
+  const modal = document.getElementById('editTaskModal');
+  const idInput = document.getElementById('editTaskId');
+  const titleInput = document.getElementById('editTaskTitleInput');
+  const maxScoreInput = document.getElementById('editTaskMaxScoreInput');
+
+  if (idInput) idInput.value = task.id;
+  if (titleInput) titleInput.value = task.title;
+  if (maxScoreInput) maxScoreInput.value = task.maxScore;
+
+  if (modal) modal.classList.remove('hidden');
+  artSound.playPop();
+  setTimeout(() => titleInput?.focus(), 120);
+}
+
+function closeEditTaskModal() {
+  const modal = document.getElementById('editTaskModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleEditTaskSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('editTaskId')?.value;
+  const title = document.getElementById('editTaskTitleInput')?.value?.trim();
+  const maxScore = parseInt(document.getElementById('editTaskMaxScoreInput')?.value, 10);
+
+  if (!title) {
+    alert("กรุณาระบุชื่อหัวข้องาน");
+    return;
+  }
+  if (isNaN(maxScore) || maxScore <= 0) {
+    alert("กรุณาระบุคะแนนเต็มที่ถูกต้อง (มากกว่า 0)");
+    return;
+  }
+
+  const task = (appConfig.assignments || []).find(t => t.id === id);
+  if (task) {
+    task.title = title;
+    task.maxScore = maxScore;
+    saveConfigToStorage();
+    apiPost({ action: 'save_config', config: appConfig });
+
+    closeEditTaskModal();
+    renderTasksManagerList();
+    showToast(`อัปเดตชิ้นงาน "${title}" (เต็ม ${maxScore} คะแนน) สำเร็จ!`);
+    artSound.playSaveChime();
+
+    if (currentView === 'teacher') renderTeacherView();
+    else if (currentView === 'leaderboard') renderLeaderboardView();
+    renderClassroomGallery();
+  }
+}
+
 function renderTasksManagerList() {
   const container = document.getElementById('tasksListContainer');
   const countLabel = document.getElementById('taskCountLabel');
@@ -1968,21 +2021,7 @@ function renderTasksManagerList() {
     `;
 
     card.querySelector('.edit-task-btn').addEventListener('click', () => {
-      const newTitle = prompt("แก้ไขชื่อชิ้นงาน:", task.title);
-      if (newTitle && newTitle.trim()) {
-        const newMax = prompt("แก้ไขคะแนนเต็ม:", task.maxScore);
-        const parsedMax = parseInt(newMax, 10);
-        if (!isNaN(parsedMax) && parsedMax > 0) {
-          task.title = newTitle.trim();
-          task.maxScore = parsedMax;
-          saveConfigToStorage();
-          renderTasksManagerList();
-          showToast("อัปเดตชิ้นงานเรียบร้อยแล้ว!");
-          artSound.playSaveChime();
-          if (currentView === 'teacher') renderTeacherView();
-          else renderLeaderboardView();
-        }
-      }
+      openEditTaskModal(task);
     });
 
     card.querySelector('.delete-task-btn').addEventListener('click', () => {
@@ -3952,6 +3991,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('closeTaskManagerFooterBtn')?.addEventListener('click', closeTaskManagerModal);
   document.getElementById('taskManagerModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'taskManagerModal') closeTaskManagerModal();
+  });
+
+  // 10.5 Edit Task Modal Listeners
+  document.getElementById('closeEditTaskModalBtn')?.addEventListener('click', closeEditTaskModal);
+  document.getElementById('cancelEditTaskBtn')?.addEventListener('click', closeEditTaskModal);
+  document.getElementById('editTaskForm')?.addEventListener('submit', handleEditTaskSubmit);
+  document.getElementById('editTaskModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'editTaskModal') closeEditTaskModal();
   });
 
   document.getElementById('submitNewTaskBtn')?.addEventListener('click', () => {
