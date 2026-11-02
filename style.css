@@ -1662,6 +1662,106 @@ body {
   border: 1px solid #FDE68A;
 }
 
+/* Room Slogan Card in Teacher Lounge */
+.teacher-room-slogan-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  border: 1.5px solid #FBCFE8;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  box-shadow: 0 4px 16px rgba(244, 114, 182, 0.08);
+}
+
+.room-slogan-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.room-slogan-icon {
+  font-size: 1.6rem;
+  background: #FFF1F2;
+  border: 1px solid #FECDD3;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.room-slogan-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.room-slogan-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #9F1239;
+}
+
+.room-slogan-current-room {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748B;
+}
+
+.room-slogan-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 280px;
+  max-width: 580px;
+}
+
+.room-slogan-input {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  border: 1.5px solid #CBD5E1;
+  font-size: 0.88rem;
+  font-family: var(--font-main);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.room-slogan-input:focus {
+  border-color: #BE123C;
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15);
+}
+
+.btn-edit-slogan {
+  background: white;
+  border: 1px solid #CBD5E1;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  vertical-align: middle;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.btn-edit-slogan:hover {
+  transform: scale(1.1);
+  border-color: #BE123C;
+  background: #FFF1F2;
+}
+
 /* Teacher Editable Table */
 .teacher-table-card {
   background: white;

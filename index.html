@@ -264,7 +264,10 @@
       <div class="podium-area-wrapper">
         <div class="podium-header-banner">
           <div class="sparkle-line"></div>
-          <h2 class="podium-title">👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑</h2>
+          <h2 class="podium-title">
+            <span id="podiumCustomTitle">👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑</span>
+            <button type="button" id="quickEditSloganBtn" class="btn-edit-slogan hidden" title="แก้ไขคำคมประจำห้องนี้ (สำหรับครู)">✏️</button>
+          </h2>
           <p class="podium-desc">ทำเนียบยอดศิลปินผู้ทำคะแนนรวมสูงสุดประจำห้อง</p>
           <div class="sparkle-line"></div>
         </div>
@@ -443,6 +446,23 @@
         </div>
         <div class="filter-info">
           <span>💡 <strong>เคล็ดลับ:</strong> พิมพ์กรอกคะแนนตามช่องงานที่สั่งได้ทันที ระบบ Auto-save บันทึกอัตโนมัติ และอัปเดตโพเดียม Real-time</span>
+        </div>
+      </div>
+
+      <!-- Room Slogan / Quote Settings Card for current Room -->
+      <div class="teacher-room-slogan-card">
+        <div class="room-slogan-info">
+          <span class="room-slogan-icon">👑</span>
+          <div class="room-slogan-meta">
+            <span class="room-slogan-title">ข้อความสโลแกน / คำคมประจำห้อง (แสดงบนหัวโพเดียมทำเนียบแรงกิ้ง):</span>
+            <span class="room-slogan-current-room" id="teacherCurrentRoomLabel">ชั้นประถมศึกษาปีที่ 4 / ห้อง 1</span>
+          </div>
+        </div>
+        <div class="room-slogan-control">
+          <input type="text" id="teacherRoomSloganInput" class="form-input-sm room-slogan-input" placeholder='เช่น 👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑' maxlength="120">
+          <button type="button" id="saveRoomSloganBtn" class="btn btn-sm btn-art-primary" title="บันทึกข้อความสำหรับห้องนี้">
+            <span>💾 บันทึกคำคมห้องนี้</span>
+          </button>
         </div>
       </div>
 

@@ -84,6 +84,9 @@ const DEFAULT_CONFIG = {
     "p4_3": "1234",
     "default": "1234"
   },
+  roomSlogans: {
+    "default": '👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑'
+  },
   grades: [
     { id: 'p4', name: 'ชั้นประถมศึกษาปีที่ 4' },
     { id: 'p5', name: 'ชั้นประถมศึกษาปีที่ 5' },
@@ -1050,6 +1053,26 @@ function handlePasscodeSubmit(e) {
   }
 }
 
+function getRoomSlogan(grade, room) {
+  const key = `${grade}_${room}`;
+  if (appConfig.roomSlogans && appConfig.roomSlogans[key]) {
+    return appConfig.roomSlogans[key];
+  }
+  if (appConfig.roomSlogans && appConfig.roomSlogans['default']) {
+    return appConfig.roomSlogans['default'];
+  }
+  return '👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑';
+}
+
+function setRoomSlogan(grade, room, slogan) {
+  if (!appConfig.roomSlogans) appConfig.roomSlogans = {};
+  const key = `${grade}_${room}`;
+  const clean = slogan ? slogan.trim() : '';
+  appConfig.roomSlogans[key] = clean || '👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑';
+  saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
+}
+
 // ==========================================
 // 8. VIEW RENDERING: ROOM LEADERBOARD & PODIUM
 // ==========================================
@@ -1060,6 +1083,8 @@ function renderLeaderboardView() {
   const titleElem = document.getElementById('currentRoomDisplayTitle');
   const countElem = document.getElementById('roomStudentsCountBadge');
   const termBadge = document.getElementById('podiumTermYearDisplay');
+  const sloganElem = document.getElementById('podiumCustomTitle');
+  const quickEditBtn = document.getElementById('quickEditSloganBtn');
 
   const semester = appConfig.semester || "1";
   const academicYear = appConfig.academicYear || "2567";
@@ -1067,9 +1092,13 @@ function renderLeaderboardView() {
   if (titleElem) titleElem.textContent = `${getGradeLabel(currentGrade)} / ห้อง ${currentRoom}`;
   if (countElem) countElem.textContent = `${ranked.length} คน`;
   if (termBadge) termBadge.textContent = `ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
+  if (sloganElem) sloganElem.textContent = getRoomSlogan(currentGrade, currentRoom);
 
   // Teacher Class & Room Switcher (Visible only when logged in as teacher)
   const isTeacher = !!getLoggedInTeacher();
+  if (quickEditBtn) {
+    quickEditBtn.classList.toggle('hidden', !isTeacher);
+  }
   const lbTeacherPicker = document.getElementById('leaderboardTeacherClassPicker');
   if (lbTeacherPicker) {
     if (isTeacher) {
@@ -1694,6 +1723,16 @@ function renderTeacherView() {
 
   if (teacherGradeSelect) teacherGradeSelect.value = currentGrade;
   if (teacherRoomSelect) teacherRoomSelect.value = currentRoom;
+
+  // Update Room Slogan for current Room in Teacher Lounge
+  const roomLabelElem = document.getElementById('teacherCurrentRoomLabel');
+  const sloganInputElem = document.getElementById('teacherRoomSloganInput');
+  if (roomLabelElem) {
+    roomLabelElem.textContent = `${getGradeLabel(currentGrade)} / ห้อง ${currentRoom}`;
+  }
+  if (sloganInputElem) {
+    sloganInputElem.value = getRoomSlogan(currentGrade, currentRoom);
+  }
 
   const students = getStudentsList(currentGrade, currentRoom);
   const sortedByNo = [...students].sort((a, b) => (a.no || 0) - (b.no || 0));
@@ -3755,6 +3794,45 @@ document.addEventListener('DOMContentLoaded', () => {
       if (roomSelect) roomSelect.value = currentRoom;
       artSound.playPop();
       renderTeacherView();
+    });
+  }
+
+  // Room Slogan Listeners (แก้ไขคำคมประจำห้อง)
+  const saveRoomSloganBtn = document.getElementById('saveRoomSloganBtn');
+  if (saveRoomSloganBtn) {
+    saveRoomSloganBtn.addEventListener('click', () => {
+      const input = document.getElementById('teacherRoomSloganInput');
+      const val = input ? input.value : '';
+      setRoomSlogan(currentGrade, currentRoom, val);
+      artSound.playSaveChime();
+      showToast(`บันทึกคำคมประจำห้อง ${getGradeLabel(currentGrade)} ห้อง ${currentRoom} เรียบร้อยแล้ว! 👑`);
+      const sloganElem = document.getElementById('podiumCustomTitle');
+      if (sloganElem) sloganElem.textContent = getRoomSlogan(currentGrade, currentRoom);
+    });
+  }
+
+  const teacherRoomSloganInput = document.getElementById('teacherRoomSloganInput');
+  if (teacherRoomSloganInput) {
+    teacherRoomSloganInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveRoomSloganBtn?.click();
+      }
+    });
+  }
+
+  const quickEditSloganBtn = document.getElementById('quickEditSloganBtn');
+  if (quickEditSloganBtn) {
+    quickEditSloganBtn.addEventListener('click', () => {
+      artSound.playPop();
+      const current = getRoomSlogan(currentGrade, currentRoom);
+      const newSlogan = prompt(`ระบุข้อความสโลแกน / คำคมประจำห้อง ${getGradeLabel(currentGrade)} ห้อง ${currentRoom}:`, current);
+      if (newSlogan !== null) {
+        setRoomSlogan(currentGrade, currentRoom, newSlogan);
+        artSound.playSaveChime();
+        showToast("บันทึกคำคมประจำห้องเรียบร้อยแล้ว! 👑");
+        renderLeaderboardView();
+      }
     });
   }
 
