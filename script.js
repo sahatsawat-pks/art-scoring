@@ -600,7 +600,9 @@ async function checkAndSyncCloudDb() {
       const data = await res.json();
       if (data.dbConnected) {
         isCloudDbConnected = true;
-        if (data.config) appConfig = data.config;
+        if (data.config && typeof data.config === 'object' && Object.keys(data.config).length > 2) {
+          appConfig = { ...DEFAULT_CONFIG, ...data.config };
+        }
         if (data.students) appData = data.students;
         if (data.accounts) saveAccounts(data.accounts);
 
@@ -610,6 +612,7 @@ async function checkAndSyncCloudDb() {
 
         populateGradeDropdowns();
         if (currentView === 'teacher') renderTeacherView();
+        else if (currentView === 'home') renderHomeView();
         else renderLeaderboardView();
         return;
       }
@@ -1084,22 +1087,22 @@ function handlePasscodeSubmit(e) {
   }
 }
 
-function getRoomSlogan(grade, room) {
+function getRoomSlogan(grade = currentGrade, room = currentRoom) {
   const key = `${grade}_${room}`;
-  if (appConfig.roomSlogans && appConfig.roomSlogans[key]) {
+  if (appConfig.roomSlogans && appConfig.roomSlogans[key] !== undefined && appConfig.roomSlogans[key] !== null) {
     return appConfig.roomSlogans[key];
   }
-  if (appConfig.roomSlogans && appConfig.roomSlogans['default']) {
+  if (appConfig.roomSlogans && appConfig.roomSlogans['default'] !== undefined && appConfig.roomSlogans['default'] !== null) {
     return appConfig.roomSlogans['default'];
   }
   return '👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑';
 }
 
-function setRoomSlogan(grade, room, slogan) {
+function setRoomSlogan(grade = currentGrade, room = currentRoom, slogan = '') {
   if (!appConfig.roomSlogans) appConfig.roomSlogans = {};
   const key = `${grade}_${room}`;
-  const clean = slogan ? slogan.trim() : '';
-  appConfig.roomSlogans[key] = clean || '👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑';
+  const clean = slogan !== undefined && slogan !== null ? slogan.trim() : '';
+  appConfig.roomSlogans[key] = clean;
   saveConfigToStorage();
   apiPost({ action: 'save_config', config: appConfig });
 }
@@ -1123,7 +1126,16 @@ function renderLeaderboardView() {
   if (titleElem) titleElem.textContent = `${getGradeLabel(currentGrade)} / ห้อง ${currentRoom}`;
   if (countElem) countElem.textContent = `${ranked.length} คน`;
   if (termBadge) termBadge.textContent = `ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
-  if (sloganElem) sloganElem.textContent = getRoomSlogan(currentGrade, currentRoom);
+  const sloganText = getRoomSlogan(currentGrade, currentRoom);
+  if (sloganElem) {
+    if (sloganText && sloganText.trim()) {
+      sloganElem.textContent = sloganText;
+      sloganElem.style.display = '';
+    } else {
+      sloganElem.textContent = '';
+      sloganElem.style.display = 'none';
+    }
+  }
 
   const scale = getClassScoreScale(currentGrade);
   const subtitleElem = document.getElementById('tableHeaderSubtitle');
@@ -3918,7 +3930,16 @@ document.addEventListener('DOMContentLoaded', () => {
       artSound.playSaveChime();
       showToast(`บันทึกคำคมประจำห้อง ${getGradeLabel(currentGrade)} ห้อง ${currentRoom} เรียบร้อยแล้ว! 👑`);
       const sloganElem = document.getElementById('podiumCustomTitle');
-      if (sloganElem) sloganElem.textContent = getRoomSlogan(currentGrade, currentRoom);
+      const sloganText = getRoomSlogan(currentGrade, currentRoom);
+  if (sloganElem) {
+    if (sloganText && sloganText.trim()) {
+      sloganElem.textContent = sloganText;
+      sloganElem.style.display = '';
+    } else {
+      sloganElem.textContent = '';
+      sloganElem.style.display = 'none';
+    }
+  }
     });
   }
 

@@ -56,26 +56,9 @@ async function ensureTables() {
     await sql`ALTER TABLE art_students ADD COLUMN IF NOT EXISTS portfolio JSONB DEFAULT '[]'::jsonb;`;
   } catch (err) {}
 
-  // Check if art_config has default config or needs migration to ป.4 - ม.3 and 5 tasks
+  // Initialize default art_config ONLY if it does not exist yet (never overwrite user edits)
   const existingConfig = await sql`SELECT * FROM art_config WHERE key = 'app_config'`;
-  let needsConfigUpdate = false;
-  if (existingConfig.length > 0) {
-    const curCfg = existingConfig[0].data || {};
-    if (curCfg.grades && curCfg.grades.some(g => g.id === 'p1')) {
-      needsConfigUpdate = true;
-    }
-    if (!curCfg.assignments || curCfg.assignments.length < 5) {
-      needsConfigUpdate = true;
-    }
-    if (!curCfg.schoolName || curCfg.schoolName === 'โรงเรียนสาธิตศิลปวัฒนธรรม') {
-      needsConfigUpdate = true;
-    }
-    if (curCfg.grades && curCfg.grades.some(g => g.name && g.name.includes('('))) {
-      needsConfigUpdate = true;
-    }
-  }
-
-  if (existingConfig.length === 0 || needsConfigUpdate) {
+  if (existingConfig.length === 0) {
     const defaultCfg = {
       grades: [
         { id: 'p4', name: 'ชั้นประถมศึกษาปีที่ 4' },
@@ -109,13 +92,12 @@ async function ensureTables() {
         "p4_2": "1234",
         "p4_3": "1234",
         "default": "1234"
+      },
+      roomSlogans: {
+        "default": '👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑'
       }
     };
-    if (existingConfig.length === 0) {
-      await sql`INSERT INTO art_config (key, data) VALUES ('app_config', ${JSON.stringify(defaultCfg)})`;
-    } else {
-      await sql`UPDATE art_config SET data = ${JSON.stringify(defaultCfg)} WHERE key = 'app_config'`;
-    }
+    await sql`INSERT INTO art_config (key, data) VALUES ('app_config', ${JSON.stringify(defaultCfg)})`;
   }
 
   // Check if admin account exists
