@@ -1240,20 +1240,65 @@
           <textarea id="editMagCopy1" rows="3" placeholder="เช่น ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี"></textarea>
         </div>
         <div class="form-group">
-          <label for="editMagPic1">URL รูปภาพบทความหลัก 1</label>
-          <input type="text" id="editMagPic1" placeholder="เช่น https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80">
+          <label for="editMagPic1">🖼️ รูปภาพบทความหลัก 1 (อัปโหลดรูปถ่ายหรือใส่ URL)</label>
+          <div class="mag-pic-upload-row">
+            <div class="mag-pic-preview-box" id="previewBoxPic1">
+              <img id="previewImgPic1" src="" class="mag-pic-thumb hidden" alt="พรีวิวภาพ 1">
+              <span class="mag-pic-placeholder-text">ยังไม่มีรูป</span>
+            </div>
+            <div class="mag-pic-input-col">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <input type="file" id="fileMagPic1" accept="image/*" style="display: none;">
+                <button type="button" class="btn btn-sm btn-art-primary" onclick="document.getElementById('fileMagPic1').click()">
+                  📷 อัปโหลดไฟล์รูปถ่าย
+                </button>
+                <span class="file-chosen-status" id="statusPic1" style="font-size: 0.8rem; color: #64748B;"></span>
+              </div>
+              <input type="text" id="editMagPic1" class="form-input-sm" style="margin-top: 6px; width: 100%;" placeholder="หรือใส่ URL รูปภาพ: https://...">
+            </div>
+          </div>
         </div>
 
         <hr style="margin: 16px 0; border: none; border-top: 1px dashed #CBD5E1;">
 
         <h4 style="color: #059669; font-size: 0.95rem; margin-bottom: 8px;">🖼️ คอลัมน์ที่ 2: ภาพไฮไลต์ตรงกลาง (Photo Highlights)</h4>
         <div class="form-group">
-          <label for="editMagPic2">URL รูปภาพกลางบน 2</label>
-          <input type="text" id="editMagPic2" placeholder="เช่น https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80">
+          <label for="editMagPic2">🖼️ รูปภาพกลางบน 2 (อัปโหลดรูปถ่ายหรือใส่ URL)</label>
+          <div class="mag-pic-upload-row">
+            <div class="mag-pic-preview-box" id="previewBoxPic2">
+              <img id="previewImgPic2" src="" class="mag-pic-thumb hidden" alt="พรีวิวภาพ 2">
+              <span class="mag-pic-placeholder-text">ยังไม่มีรูป</span>
+            </div>
+            <div class="mag-pic-input-col">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <input type="file" id="fileMagPic2" accept="image/*" style="display: none;">
+                <button type="button" class="btn btn-sm btn-art-primary" onclick="document.getElementById('fileMagPic2').click()">
+                  📷 อัปโหลดไฟล์รูปถ่าย
+                </button>
+                <span class="file-chosen-status" id="statusPic2" style="font-size: 0.8rem; color: #64748B;"></span>
+              </div>
+              <input type="text" id="editMagPic2" class="form-input-sm" style="margin-top: 6px; width: 100%;" placeholder="หรือใส่ URL รูปภาพ: https://...">
+            </div>
+          </div>
         </div>
         <div class="form-group">
-          <label for="editMagPic3">URL รูปภาพกลางล่าง 3</label>
-          <input type="text" id="editMagPic3" placeholder="เช่น https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80">
+          <label for="editMagPic3">🖼️ รูปภาพกลางล่าง 3 (อัปโหลดรูปถ่ายหรือใส่ URL)</label>
+          <div class="mag-pic-upload-row">
+            <div class="mag-pic-preview-box" id="previewBoxPic3">
+              <img id="previewImgPic3" src="" class="mag-pic-thumb hidden" alt="พรีวิวภาพ 3">
+              <span class="mag-pic-placeholder-text">ยังไม่มีรูป</span>
+            </div>
+            <div class="mag-pic-input-col">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <input type="file" id="fileMagPic3" accept="image/*" style="display: none;">
+                <button type="button" class="btn btn-sm btn-art-primary" onclick="document.getElementById('fileMagPic3').click()">
+                  📷 อัปโหลดไฟล์รูปถ่าย
+                </button>
+                <span class="file-chosen-status" id="statusPic3" style="font-size: 0.8rem; color: #64748B;"></span>
+              </div>
+              <input type="text" id="editMagPic3" class="form-input-sm" style="margin-top: 6px; width: 100%;" placeholder="หรือใส่ URL รูปภาพ: https://...">
+            </div>
+          </div>
         </div>
 
         <hr style="margin: 16px 0; border: none; border-top: 1px dashed #CBD5E1;">
@@ -1268,8 +1313,23 @@
           <textarea id="editMagCopy2" rows="3" placeholder="เช่น เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง"></textarea>
         </div>
         <div class="form-group">
-          <label for="editMagPic4">URL รูปภาพบทความรอง 4</label>
-          <input type="text" id="editMagPic4" placeholder="เช่น https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80">
+          <label for="editMagPic4">🖼️ รูปภาพบทความรอง 4 (อัปโหลดรูปถ่ายหรือใส่ URL)</label>
+          <div class="mag-pic-upload-row">
+            <div class="mag-pic-preview-box" id="previewBoxPic4">
+              <img id="previewImgPic4" src="" class="mag-pic-thumb hidden" alt="พรีวิวภาพ 4">
+              <span class="mag-pic-placeholder-text">ยังไม่มีรูป</span>
+            </div>
+            <div class="mag-pic-input-col">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <input type="file" id="fileMagPic4" accept="image/*" style="display: none;">
+                <button type="button" class="btn btn-sm btn-art-primary" onclick="document.getElementById('fileMagPic4').click()">
+                  📷 อัปโหลดไฟล์รูปถ่าย
+                </button>
+                <span class="file-chosen-status" id="statusPic4" style="font-size: 0.8rem; color: #64748B;"></span>
+              </div>
+              <input type="text" id="editMagPic4" class="form-input-sm" style="margin-top: 6px; width: 100%;" placeholder="หรือใส่ URL รูปภาพ: https://...">
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label for="editMagQuote">ข้อความโควทแรงบันดาลใจ</label>

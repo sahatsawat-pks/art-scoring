@@ -669,30 +669,59 @@ function calcStudentRawAssignmentScore(student) {
   return total;
 }
 
-function calcStudentAssignmentScore80(student) {
-  const raw = calcStudentRawAssignmentScore(student);
-  // Direct sum capped at 80 so scores add up directly (บวกตรงตามคะแนนจริง)
-  return Math.min(80, Math.round(raw * 10) / 10);
+function isPrimaryGrade(gradeId = currentGrade) {
+  return ['p4', 'p5', 'p6'].includes(gradeId);
 }
 
-function calcStudentExamScore(student) {
+function getClassScoreScale(gradeId = currentGrade) {
+  if (isPrimaryGrade(gradeId)) {
+    return {
+      maxAssignment: 40,
+      maxExam: 10,
+      maxTotal: 50,
+      hasGrade: false
+    };
+  }
+  return {
+    maxAssignment: 80,
+    maxExam: 20,
+    maxTotal: 100,
+    hasGrade: true
+  };
+}
+
+function calcStudentAssignmentScore(student, gradeId = currentGrade) {
+  const raw = calcStudentRawAssignmentScore(student);
+  const scale = getClassScoreScale(gradeId);
+  return Math.min(scale.maxAssignment, Math.round(raw * 10) / 10);
+}
+
+function calcStudentAssignmentScore80(student) {
+  return calcStudentAssignmentScore(student, currentGrade);
+}
+
+function calcStudentExamScore(student, gradeId = currentGrade) {
   const scores = student.scores || {};
-  return Number(scores.examScore ?? student.examScore ?? 0);
+  const rawExam = Number(scores.examScore ?? student.examScore ?? 0);
+  const scale = getClassScoreScale(gradeId);
+  return Math.min(scale.maxExam, Math.round(rawExam * 10) / 10);
+}
+
+function calcStudentTotalScore(student, gradeId = currentGrade) {
+  const sc = calcStudentAssignmentScore(student, gradeId);
+  const exam = calcStudentExamScore(student, gradeId);
+  const scale = getClassScoreScale(gradeId);
+  return Math.min(scale.maxTotal, Math.round((sc + exam) * 10) / 10);
 }
 
 function calcStudentTotal100(student) {
-  const sc80 = calcStudentAssignmentScore80(student);
-  const exam = calcStudentExamScore(student);
-  return Math.min(100, Math.round((sc80 + exam) * 10) / 10);
+  return calcStudentTotalScore(student, currentGrade);
 }
 
-// Backward compatibility alias
-function calcStudentTotalScore(student) {
-  return calcStudentTotal100(student);
-}
-
-function calculateGrade(total100) {
-  const s = Math.round(Number(total100 || 0) * 10) / 10;
+function calculateGrade(totalScore, gradeId = currentGrade) {
+  const scale = getClassScoreScale(gradeId);
+  if (!scale.hasGrade) return "";
+  const s = Math.round(Number(totalScore || 0) * 10) / 10;
   if (s >= 80) return "4";
   if (s >= 75) return "3.5";
   if (s >= 70) return "3";
@@ -718,8 +747,8 @@ function getSubmittedTasksCount(student) {
 function getRankedStudents(grade = currentGrade, room = currentRoom) {
   const list = [...getStudentsList(grade, room)];
   return list.sort((a, b) => {
-    const scoreA = calcStudentTotal100(a);
-    const scoreB = calcStudentTotal100(b);
+    const scoreA = calcStudentTotalScore(a, grade);
+    const scoreB = calcStudentTotalScore(b, grade);
     if (scoreB !== scoreA) {
       return scoreB - scoreA;
     }
@@ -735,8 +764,10 @@ function getRankedStudents(grade = currentGrade, room = currentRoom) {
 }
 
 // 7 HILARIOUS RANK TIERS as specified in brief
-function getArtRankTier(total100) {
-  const s = Math.round(Number(total100 || 0));
+function getArtRankTier(totalScore, gradeId = currentGrade) {
+  const scale = getClassScoreScale(gradeId);
+  const normalized = (Number(totalScore || 0) / scale.maxTotal) * 100;
+  const s = Math.round(normalized * 10) / 10;
   if (s >= 100) {
     return {
       title: "มหาเทพไร้พ่าย ก็มาดิครับ",
@@ -1094,6 +1125,12 @@ function renderLeaderboardView() {
   if (termBadge) termBadge.textContent = `ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`;
   if (sloganElem) sloganElem.textContent = getRoomSlogan(currentGrade, currentRoom);
 
+  const scale = getClassScoreScale(currentGrade);
+  const subtitleElem = document.getElementById('tableHeaderSubtitle');
+  if (subtitleElem) {
+    subtitleElem.textContent = `คะแนนเก็บ ${scale.maxAssignment} คะแนนสอบ ${scale.maxExam} รวม ${scale.maxTotal} คะแนน`;
+  }
+
   // Teacher Class & Room Switcher (Visible only when logged in as teacher)
   const isTeacher = !!getLoggedInTeacher();
   if (quickEditBtn) {
@@ -1150,6 +1187,7 @@ function buildPodiumSlotHtml(student, rank) {
   const badgeEmojis = { 1: '👑', 2: '🥈', 3: '🥉' };
   const stepLabel = rank === 1 ? '1ST PLACE' : rank === 2 ? '2ND PLACE' : '3RD PLACE';
   const tasks = getActiveAssignments();
+  const scale = getClassScoreScale(currentGrade);
 
   if (!student) {
     return `
@@ -1166,8 +1204,8 @@ function buildPodiumSlotHtml(student, rank) {
     `;
   }
 
-  const total100 = calcStudentTotal100(student);
-  const tier = getArtRankTier(total100);
+  const totalScore = calcStudentTotalScore(student, currentGrade);
+  const tier = getArtRankTier(totalScore, currentGrade);
   const submittedCount = getSubmittedTasksCount(student);
 
   const avatarDisplay = student.avatar && (student.avatar.startsWith('http') || student.avatar.startsWith('data:image'))
@@ -1181,7 +1219,7 @@ function buildPodiumSlotHtml(student, rank) {
       <h3 class="podium-student-name">${student.name}</h3>
       <div class="podium-task-summary">📝 ส่งครบ ${submittedCount}/${tasks.length} งาน</div>
       <div class="podium-score-tag">
-        ${total100} <span class="unit">/ 100 คะแนน</span>
+        ${totalScore} <span class="unit">/ ${scale.maxTotal} คะแนน</span>
       </div>
       <div class="podium-tier-label ${tier.class}">
         <span>${tier.icon}</span> <span>${tier.label}</span>
@@ -1204,13 +1242,14 @@ function renderRankTable(ranked) {
   const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
   const emptyState = document.getElementById('noResultsState');
   const tasks = getActiveAssignments();
+  const scale = getClassScoreScale(currentGrade);
 
-  // Dynamic Head Row matching Image 2 brief: อันดับ, ชื่อ-นามสกุล, คะแนนรายชิ้นงาน (5 งาน), คะแนนรวม (100), อันดับแรงก์, โปรไฟล์
+  // Dynamic Head Row: อันดับ, ชื่อ-นามสกุล, คะแนนรายชิ้นงาน, คะแนนรวม (50 หรือ 100), อันดับแรงก์, โปรไฟล์
   theadRow.innerHTML = `
     <th class="col-rank" style="width: 70px; text-align: center;">อันดับ</th>
     <th class="col-student" style="min-width: 200px;">ชื่อ-นามสกุล (คลิกดูผลงาน)</th>
     <th>คะแนนรายชิ้นงานที่สั่ง (${tasks.length} งาน)</th>
-    <th class="col-score" style="width: 110px; text-align: center;">คะแนนรวม (100)</th>
+    <th class="col-score" style="width: 110px; text-align: center;">คะแนนรวม (${scale.maxTotal})</th>
     <th class="col-badge" style="min-width: 250px; text-align: center;">อันดับแรงก์</th>
     <th class="col-action" style="width: 130px; text-align: center;">ดูผลงาน & โปรไฟล์</th>
   `;
@@ -1234,8 +1273,8 @@ function renderRankTable(ranked) {
 
   filtered.forEach(student => {
     const actualRank = ranked.findIndex(item => item.id === student.id) + 1;
-    const total100 = calcStudentTotal100(student);
-    const tier = getArtRankTier(total100);
+    const totalScore = calcStudentTotalScore(student, currentGrade);
+    const tier = getArtRankTier(totalScore, currentGrade);
 
     let rankBadgeClass = 'rank-badge-other';
     let rankBadgeContent = actualRank;
@@ -1284,7 +1323,7 @@ function renderRankTable(ranked) {
       </td>
       <td style="text-align: center;">
         <div class="score-cell-badge">
-          ${total100} <span class="total-max">/100</span>
+          ${totalScore} <span class="total-max">/${scale.maxTotal}</span>
         </div>
       </td>
       <td style="text-align: center;">
@@ -1447,11 +1486,12 @@ function openStudentProfileModal(student) {
   const content = document.getElementById('studentProfileContent');
   if (!modal || !content) return;
 
-  const total100 = calcStudentTotal100(student);
-  const sc80 = calcStudentAssignmentScore80(student);
-  const exam = calcStudentExamScore(student);
-  const gradeVal = calculateGrade(total100);
-  const tier = getArtRankTier(total100);
+  const scale = getClassScoreScale(currentGrade);
+  const totalScore = calcStudentTotalScore(student, currentGrade);
+  const sc = calcStudentAssignmentScore(student, currentGrade);
+  const exam = calcStudentExamScore(student, currentGrade);
+  const gradeVal = scale.hasGrade ? calculateGrade(totalScore, currentGrade) : '';
+  const tier = getArtRankTier(totalScore, currentGrade);
   const tasks = getActiveAssignments();
   const portfolios = student.portfolio || [];
 
@@ -1527,23 +1567,23 @@ function openStudentProfileModal(student) {
 
     <div class="passport-body-content">
       
-      <!-- Total Score Card (คะแนนเก็บ 80 + สอบ 20 = 100) -->
+      <!-- Total Score Card -->
       <div class="passport-scores-card">
         <div class="scores-card-header">
           <span class="scores-card-title">🎯 คะแนนประเมินรวม</span>
           <div class="scores-big-total">
-            ${total100} <small>/ 100 คะแนน</small>
-            <span class="art-tier-badge ${tier.class}" style="margin-left: 8px;">เกรด ${gradeVal}</span>
+            ${totalScore} <small>/ ${scale.maxTotal} คะแนน</small>
+            ${scale.hasGrade ? `<span class="art-tier-badge ${tier.class}" style="margin-left: 8px;">เกรด ${gradeVal}</span>` : ''}
           </div>
         </div>
 
         <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
           <div class="stat-box-mini" style="flex: 1;">
-            <div class="stat-val" style="color: #4F46E5;">${sc80} / 80</div>
+            <div class="stat-val" style="color: #4F46E5;">${sc} / ${scale.maxAssignment}</div>
             <div class="stat-lbl">คะแนนเก็บตามชิ้นงาน</div>
           </div>
           <div class="stat-box-mini" style="flex: 1;">
-            <div class="stat-val" style="color: #059669;">${exam} / 20</div>
+            <div class="stat-val" style="color: #059669;">${exam} / ${scale.maxExam}</div>
             <div class="stat-lbl">คะแนนสอบประเมิน</div>
           </div>
         </div>
@@ -1737,9 +1777,10 @@ function renderTeacherView() {
   const students = getStudentsList(currentGrade, currentRoom);
   const sortedByNo = [...students].sort((a, b) => (a.no || 0) - (b.no || 0));
   const tasks = getActiveAssignments();
+  const scale = getClassScoreScale(currentGrade);
 
-  // Dynamic Table Headers matching Image 3:
-  // เลขที่, รูปโปรไฟล์, ชื่อ-นามสกุล, งาน 1 (25), งาน 2 (25), งาน 3 (25), งาน 4 (25), งาน 5 (20), คะแนนเก็บ 80, คะแนนสอบ 20, คะแนนรวม 100, เกรด, จัดการ
+  // Dynamic Table Headers:
+  // เลขที่, รูปโปรไฟล์, ชื่อ-นามสกุล, งาน... คะแนนเก็บ (40/80), คะแนนสอบ (10/20), คะแนนรวม (50/100), เกรด (ถ้ามี), จัดการ
   const theadRow = document.getElementById('teacherTableHeadRow');
   let headHtml = `
     <th style="width: 50px; text-align: center;">เลขที่</th>
@@ -1756,19 +1797,23 @@ function renderTeacherView() {
   });
 
   headHtml += `
-    <th style="min-width: 85px; text-align: center; color: #4F46E5;">คะแนนเก็บ (80)</th>
-    <th style="min-width: 85px; text-align: center; color: #059669;">คะแนนสอบ (20)</th>
-    <th style="min-width: 85px; text-align: center; color: #D97706;">คะแนนรวม (100)</th>
-    <th style="min-width: 65px; text-align: center;">เกรด</th>
-    <th style="width: 90px; text-align: center;">จัดการ</th>
+    <th style="min-width: 85px; text-align: center; color: #4F46E5;">คะแนนเก็บ (${scale.maxAssignment})</th>
+    <th style="min-width: 85px; text-align: center; color: #059669;">คะแนนสอบ (${scale.maxExam})</th>
+    <th style="min-width: 85px; text-align: center; color: #D97706;">คะแนนรวม (${scale.maxTotal})</th>
   `;
+
+  if (scale.hasGrade) {
+    headHtml += `<th style="min-width: 65px; text-align: center;">เกรด</th>`;
+  }
+
+  headHtml += `<th style="width: 90px; text-align: center;">จัดการ</th>`;
 
   theadRow.innerHTML = headHtml;
 
   const tbody = document.getElementById('teacherTableBody');
   tbody.innerHTML = '';
 
-  const colSpanCount = 7 + tasks.length;
+  const colSpanCount = (scale.hasGrade ? 7 : 6) + tasks.length;
 
   if (sortedByNo.length === 0) {
     tbody.innerHTML = `
@@ -1791,10 +1836,10 @@ function renderTeacherView() {
 
   sortedByNo.forEach(student => {
     if (!student.scores) student.scores = {};
-    const sc80 = calcStudentAssignmentScore80(student);
-    const examScore = calcStudentExamScore(student);
-    const total100 = calcStudentTotal100(student);
-    const gradeVal = calculateGrade(total100);
+    const sc = calcStudentAssignmentScore(student, currentGrade);
+    const examScore = calcStudentExamScore(student, currentGrade);
+    const totalScore = calcStudentTotalScore(student, currentGrade);
+    const gradeVal = scale.hasGrade ? calculateGrade(totalScore, currentGrade) : '';
 
     const avatarDisplay = student.avatar && (student.avatar.startsWith('http') || student.avatar.startsWith('data:image'))
       ? `<img src="${student.avatar}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 50%;" alt="${student.name}">`
@@ -1830,24 +1875,32 @@ function renderTeacherView() {
       `;
     });
 
-    // Auto-calculated columns as requested in brief Image 3
+    // Auto-calculated columns
     rowHtml += `
       <td style="text-align: center; font-weight: 700; color: #4F46E5;">
-        <span id="score80-${student.id}">${sc80}</span>
+        <span id="score80-${student.id}">${sc}</span>
       </td>
       <td style="text-align: center;">
-        <input type="number" min="0" max="20" 
+        <input type="number" min="0" max="${scale.maxExam}" 
           class="score-input-inline exam-score-input" 
           data-student-id="${student.id}" 
           value="${examScore}" 
-          placeholder="0-20">
+          placeholder="0-${scale.maxExam}">
       </td>
       <td style="text-align: center; font-weight: 800; font-size: 1.05rem; color: #D97706;">
-        <span id="total100-${student.id}">${total100}</span>
+        <span id="total100-${student.id}">${totalScore}</span>
       </td>
-      <td style="text-align: center; font-weight: 800; color: #059669;">
-        <span id="grade-${student.id}" class="badge-grade-auto">${gradeVal}</span>
-      </td>
+    `;
+
+    if (scale.hasGrade) {
+      rowHtml += `
+        <td style="text-align: center; font-weight: 800; color: #059669;">
+          <span id="grade-${student.id}" class="badge-grade-auto">${gradeVal}</span>
+        </td>
+      `;
+    }
+
+    rowHtml += `
       <td>
         <div class="table-actions-cell">
           <button class="btn-icon-sm view-profile-btn" title="ดูผลงาน & โปรไฟล์">👁️</button>
@@ -1861,17 +1914,17 @@ function renderTeacherView() {
 
     // Helper to refresh calculated columns in row
     const refreshRowCalculations = () => {
-      const newSc80 = calcStudentAssignmentScore80(student);
-      const newTotal = calcStudentTotal100(student);
-      const newGrade = calculateGrade(newTotal);
+      const newSc = calcStudentAssignmentScore(student, currentGrade);
+      const newTotal = calcStudentTotalScore(student, currentGrade);
+      const newGrade = scale.hasGrade ? calculateGrade(newTotal, currentGrade) : '';
 
       const el80 = document.getElementById(`score80-${student.id}`);
       const elTotal = document.getElementById(`total100-${student.id}`);
       const elGrade = document.getElementById(`grade-${student.id}`);
 
-      if (el80) el80.textContent = newSc80;
+      if (el80) el80.textContent = newSc;
       if (elTotal) elTotal.textContent = newTotal;
-      if (elGrade) elGrade.textContent = newGrade;
+      if (elGrade && scale.hasGrade) elGrade.textContent = newGrade;
     };
 
     // Realtime score update handler
@@ -1914,7 +1967,7 @@ function renderTeacherView() {
       let rawVal = examInput.value.trim();
       let val = rawVal === '' ? 0 : parseInt(rawVal, 10);
       if (isNaN(val) || val < 0) val = 0;
-      if (val > 20) val = 20;
+      if (val > scale.maxExam) val = scale.maxExam;
       if (commit) examInput.value = rawVal === '' ? '' : val;
 
       student.scores.examScore = val;
@@ -1929,7 +1982,7 @@ function renderTeacherView() {
           room: currentRoom,
           student: student
         });
-        showToast(`บันทึกคะแนนสอบ ${student.name} (${val}/20) แล้ว!`);
+        showToast(`บันทึกคะแนนสอบ ${student.name} (${val}/${scale.maxExam}) แล้ว!`);
         artSound.playSaveChime();
       }
     };
@@ -2681,15 +2734,15 @@ function getExportDataForClass(gradeId, roomId) {
   const list = getRankedStudents(gradeId, roomId);
   const gradeLabel = getGradeLabel(gradeId);
   const tasks = getActiveAssignments();
-  const totalMax = getTotalMaxScore();
+  const scale = getClassScoreScale(gradeId);
 
   return list.map((s, index) => {
     const rank = index + 1;
-    const total100 = calcStudentTotal100(s);
-    const sc80 = calcStudentAssignmentScore80(s);
-    const exam = calcStudentExamScore(s);
-    const gradeVal = calculateGrade(total100);
-    const tier = getArtRankTier(total100);
+    const totalScore = calcStudentTotalScore(s, gradeId);
+    const sc = calcStudentAssignmentScore(s, gradeId);
+    const exam = calcStudentExamScore(s, gradeId);
+    const gradeVal = scale.hasGrade ? calculateGrade(totalScore, gradeId) : '';
+    const tier = getArtRankTier(totalScore, gradeId);
 
     const rowObj = {
       "อันดับ (Rank)": rank,
@@ -2706,10 +2759,12 @@ function getExportDataForClass(gradeId, roomId) {
       rowObj[`งานที่ ${i + 1}: ${t.title} (${t.maxScore})`] = val;
     });
 
-    rowObj["คะแนนเก็บ (80)"] = sc80;
-    rowObj["คะแนนสอบ (20)"] = exam;
-    rowObj["คะแนนรวม (100)"] = total100;
-    rowObj["เกรด (Grade)"] = gradeVal;
+    rowObj[`คะแนนเก็บ (${scale.maxAssignment})`] = sc;
+    rowObj[`คะแนนสอบ (${scale.maxExam})`] = exam;
+    rowObj[`คะแนนรวม (${scale.maxTotal})`] = totalScore;
+    if (scale.hasGrade) {
+      rowObj["เกรด (Grade)"] = gradeVal;
+    }
     rowObj["อันดับแรงก์ (Art Rank)"] = `${tier.icon} ${tier.label}`;
     rowObj["ฉายาทางศิลปะ"] = tier.title;
     rowObj["คำติชมของครู"] = s.feedback || '';
@@ -3620,6 +3675,54 @@ const DEFAULT_MAGAZINE_DATA = {
   quote: "ศิลปะไม่ใช่แค่ผลงานที่แขวนบนผนัง แต่คือการเดินทางที่เด็กๆ ได้ค้นพบคุณค่าในตัวเอง"
 };
 
+function updateMagazinePreviewThumbnails() {
+  for (let i = 1; i <= 4; i++) {
+    const input = document.getElementById(`editMagPic${i}`);
+    const img = document.getElementById(`previewImgPic${i}`);
+    const box = document.getElementById(`previewBoxPic${i}`);
+    const placeholder = box ? box.querySelector('.mag-pic-placeholder-text') : null;
+    const val = input ? input.value.trim() : '';
+
+    if (val && img) {
+      img.src = val;
+      img.classList.remove('hidden');
+      if (placeholder) placeholder.classList.add('hidden');
+    } else if (img) {
+      img.src = '';
+      img.classList.add('hidden');
+      if (placeholder) placeholder.classList.remove('hidden');
+    }
+  }
+}
+
+async function handleMagPicUpload(file, picNum) {
+  if (!file) return;
+  const statusElem = document.getElementById(`statusPic${picNum}`);
+  if (statusElem) statusElem.textContent = "กำลังประมวลผล...";
+
+  try {
+    const base64Data = await resizeImageToCanvas(file, 900, 900, 0.85);
+    const input = document.getElementById(`editMagPic${picNum}`);
+    if (input) {
+      input.value = base64Data;
+    }
+    updateMagazinePreviewThumbnails();
+    if (statusElem) {
+      statusElem.textContent = `✅ อัปโหลดสำเร็จ (${file.name.slice(0, 15)}...)`;
+      statusElem.style.color = "#059669";
+    }
+    showToast(`อัปโหลดรูปภาพที่ ${picNum} เรียบร้อยแล้ว 📸`);
+    artSound.playCamera();
+  } catch (err) {
+    console.error("Mag image upload error:", err);
+    if (statusElem) {
+      statusElem.textContent = "❌ ไม่สามารถประมวลผลรูปภาพได้";
+      statusElem.style.color = "#EF4444";
+    }
+    showToast("เกิดข้อผิดพลาดในการอ่านไฟล์รูปภาพ");
+  }
+}
+
 function openMagazineModal() {
   const modal = document.getElementById('magazineEditModal');
   const mag = appConfig.magazine || {};
@@ -3648,6 +3751,13 @@ function openMagazineModal() {
   if (p4) p4.value = mag.pic4 || '';
   if (quote) quote.value = mag.quote || '';
 
+  // Reset upload statuses and refresh live thumbnails
+  for (let i = 1; i <= 4; i++) {
+    const statusElem = document.getElementById(`statusPic${i}`);
+    if (statusElem) statusElem.textContent = '';
+  }
+  updateMagazinePreviewThumbnails();
+
   if (modal) modal.classList.remove('hidden');
   artSound.playPop();
 }
@@ -3672,6 +3782,7 @@ function fillDefaultMagazineValues() {
   if (c2) c2.value = DEFAULT_MAGAZINE_DATA.copy2;
   if (p4) p4.value = DEFAULT_MAGAZINE_DATA.pic4;
   if (quote) quote.value = DEFAULT_MAGAZINE_DATA.quote;
+  updateMagazinePreviewThumbnails();
   artSound.playChime();
   showToast("📋 ดึงข้อมูลตัวอย่างหน้าแรกมาใส่ในช่องเรียบร้อยแล้ว");
 }
@@ -4095,6 +4206,22 @@ document.addEventListener('DOMContentLoaded', () => {
     magazineEditModal.addEventListener('click', (e) => {
       if (e.target.id === 'magazineEditModal') closeMagazineModal();
     });
+  }
+
+  // Live previews and file upload for magazine photos
+  for (let i = 1; i <= 4; i++) {
+    const fileInput = document.getElementById(`fileMagPic${i}`);
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          handleMagPicUpload(e.target.files[0], i);
+        }
+      });
+    }
+    const textInput = document.getElementById(`editMagPic${i}`);
+    if (textInput) {
+      textInput.addEventListener('input', () => updateMagazinePreviewThumbnails());
+    }
   }
 
   // Auth & Account Modal Listeners
