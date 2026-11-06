@@ -151,7 +151,7 @@
         <div class="mag-pink-wireframe" id="magazineEditorialGrid">
           
           <!-- ================= ROW 1: TOP SECTION (2 Columns: Left [Sub Head] + [Copy] | Right [Picture]) ================= -->
-          <div class="mag-layout-top">
+          <div class="mag-layout-top" id="magLayoutTop">
             
             <!-- Left Column: 2 Stacked Boxes -->
             <div class="mag-col-stacked">
@@ -170,25 +170,37 @@
             </div>
 
             <!-- Right Column: 1 Large Picture Box -->
-            <article class="mag-box mag-box-picture-hero">
-              <div class="mag-photo-wrap-fill">
+            <article class="mag-box mag-box-picture-hero" id="magBoxPic1">
+              <div class="mag-photo-wrap-fill" id="magWrapPic1" title="คลิกเพื่อดูรูปภาพขยาย">
                 <img id="magPic1" class="mag-photo-hero" src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" alt="ศิลปะสร้างสรรค์">
+                <span class="mag-zoom-hint">🔍 คลิกเปิดดูรูปขยาย</span>
                 <span class="mag-photo-caption">🎨 การทดลองผสมสีน้ำสร้างโทนสีแห่งความสุข</span>
+              </div>
+              <div class="mag-box-pic-hidden-teacher hidden" id="teacherPlaceholderPic1" onclick="toggleMagazineImageVisibility(1)" title="คลิกเพื่อเปิดแสดงรูปภาพบทความหลัก">
+                <span style="font-size: 1.8rem;">🙈</span>
+                <strong>รูปภาพบทความหลักถูกปิดซ่อนไว้</strong>
+                <span class="btn-mag-quick-toggle">🖼️ คลิกเพื่อเปิดแสดงรูป</span>
               </div>
             </article>
 
           </div>
 
           <!-- ================= ROW 2: BOTTOM SECTION (3 Columns: Col 1 [Picture]+[Subhead] | Col 2 [Copy] | Col 3 [Picture]+[Copy]) ================= -->
-          <div class="mag-layout-bottom">
+          <div class="mag-layout-bottom" id="magLayoutBottom">
             
             <!-- Column 1 (Left): Picture (Top) + Subhead (Bottom) -->
             <div class="mag-col-stacked">
               <!-- Box 4: Picture -->
-              <article class="mag-box mag-box-picture-half">
-                <div class="mag-photo-wrap-fill">
+              <article class="mag-box mag-box-picture-half" id="magBoxPic2">
+                <div class="mag-photo-wrap-fill" id="magWrapPic2" title="คลิกเพื่อดูรูปภาพขยาย">
                   <img id="magPic2" class="mag-photo" src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" alt="ผลงานภาพพิมพ์">
+                  <span class="mag-zoom-hint">🔍 คลิกเปิดดูรูปขยาย</span>
                   <span class="mag-photo-caption">🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ</span>
+                </div>
+                <div class="mag-box-pic-hidden-teacher hidden" id="teacherPlaceholderPic2" onclick="toggleMagazineImageVisibility(2)" title="คลิกเพื่อเปิดแสดงรูปภาพไฮไลต์ 2">
+                  <span style="font-size: 1.4rem;">🙈</span>
+                  <strong style="font-size: 0.85rem;">รูปภาพ 2 ถูกปิดซ่อนไว้</strong>
+                  <span class="btn-mag-quick-toggle">🖼️ คลิกเพื่อเปิดแสดงรูป</span>
                 </div>
               </article>
 
@@ -209,11 +221,17 @@
             <!-- Column 3 (Right): Picture (Top) + Copy (Bottom) -->
             <div class="mag-col-stacked">
               <!-- Box 7: Picture -->
-              <article class="mag-box mag-box-picture-half">
-                <div class="mag-photo-wrap-fill">
+              <article class="mag-box mag-box-picture-half" id="magBoxPic3">
+                <div class="mag-photo-wrap-fill" id="magWrapPic3" title="คลิกเพื่อดูรูปภาพขยาย">
                   <img id="magPic3" class="mag-photo" src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" alt="ภาพวาดสัตว์ในจินตนาการ">
+                  <span class="mag-zoom-hint">🔍 คลิกเปิดดูรูปขยาย</span>
                   <span class="mag-photo-caption">🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด</span>
                   <img id="magPic4" src="https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80" alt="ห้องเรียนศิลปะ" style="display:none;">
+                </div>
+                <div class="mag-box-pic-hidden-teacher hidden" id="teacherPlaceholderPic3" onclick="toggleMagazineImageVisibility(3)" title="คลิกเพื่อเปิดแสดงรูปภาพไฮไลต์ 3">
+                  <span style="font-size: 1.4rem;">🙈</span>
+                  <strong style="font-size: 0.85rem;">รูปภาพ 3 ถูกปิดซ่อนไว้</strong>
+                  <span class="btn-mag-quick-toggle">🖼️ คลิกเพื่อเปิดแสดงรูป</span>
                 </div>
               </article>
 
@@ -1262,6 +1280,13 @@
         </div>
 
         <h4 style="color: #4F46E5; font-size: 0.95rem; margin-bottom: 8px;">🌟 คอลัมน์ที่ 1: บทความหลัก (Lead Story)</h4>
+        <div class="mag-toggle-row">
+          <span class="mag-toggle-label">🖼️ เปิด-ปิด รูปภาพบทความหลัก 1</span>
+          <label class="mag-switch" title="เปิด/ปิดการแสดงรูปภาพในบทความนี้">
+            <input type="checkbox" id="toggleMagPic1" checked>
+            <span class="mag-switch-slider"></span>
+          </label>
+        </div>
         <div class="form-group">
           <label for="editMagHead1">หัวข้อบทความหลัก 1</label>
           <input type="text" id="editMagHead1" placeholder="เช่น ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ">
@@ -1270,7 +1295,7 @@
           <label for="editMagCopy1">เนื้อหาบทความหลัก 1</label>
           <textarea id="editMagCopy1" rows="3" placeholder="เช่น ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี"></textarea>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="groupMagPic1">
           <label for="editMagPic1">🖼️ รูปภาพบทความหลัก 1 (อัปโหลดรูปถ่ายหรือใส่ URL)</label>
           <div class="mag-pic-upload-row">
             <div class="mag-pic-preview-box" id="previewBoxPic1">
@@ -1296,7 +1321,14 @@
         <hr style="margin: 16px 0; border: none; border-top: 1px dashed #CBD5E1;">
 
         <h4 style="color: #059669; font-size: 0.95rem; margin-bottom: 8px;">🖼️ คอลัมน์ที่ 2: ภาพไฮไลต์ตรงกลาง (Photo Highlights)</h4>
-        <div class="form-group">
+        <div class="mag-toggle-row">
+          <span class="mag-toggle-label">🖼️ เปิด-ปิด รูปภาพกลางบน 2</span>
+          <label class="mag-switch" title="เปิด/ปิดการแสดงรูปภาพกลางบน">
+            <input type="checkbox" id="toggleMagPic2" checked>
+            <span class="mag-switch-slider"></span>
+          </label>
+        </div>
+        <div class="form-group" id="groupMagPic2">
           <label for="editMagPic2">🖼️ รูปภาพกลางบน 2 (อัปโหลดรูปถ่ายหรือใส่ URL)</label>
           <div class="mag-pic-upload-row">
             <div class="mag-pic-preview-box" id="previewBoxPic2">
@@ -1318,7 +1350,14 @@
             </div>
           </div>
         </div>
-        <div class="form-group">
+        <div class="mag-toggle-row">
+          <span class="mag-toggle-label">🖼️ เปิด-ปิด รูปภาพกลางล่าง 3</span>
+          <label class="mag-switch" title="เปิด/ปิดการแสดงรูปภาพกลางล่าง">
+            <input type="checkbox" id="toggleMagPic3" checked>
+            <span class="mag-switch-slider"></span>
+          </label>
+        </div>
+        <div class="form-group" id="groupMagPic3">
           <label for="editMagPic3">🖼️ รูปภาพกลางล่าง 3 (อัปโหลดรูปถ่ายหรือใส่ URL)</label>
           <div class="mag-pic-upload-row">
             <div class="mag-pic-preview-box" id="previewBoxPic3">
@@ -1344,6 +1383,13 @@
         <hr style="margin: 16px 0; border: none; border-top: 1px dashed #CBD5E1;">
 
         <h4 style="color: #9333EA; font-size: 0.95rem; margin-bottom: 8px;">💡 คอลัมน์ที่ 3: แง่คิดศิลปะ & โควท (Artist Mindset)</h4>
+        <div class="mag-toggle-row">
+          <span class="mag-toggle-label">🖼️ เปิด-ปิด รูปภาพบทความรอง 4</span>
+          <label class="mag-switch" title="เปิด/ปิดการแสดงรูปภาพในบทความนี้">
+            <input type="checkbox" id="toggleMagPic4" checked>
+            <span class="mag-switch-slider"></span>
+          </label>
+        </div>
         <div class="form-group">
           <label for="editMagHead2">หัวข้อบทความรอง 2</label>
           <input type="text" id="editMagHead2" placeholder="เช่น เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า">
@@ -1352,7 +1398,7 @@
           <label for="editMagCopy2">เนื้อหาบทความรอง 2</label>
           <textarea id="editMagCopy2" rows="3" placeholder="เช่น เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง"></textarea>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="groupMagPic4">
           <label for="editMagPic4">🖼️ รูปภาพบทความรอง 4 (อัปโหลดรูปถ่ายหรือใส่ URL)</label>
           <div class="mag-pic-upload-row">
             <div class="mag-pic-preview-box" id="previewBoxPic4">

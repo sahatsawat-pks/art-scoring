@@ -1048,7 +1048,153 @@ function renderHomeView() {
   if (mag.pic4 && document.getElementById('magPic4')) document.getElementById('magPic4').src = mag.pic4;
   if (mag.quote && document.getElementById('magQuoteText')) document.getElementById('magQuoteText').textContent = mag.quote;
 
+  renderMagazinePhotoToggles();
+  initMagazinePhotoLightbox();
   applyBackgroundTheme();
+}
+
+function renderMagazinePhotoToggles() {
+  const mag = appConfig.magazine || {};
+  const show1 = mag.showPic1 !== false;
+  const show2 = mag.showPic2 !== false;
+  const show3 = mag.showPic3 !== false;
+
+  const box1 = document.getElementById('magBoxPic1');
+  const wrap1 = document.getElementById('magWrapPic1');
+  const teacherPlaceholder1 = document.getElementById('teacherPlaceholderPic1');
+
+  const box2 = document.getElementById('magBoxPic2');
+  const wrap2 = document.getElementById('magWrapPic2');
+  const teacherPlaceholder2 = document.getElementById('teacherPlaceholderPic2');
+
+  const box3 = document.getElementById('magBoxPic3');
+  const wrap3 = document.getElementById('magWrapPic3');
+  const teacherPlaceholder3 = document.getElementById('teacherPlaceholderPic3');
+
+  const topLayout = document.getElementById('magLayoutTop');
+  const isTeacher = !!getLoggedInTeacher();
+
+  // Item 1 (Lead Story Hero Photo)
+  if (box1 && wrap1) {
+    if (show1) {
+      box1.classList.remove('hidden');
+      wrap1.classList.remove('hidden');
+      if (teacherPlaceholder1) teacherPlaceholder1.classList.add('hidden');
+      if (topLayout) topLayout.classList.remove('no-pic-1');
+    } else {
+      if (isTeacher) {
+        box1.classList.remove('hidden');
+        wrap1.classList.add('hidden');
+        if (teacherPlaceholder1) teacherPlaceholder1.classList.remove('hidden');
+        if (topLayout) topLayout.classList.remove('no-pic-1');
+      } else {
+        box1.classList.add('hidden');
+        wrap1.classList.add('hidden');
+        if (teacherPlaceholder1) teacherPlaceholder1.classList.add('hidden');
+        if (topLayout) topLayout.classList.add('no-pic-1');
+      }
+    }
+  }
+
+  // Item 2 (Highlight Photo 2)
+  if (box2 && wrap2) {
+    if (show2) {
+      box2.classList.remove('hidden');
+      wrap2.classList.remove('hidden');
+      if (teacherPlaceholder2) teacherPlaceholder2.classList.add('hidden');
+    } else {
+      if (isTeacher) {
+        box2.classList.remove('hidden');
+        wrap2.classList.add('hidden');
+        if (teacherPlaceholder2) teacherPlaceholder2.classList.remove('hidden');
+      } else {
+        box2.classList.add('hidden');
+        wrap2.classList.add('hidden');
+        if (teacherPlaceholder2) teacherPlaceholder2.classList.add('hidden');
+      }
+    }
+  }
+
+  // Item 3 (Highlight Photo 3)
+  if (box3 && wrap3) {
+    if (show3) {
+      box3.classList.remove('hidden');
+      wrap3.classList.remove('hidden');
+      if (teacherPlaceholder3) teacherPlaceholder3.classList.add('hidden');
+    } else {
+      if (isTeacher) {
+        box3.classList.remove('hidden');
+        wrap3.classList.add('hidden');
+        if (teacherPlaceholder3) teacherPlaceholder3.classList.remove('hidden');
+      } else {
+        box3.classList.add('hidden');
+        wrap3.classList.add('hidden');
+        if (teacherPlaceholder3) teacherPlaceholder3.classList.add('hidden');
+      }
+    }
+  }
+
+  // Clean up existing quick-toggle pills
+  document.querySelectorAll('.btn-mag-quick-toggle-wrap').forEach(el => el.remove());
+
+  // If teacher is logged in and photos are shown, inject quick-toggle button into the photo cards
+  if (isTeacher) {
+    [1, 2, 3].forEach(num => {
+      const isShown = (num === 1 && show1) || (num === 2 && show2) || (num === 3 && show3);
+      const wrap = document.getElementById(`magWrapPic${num}`);
+      if (wrap && isShown) {
+        const toggleBtnWrap = document.createElement('div');
+        toggleBtnWrap.className = 'btn-mag-quick-toggle-wrap';
+        toggleBtnWrap.style.cssText = 'position: absolute; top: 10px; left: 10px; z-index: 5;';
+        toggleBtnWrap.innerHTML = `
+          <button type="button" class="btn-mag-quick-toggle" onclick="event.stopPropagation(); toggleMagazineImageVisibility(${num})" title="ปิด/ซ่อนการแสดงรูปภาพนี้">
+            <span>🙈 ปิดรูป</span>
+          </button>
+        `;
+        wrap.appendChild(toggleBtnWrap);
+      }
+    });
+  }
+}
+
+function toggleMagazineImageVisibility(num) {
+  if (!appConfig.magazine) appConfig.magazine = {};
+  const key = `showPic${num}`;
+  const current = appConfig.magazine[key] !== false;
+  appConfig.magazine[key] = !current;
+
+  saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
+
+  artSound.playPop();
+  showToast(appConfig.magazine[key] ? `เปิดแสดงรูปภาพที่ ${num} เรียบร้อย 🖼️` : `ปิดซ่อนรูปภาพที่ ${num} เรียบร้อย 🙈`);
+  renderMagazinePhotoToggles();
+}
+window.toggleMagazineImageVisibility = toggleMagazineImageVisibility;
+
+function initMagazinePhotoLightbox() {
+  const configs = [
+    { picId: 'magPic1', titleId: 'magHead1', defaultTitle: 'ศิลปะกับพลังแห่งจินตนาการ' },
+    { picId: 'magPic2', titleId: 'magHead2', defaultTitle: 'เทคนิคสีโปสเตอร์และคู่สีตรงข้าม' },
+    { picId: 'magPic3', titleId: 'magHead2', defaultTitle: 'จินตนาการลายเส้นที่ไร้กรอบจำกัด' }
+  ];
+
+  configs.forEach(c => {
+    const img = document.getElementById(c.picId);
+    if (!img) return;
+    const parentWrap = img.closest('.mag-photo-wrap-fill');
+    if (!parentWrap) return;
+
+    parentWrap.onclick = (e) => {
+      if (e.target.closest('.btn-mag-quick-toggle')) return;
+      const headEl = document.getElementById(c.titleId);
+      const title = (headEl ? headEl.textContent : '') || c.defaultTitle;
+      const src = img.src;
+      if (src && !src.endsWith('#') && src !== window.location.href) {
+        openPhotoLightbox(src, title, "📰 ภาพประกอบจาก THE ART TIME • คลิก ✕ หรือคลิกนอกกรอบเพื่อปิดรูป");
+      }
+    };
+  });
 }
 
 // Room Passcode Handler
@@ -3206,6 +3352,7 @@ function updateTeacherAuthUI(user = null) {
 
   // Refresh classroom gallery so teacher add/delete controls update
   renderClassroomGallery();
+  renderMagazinePhotoToggles();
 }
 
 function openTeacherLoginModal() {
@@ -4021,6 +4168,31 @@ function openMagazineModal() {
   if (p4) p4.value = mag.pic4 || '';
   if (quote) quote.value = mag.quote || '';
 
+  // Setup Image Toggles
+  const t1 = document.getElementById('toggleMagPic1');
+  const t2 = document.getElementById('toggleMagPic2');
+  const t3 = document.getElementById('toggleMagPic3');
+  const t4 = document.getElementById('toggleMagPic4');
+
+  if (t1) t1.checked = mag.showPic1 !== false;
+  if (t2) t2.checked = mag.showPic2 !== false;
+  if (t3) t3.checked = mag.showPic3 !== false;
+  if (t4) t4.checked = mag.showPic4 !== false;
+
+  [1, 2, 3, 4].forEach(i => {
+    const t = document.getElementById(`toggleMagPic${i}`);
+    const g = document.getElementById(`groupMagPic${i}`);
+    if (t && g) {
+      g.style.opacity = t.checked ? '1' : '0.45';
+      g.style.pointerEvents = t.checked ? 'auto' : 'none';
+      t.onchange = () => {
+        g.style.opacity = t.checked ? '1' : '0.45';
+        g.style.pointerEvents = t.checked ? 'auto' : 'none';
+        artSound.playPop();
+      };
+    }
+  });
+
   // Reset upload statuses and refresh live thumbnails
   for (let i = 1; i <= 4; i++) {
     const statusElem = document.getElementById(`statusPic${i}`);
@@ -4052,6 +4224,20 @@ function fillDefaultMagazineValues() {
   if (c2) c2.value = DEFAULT_MAGAZINE_DATA.copy2;
   if (p4) p4.value = DEFAULT_MAGAZINE_DATA.pic4;
   if (quote) quote.value = DEFAULT_MAGAZINE_DATA.quote;
+
+  // Turn toggles back on
+  [1, 2, 3, 4].forEach(i => {
+    const t = document.getElementById(`toggleMagPic${i}`);
+    const g = document.getElementById(`groupMagPic${i}`);
+    if (t) {
+      t.checked = true;
+      if (g) {
+        g.style.opacity = '1';
+        g.style.pointerEvents = 'auto';
+      }
+    }
+  });
+
   updateMagazinePreviewThumbnails();
   artSound.playChime();
   showToast("📋 ดึงข้อมูลตัวอย่างหน้าแรกมาใส่ในช่องเรียบร้อยแล้ว");
@@ -4075,6 +4261,16 @@ function handleMagazineSubmit(e) {
   const c2 = document.getElementById('editMagCopy2');
   const p4 = document.getElementById('editMagPic4');
   const quote = document.getElementById('editMagQuote');
+
+  const t1 = document.getElementById('toggleMagPic1');
+  const t2 = document.getElementById('toggleMagPic2');
+  const t3 = document.getElementById('toggleMagPic3');
+  const t4 = document.getElementById('toggleMagPic4');
+
+  appConfig.magazine.showPic1 = t1 ? t1.checked : true;
+  appConfig.magazine.showPic2 = t2 ? t2.checked : true;
+  appConfig.magazine.showPic3 = t3 ? t3.checked : true;
+  appConfig.magazine.showPic4 = t4 ? t4.checked : true;
 
   appConfig.magazine.head1 = (h1 && h1.value.trim()) ? h1.value.trim() : DEFAULT_MAGAZINE_DATA.head1;
   appConfig.magazine.copy1 = (c1 && c1.value.trim()) ? c1.value.trim() : DEFAULT_MAGAZINE_DATA.copy1;
