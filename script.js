@@ -1397,6 +1397,56 @@ function renderRankTable(ranked) {
 // ==========================================
 // 9. CLASSROOM ACTIVITY & ARTWORK GALLERY
 // ==========================================
+let currentLightboxTaskId = null;
+let currentLightboxPhotoId = null;
+
+function deleteGalleryPhoto(taskId, photoId) {
+  if (!appConfig.galleries || !appConfig.galleries[taskId]) return;
+  const list = appConfig.galleries[taskId];
+  const idx = list.findIndex(p => p.id === photoId);
+  if (idx === -1) return;
+
+  const photo = list[idx];
+  if (!confirm(`คุณต้องการลบรูปภาพ "${photo.title || 'นี้'}" ใช่หรือไม่?`)) {
+    return;
+  }
+
+  list.splice(idx, 1);
+  saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
+
+  showToast("ลบรูปภาพกิจกรรมเรียบร้อยแล้ว 🗑️");
+  artSound.playPop();
+  closePhotoLightbox();
+  renderClassroomGallery();
+}
+
+function deleteCustomGalleryFolder(folderId) {
+  const folders = appConfig.customFolders || [];
+  const idx = folders.findIndex(f => f.id === folderId);
+  if (idx === -1) return;
+
+  const folder = folders[idx];
+  if (!confirm(`คุณต้องการลบโฟลเดอร์ "${folder.title}" และภาพทั้งหมดในโฟลเดอร์นี้ใช่หรือไม่?`)) {
+    return;
+  }
+
+  folders.splice(idx, 1);
+  if (appConfig.galleries && appConfig.galleries[folderId]) {
+    delete appConfig.galleries[folderId];
+  }
+
+  saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
+
+  showToast(`ลบโฟลเดอร์ "${folder.title}" เรียบร้อยแล้ว 🗑️`);
+  artSound.playPop();
+
+  const tasks = getActiveAssignments();
+  activeGalleryTaskId = tasks.length > 0 ? tasks[0].id : '';
+  renderClassroomGallery();
+}
+
 function renderClassroomGallery() {
   const tabsContainer = document.getElementById('galleryTasksTabs');
   const photosGrid = document.getElementById('galleryPhotosGrid');
@@ -1437,21 +1487,36 @@ function renderClassroomGallery() {
     });
   });
 
-  // Render Teacher Upload Button if Logged In
+  // Render Teacher Action Buttons if Logged In
   const loggedTeacher = getLoggedInTeacher();
+  const isTeacher = !!loggedTeacher;
+
   if (teacherActions) {
-    if (loggedTeacher) {
-      teacherActions.innerHTML = `
+    if (isTeacher) {
+      const isCustomFolder = (appConfig.customFolders || []).some(f => f.id === activeGalleryTaskId);
+      let actionsHtml = `
         <button id="galleryNewFolderBtn" class="btn btn-sm btn-outline" style="border-radius: var(--radius-full); margin-right: 8px;">
           <span>➕ สร้างโฟลเดอร์ใหม่</span>
         </button>
-        <button id="quickUploadGalleryBtn" class="btn btn-sm btn-emerald" style="border-radius: var(--radius-full);">
+        <button id="quickUploadGalleryBtn" class="btn btn-sm btn-emerald" style="border-radius: var(--radius-full); margin-right: 8px;">
           <span>📸 อัปโหลดภาพกิจกรรม</span>
         </button>
       `;
+      if (isCustomFolder) {
+        actionsHtml += `
+          <button id="galleryDeleteFolderBtn" class="btn btn-sm btn-outline-danger" style="border-radius: var(--radius-full);" title="ลบโฟลเดอร์นี้">
+            <span>🗑️ ลบโฟลเดอร์นี้</span>
+          </button>
+        `;
+      }
+      teacherActions.innerHTML = actionsHtml;
+
       document.getElementById('galleryNewFolderBtn')?.addEventListener('click', promptAddNewGalleryFolder);
       document.getElementById('quickUploadGalleryBtn')?.addEventListener('click', () => {
         openGalleryUploadModal(activeGalleryTaskId);
+      });
+      document.getElementById('galleryDeleteFolderBtn')?.addEventListener('click', () => {
+        deleteCustomGalleryFolder(activeGalleryTaskId);
       });
     } else {
       teacherActions.innerHTML = '';
@@ -1461,35 +1526,78 @@ function renderClassroomGallery() {
   // Render Photos for Active Assignment
   const photos = appConfig.galleries[activeGalleryTaskId] || [];
 
-  if (photos.length === 0) {
+  let cardsHtml = '';
+
+  // If teacher is logged in, show the quick-add card first!
+  if (isTeacher) {
+    cardsHtml += `
+      <div class="gallery-photo-card gallery-quick-add-card" id="galleryQuickAddCard" title="คลิกเพื่ออัปโหลดภาพกิจกรรมใหม่">
+        <div style="font-size: 2.2rem; margin-bottom: 6px;">➕</div>
+        <strong style="color: #047857; font-size: 0.95rem;">เพิ่มรูปภาพใหม่</strong>
+        <p style="font-size: 0.78rem; color: #065F46; margin-top: 4px;">คลิกเพื่ออัปโหลดรูปภาพกิจกรรม</p>
+      </div>
+    `;
+  }
+
+  if (photos.length === 0 && !isTeacher) {
     photosGrid.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #94A3B8; background: #F8FAFC; border-radius: 16px;">
-        📷 ยังไม่มีภาพกิจกรรมสำหรับชิ้นงานนี้ คุณครูสามารถอัปโหลดภาพกิจกรรมในห้องพักครูได้
+        📷 ยังไม่มีภาพกิจกรรมสำหรับชิ้นงานนี้
       </div>
     `;
     return;
   }
 
-  photosGrid.innerHTML = photos.map(p => `
+  cardsHtml += photos.map(p => `
     <div class="gallery-photo-card" data-photo-id="${p.id}" data-photo-url="${p.url}" data-photo-title="${p.title}">
-      <div class="photo-img-wrap">
+      <div class="photo-img-wrap" style="position: relative;">
         <img src="${p.url}" alt="${p.title}" loading="lazy">
+        ${isTeacher ? `
+          <button type="button" class="btn-delete-photo-corner" data-photo-id="${p.id}" title="ลบรูปภาพนี้">
+            🗑️
+          </button>
+        ` : ''}
       </div>
       <div class="gallery-photo-info">
         <div class="gallery-photo-title">${p.title}</div>
         <div class="gallery-photo-meta">
           <span class="gallery-photo-tag">${p.date || 'กิจกรรมในห้องเรียน'}</span>
-          <span class="btn-view-photo-sm">🔍 ดูรูปขยาย / ดาวน์โหลด</span>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span class="btn-view-photo-sm">🔍 ดูรูปขยาย</span>
+            ${isTeacher ? `
+              <button type="button" class="btn-delete-photo-sm" data-photo-id="${p.id}" title="ลบรูปนี้">
+                🗑️ ลบ
+              </button>
+            ` : ''}
+          </div>
         </div>
       </div>
     </div>
   `).join('');
 
-  photosGrid.querySelectorAll('.gallery-photo-card').forEach(card => {
+  photosGrid.innerHTML = cardsHtml;
+
+  // Attach quick add listener
+  document.getElementById('galleryQuickAddCard')?.addEventListener('click', () => {
+    openGalleryUploadModal(activeGalleryTaskId);
+  });
+
+  // Attach delete listeners
+  photosGrid.querySelectorAll('.btn-delete-photo-corner, .btn-delete-photo-sm').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const photoId = btn.getAttribute('data-photo-id');
+      deleteGalleryPhoto(activeGalleryTaskId, photoId);
+    });
+  });
+
+  // Attach card click listeners (excluding delete clicks)
+  photosGrid.querySelectorAll('.gallery-photo-card:not(.gallery-quick-add-card)').forEach(card => {
     card.addEventListener('click', () => {
       const url = card.getAttribute('data-photo-url');
       const title = card.getAttribute('data-photo-title');
-      openPhotoLightbox(url, title, `ชิ้นงาน: ${getAssignmentTitle(activeGalleryTaskId)}`);
+      const photoId = card.getAttribute('data-photo-id');
+      openPhotoLightbox(url, title, `ชิ้นงาน: ${getAssignmentTitle(activeGalleryTaskId)}`, activeGalleryTaskId, photoId);
     });
   });
 }
@@ -1500,12 +1608,16 @@ function getAssignmentTitle(taskId, grade = currentGrade, room = currentRoom) {
   return t ? t.title : taskId;
 }
 
-function openPhotoLightbox(imgUrl, title, caption) {
+function openPhotoLightbox(imgUrl, title, caption, taskId = null, photoId = null) {
+  currentLightboxTaskId = taskId;
+  currentLightboxPhotoId = photoId;
+
   const modal = document.getElementById('galleryPhotoModal');
   const img = document.getElementById('lightboxImg');
   const titleEl = document.getElementById('lightboxTitle');
   const captionEl = document.getElementById('lightboxCaption');
   const downloadBtn = document.getElementById('downloadPhotoBtn');
+  const deleteBtn = document.getElementById('lightboxDeletePhotoBtn');
 
   if (img) img.src = imgUrl;
   if (titleEl) titleEl.textContent = title || "ภาพกิจกรรมศิลปะ";
@@ -1513,6 +1625,19 @@ function openPhotoLightbox(imgUrl, title, caption) {
   if (downloadBtn) {
     downloadBtn.href = imgUrl;
     downloadBtn.download = `art-${Date.now()}.jpg`;
+  }
+
+  const isTeacher = !!getLoggedInTeacher();
+  if (deleteBtn) {
+    if (isTeacher && taskId && photoId) {
+      deleteBtn.classList.remove('hidden');
+      deleteBtn.onclick = () => {
+        deleteGalleryPhoto(currentLightboxTaskId, currentLightboxPhotoId);
+      };
+    } else {
+      deleteBtn.classList.add('hidden');
+      deleteBtn.onclick = null;
+    }
   }
 
   if (modal) modal.classList.remove('hidden');
@@ -3013,6 +3138,16 @@ function switchView(viewName) {
   if (lbSec) lbSec.classList.toggle('active-view', viewName === 'leaderboard');
   if (tcSec) tcSec.classList.toggle('active-view', viewName === 'teacher');
 
+  const gallerySec = document.getElementById('classroomGallerySection');
+  if (gallerySec) {
+    if (viewName === 'home' || viewName === 'leaderboard') {
+      gallerySec.style.display = 'block';
+      renderClassroomGallery();
+    } else {
+      gallerySec.style.display = 'none';
+    }
+  }
+
   if (viewName === 'home') {
     renderHomeView();
   } else if (viewName === 'leaderboard') {
@@ -3068,6 +3203,9 @@ function updateTeacherAuthUI(user = null) {
       populateGradeDropdowns();
     }
   }
+
+  // Refresh classroom gallery so teacher add/delete controls update
+  renderClassroomGallery();
 }
 
 function openTeacherLoginModal() {
@@ -3839,6 +3977,22 @@ async function handleMagPicUpload(file, picNum) {
   }
 }
 
+function clearMagazinePic(picNum) {
+  const input = document.getElementById(`editMagPic${picNum}`);
+  const fileInput = document.getElementById(`fileMagPic${picNum}`);
+  const statusElem = document.getElementById(`statusPic${picNum}`);
+  if (input) input.value = '';
+  if (fileInput) fileInput.value = '';
+  if (statusElem) {
+    statusElem.textContent = "🗑️ ลบ/ล้างรูปแล้ว (จะใช้รูปภาพเริ่มต้นหากไม่ระบุรูปใหม่)";
+    statusElem.style.color = "#EF4444";
+  }
+  updateMagazinePreviewThumbnails();
+  artSound.playChime();
+  showToast(`ล้างรูปภาพที่ ${picNum} เรียบร้อยแล้ว 🧹`);
+}
+window.clearMagazinePic = clearMagazinePic;
+
 function openMagazineModal() {
   const modal = document.getElementById('magazineEditModal');
   const mag = appConfig.magazine || {};
@@ -3922,15 +4076,15 @@ function handleMagazineSubmit(e) {
   const p4 = document.getElementById('editMagPic4');
   const quote = document.getElementById('editMagQuote');
 
-  appConfig.magazine.head1 = (h1 && h1.value.trim()) ? h1.value.trim() : (appConfig.magazine.head1 || DEFAULT_MAGAZINE_DATA.head1);
-  appConfig.magazine.copy1 = (c1 && c1.value.trim()) ? c1.value.trim() : (appConfig.magazine.copy1 || DEFAULT_MAGAZINE_DATA.copy1);
-  appConfig.magazine.pic1 = (p1 && p1.value.trim()) ? p1.value.trim() : (appConfig.magazine.pic1 || DEFAULT_MAGAZINE_DATA.pic1);
-  appConfig.magazine.pic2 = (p2 && p2.value.trim()) ? p2.value.trim() : (appConfig.magazine.pic2 || DEFAULT_MAGAZINE_DATA.pic2);
-  appConfig.magazine.pic3 = (p3 && p3.value.trim()) ? p3.value.trim() : (appConfig.magazine.pic3 || DEFAULT_MAGAZINE_DATA.pic3);
-  appConfig.magazine.head2 = (h2 && h2.value.trim()) ? h2.value.trim() : (appConfig.magazine.head2 || DEFAULT_MAGAZINE_DATA.head2);
-  appConfig.magazine.copy2 = (c2 && c2.value.trim()) ? c2.value.trim() : (appConfig.magazine.copy2 || DEFAULT_MAGAZINE_DATA.copy2);
-  appConfig.magazine.pic4 = (p4 && p4.value.trim()) ? p4.value.trim() : (appConfig.magazine.pic4 || DEFAULT_MAGAZINE_DATA.pic4);
-  appConfig.magazine.quote = (quote && quote.value.trim()) ? quote.value.trim() : (appConfig.magazine.quote || DEFAULT_MAGAZINE_DATA.quote);
+  appConfig.magazine.head1 = (h1 && h1.value.trim()) ? h1.value.trim() : DEFAULT_MAGAZINE_DATA.head1;
+  appConfig.magazine.copy1 = (c1 && c1.value.trim()) ? c1.value.trim() : DEFAULT_MAGAZINE_DATA.copy1;
+  appConfig.magazine.pic1 = (p1 && p1.value.trim()) ? p1.value.trim() : DEFAULT_MAGAZINE_DATA.pic1;
+  appConfig.magazine.pic2 = (p2 && p2.value.trim()) ? p2.value.trim() : DEFAULT_MAGAZINE_DATA.pic2;
+  appConfig.magazine.pic3 = (p3 && p3.value.trim()) ? p3.value.trim() : DEFAULT_MAGAZINE_DATA.pic3;
+  appConfig.magazine.head2 = (h2 && h2.value.trim()) ? h2.value.trim() : DEFAULT_MAGAZINE_DATA.head2;
+  appConfig.magazine.copy2 = (c2 && c2.value.trim()) ? c2.value.trim() : DEFAULT_MAGAZINE_DATA.copy2;
+  appConfig.magazine.pic4 = (p4 && p4.value.trim()) ? p4.value.trim() : DEFAULT_MAGAZINE_DATA.pic4;
+  appConfig.magazine.quote = (quote && quote.value.trim()) ? quote.value.trim() : DEFAULT_MAGAZINE_DATA.quote;
 
   saveConfigToStorage();
   apiPost({ action: 'save_config', config: appConfig });

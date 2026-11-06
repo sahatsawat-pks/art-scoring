@@ -329,32 +329,6 @@
         </div>
       </div>
 
-      <!-- ================= CLASSROOM ACTIVITY & ARTWORK GALLERY (ด้านล่างหลังจากรายชื่อ) ================= -->
-      <section class="classroom-gallery-section" id="classroomGallerySection">
-        <div class="gallery-section-header">
-          <div class="gallery-title-group">
-            <span class="gallery-header-icon">📸</span>
-            <div>
-              <h3 class="gallery-title">ภาพรวมการเรียนการสอนและผลงานศิลปะประจำชิ้นงาน</h3>
-              <p class="gallery-subtitle">ภาพบรรยากาศห้องเรียน กระบวนการสร้างสรรค์ และผลงานของนักเรียน (ทุกคนเข้าดูและดาวน์โหลดรูปได้)</p>
-            </div>
-          </div>
-          <div class="gallery-header-actions" id="galleryHeaderActions">
-            <!-- Upload button shown for teachers -->
-          </div>
-        </div>
-
-        <!-- Assignment Filter Tabs for Gallery -->
-        <div class="gallery-tasks-tabs" id="galleryTasksTabs">
-          <!-- Dynamically populated per assignment -->
-        </div>
-
-        <!-- Photos Grid (4-6 photos per assignment) -->
-        <div class="gallery-photos-grid" id="galleryPhotosGrid">
-          <!-- Dynamically populated via JavaScript -->
-        </div>
-      </section>
-
     </section>
 
     <!-- ==================== VIEW 3: TEACHER MANAGEMENT & CONFIG PORTAL ==================== -->
@@ -480,6 +454,32 @@
             </tbody>
           </table>
         </div>
+      </div>
+    </section>
+
+    <!-- ================= CLASSROOM ACTIVITY & ARTWORK GALLERY (แสดงผลด้านล่างของ THE ART TIME และ ทำเนียบแรงกิ้ง) ================= -->
+    <section class="classroom-gallery-section" id="classroomGallerySection">
+      <div class="gallery-section-header">
+        <div class="gallery-title-group">
+          <span class="gallery-header-icon">📸</span>
+          <div>
+            <h3 class="gallery-title">ภาพรวมการเรียนการสอนและผลงานศิลปะประจำชิ้นงาน</h3>
+            <p class="gallery-subtitle">ภาพบรรยากาศห้องเรียน กระบวนการสร้างสรรค์ และผลงานของนักเรียน (ทุกคนเข้าดูและดาวน์โหลดรูปได้)</p>
+          </div>
+        </div>
+        <div class="gallery-header-actions" id="galleryHeaderActions">
+          <!-- Upload & folder buttons shown for teachers -->
+        </div>
+      </div>
+
+      <!-- Assignment & Folder Filter Tabs for Gallery -->
+      <div class="gallery-tasks-tabs" id="galleryTasksTabs">
+        <!-- Dynamically populated per assignment / folder -->
+      </div>
+
+      <!-- Photos Grid -->
+      <div class="gallery-photos-grid" id="galleryPhotosGrid">
+        <!-- Dynamically populated via JavaScript -->
       </div>
     </section>
 
@@ -1086,9 +1086,14 @@
           <h4 id="lightboxTitle">ภาพกิจกรรมการเรียนการสอนศิลปะ</h4>
           <p id="lightboxCaption">ผลงานและการทดลองสร้างสรรค์ของนักเรียน</p>
         </div>
-        <a id="downloadPhotoBtn" href="#" download="art-classroom-photo.jpg" class="btn btn-emerald btn-download-photo">
-          <span>📥 ดาวน์โหลดรูปภาพ</span>
-        </a>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <a id="downloadPhotoBtn" href="#" download="art-classroom-photo.jpg" class="btn btn-emerald btn-download-photo">
+            <span>📥 ดาวน์โหลดรูปภาพ</span>
+          </a>
+          <button type="button" id="lightboxDeletePhotoBtn" class="btn btn-outline-danger hidden">
+            <span>🗑️ ลบรูปภาพนี้</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1278,6 +1283,9 @@
                 <button type="button" class="btn btn-sm btn-art-primary" onclick="document.getElementById('fileMagPic1').click()">
                   📷 อัปโหลดไฟล์รูปถ่าย
                 </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearMagazinePic(1)" title="ลบ/ล้างรูปภาพนี้">
+                  🗑️ ล้างรูป
+                </button>
                 <span class="file-chosen-status" id="statusPic1" style="font-size: 0.8rem; color: #64748B;"></span>
               </div>
               <input type="text" id="editMagPic1" class="form-input-sm" style="margin-top: 6px; width: 100%;" placeholder="หรือใส่ URL รูปภาพ: https://...">
@@ -1301,6 +1309,9 @@
                 <button type="button" class="btn btn-sm btn-art-primary" onclick="document.getElementById('fileMagPic2').click()">
                   📷 อัปโหลดไฟล์รูปถ่าย
                 </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearMagazinePic(2)" title="ลบ/ล้างรูปภาพนี้">
+                  🗑️ ล้างรูป
+                </button>
                 <span class="file-chosen-status" id="statusPic2" style="font-size: 0.8rem; color: #64748B;"></span>
               </div>
               <input type="text" id="editMagPic2" class="form-input-sm" style="margin-top: 6px; width: 100%;" placeholder="หรือใส่ URL รูปภาพ: https://...">
@@ -1319,6 +1330,9 @@
                 <input type="file" id="fileMagPic3" accept="image/*" style="display: none;">
                 <button type="button" class="btn btn-sm btn-art-primary" onclick="document.getElementById('fileMagPic3').click()">
                   📷 อัปโหลดไฟล์รูปถ่าย
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearMagazinePic(3)" title="ลบ/ล้างรูปภาพนี้">
+                  🗑️ ล้างรูป
                 </button>
                 <span class="file-chosen-status" id="statusPic3" style="font-size: 0.8rem; color: #64748B;"></span>
               </div>
@@ -1350,6 +1364,9 @@
                 <input type="file" id="fileMagPic4" accept="image/*" style="display: none;">
                 <button type="button" class="btn btn-sm btn-art-primary" onclick="document.getElementById('fileMagPic4').click()">
                   📷 อัปโหลดไฟล์รูปถ่าย
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearMagazinePic(4)" title="ลบ/ล้างรูปภาพนี้">
+                  🗑️ ล้างรูป
                 </button>
                 <span class="file-chosen-status" id="statusPic4" style="font-size: 0.8rem; color: #64748B;"></span>
               </div>
