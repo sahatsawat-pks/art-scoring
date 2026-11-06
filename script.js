@@ -87,6 +87,7 @@ const DEFAULT_CONFIG = {
   roomSlogans: {
     "default": '👑 "มีแต่ลิฟต์เท่านั้นที่จะเอาหนูลงได้" 👑'
   },
+  roomAssignments: {},
   grades: [
     { id: 'p4', name: 'ชั้นประถมศึกษาปีที่ 4' },
     { id: 'p5', name: 'ชั้นประถมศึกษาปีที่ 5' },
@@ -651,18 +652,53 @@ function getStudentsList(grade = currentGrade, room = currentRoom) {
   return appData[key];
 }
 
-// Assignments helpers
-function getActiveAssignments() {
-  return appConfig.assignments || [];
+// Assignments helpers - Scoped per year, semester, grade, and room
+function getRoomAssignmentKey(grade = currentGrade, room = currentRoom) {
+  const year = appConfig.academicYear || "2567";
+  const sem = appConfig.semester || "1";
+  return `${year}_${sem}_${grade}_${room}`;
 }
 
-function getTotalMaxScore() {
-  const tasks = getActiveAssignments();
+function getActiveAssignments(grade = currentGrade, room = currentRoom) {
+  if (!appConfig.roomAssignments) appConfig.roomAssignments = {};
+  const termRoomKey = getRoomAssignmentKey(grade, room);
+  const roomKey = `${grade}_${room}`;
+
+  // 1. Check Year + Semester + Grade + Room specific
+  if (Array.isArray(appConfig.roomAssignments[termRoomKey]) && appConfig.roomAssignments[termRoomKey].length > 0) {
+    return appConfig.roomAssignments[termRoomKey];
+  }
+
+  // 2. Check Grade + Room fallback
+  if (Array.isArray(appConfig.roomAssignments[roomKey]) && appConfig.roomAssignments[roomKey].length > 0) {
+    return appConfig.roomAssignments[roomKey];
+  }
+
+  // 3. Fallback to global assignments
+  if (Array.isArray(appConfig.assignments) && appConfig.assignments.length > 0) {
+    return appConfig.assignments;
+  }
+
+  return DEFAULT_CONFIG.assignments;
+}
+
+function ensureRoomAssignmentsMutable(grade = currentGrade, room = currentRoom) {
+  if (!appConfig.roomAssignments) appConfig.roomAssignments = {};
+  const termRoomKey = getRoomAssignmentKey(grade, room);
+  if (!Array.isArray(appConfig.roomAssignments[termRoomKey])) {
+    const currentList = getActiveAssignments(grade, room);
+    appConfig.roomAssignments[termRoomKey] = JSON.parse(JSON.stringify(currentList));
+  }
+  return appConfig.roomAssignments[termRoomKey];
+}
+
+function getTotalMaxScore(grade = currentGrade, room = currentRoom) {
+  const tasks = getActiveAssignments(grade, room);
   return tasks.reduce((sum, t) => sum + (Number(t.maxScore) || 0), 0);
 }
 
-function calcStudentRawAssignmentScore(student) {
-  const tasks = getActiveAssignments();
+function calcStudentRawAssignmentScore(student, grade = currentGrade, room = currentRoom) {
+  const tasks = getActiveAssignments(grade, room);
   const scores = student.scores || {};
   let total = 0;
   tasks.forEach(t => {
@@ -693,14 +729,14 @@ function getClassScoreScale(gradeId = currentGrade) {
   };
 }
 
-function calcStudentAssignmentScore(student, gradeId = currentGrade) {
-  const raw = calcStudentRawAssignmentScore(student);
+function calcStudentAssignmentScore(student, gradeId = currentGrade, roomId = currentRoom) {
+  const raw = calcStudentRawAssignmentScore(student, gradeId, roomId);
   const scale = getClassScoreScale(gradeId);
   return Math.min(scale.maxAssignment, Math.round(raw * 10) / 10);
 }
 
 function calcStudentAssignmentScore80(student) {
-  return calcStudentAssignmentScore(student, currentGrade);
+  return calcStudentAssignmentScore(student, currentGrade, currentRoom);
 }
 
 function calcStudentExamScore(student, gradeId = currentGrade) {
@@ -710,15 +746,15 @@ function calcStudentExamScore(student, gradeId = currentGrade) {
   return Math.min(scale.maxExam, Math.round(rawExam * 10) / 10);
 }
 
-function calcStudentTotalScore(student, gradeId = currentGrade) {
-  const sc = calcStudentAssignmentScore(student, gradeId);
+function calcStudentTotalScore(student, gradeId = currentGrade, roomId = currentRoom) {
+  const sc = calcStudentAssignmentScore(student, gradeId, roomId);
   const exam = calcStudentExamScore(student, gradeId);
   const scale = getClassScoreScale(gradeId);
   return Math.min(scale.maxTotal, Math.round((sc + exam) * 10) / 10);
 }
 
 function calcStudentTotal100(student) {
-  return calcStudentTotalScore(student, currentGrade);
+  return calcStudentTotalScore(student, currentGrade, currentRoom);
 }
 
 function calculateGrade(totalScore, gradeId = currentGrade) {
@@ -735,8 +771,8 @@ function calculateGrade(totalScore, gradeId = currentGrade) {
   return "0";
 }
 
-function getSubmittedTasksCount(student) {
-  const tasks = getActiveAssignments();
+function getSubmittedTasksCount(student, grade = currentGrade, room = currentRoom) {
+  const tasks = getActiveAssignments(grade, room);
   const scores = student.scores || {};
   let count = 0;
   tasks.forEach(t => {
@@ -750,14 +786,14 @@ function getSubmittedTasksCount(student) {
 function getRankedStudents(grade = currentGrade, room = currentRoom) {
   const list = [...getStudentsList(grade, room)];
   return list.sort((a, b) => {
-    const scoreA = calcStudentTotalScore(a, grade);
-    const scoreB = calcStudentTotalScore(b, grade);
+    const scoreA = calcStudentTotalScore(a, grade, room);
+    const scoreB = calcStudentTotalScore(b, grade, room);
     if (scoreB !== scoreA) {
       return scoreB - scoreA;
     }
     // Tie-breaker: submitted tasks count
-    const submittedA = getSubmittedTasksCount(a);
-    const submittedB = getSubmittedTasksCount(b);
+    const submittedA = getSubmittedTasksCount(a, grade, room);
+    const submittedB = getSubmittedTasksCount(b, grade, room);
     if (submittedB !== submittedA) {
       return submittedB - submittedA;
     }
@@ -1218,7 +1254,7 @@ function buildPodiumSlotHtml(student, rank) {
 
   const totalScore = calcStudentTotalScore(student, currentGrade);
   const tier = getArtRankTier(totalScore, currentGrade);
-  const submittedCount = getSubmittedTasksCount(student);
+  const submittedCount = getSubmittedTasksCount(student, currentGrade, currentRoom);
 
   const avatarDisplay = student.avatar && (student.avatar.startsWith('http') || student.avatar.startsWith('data:image'))
     ? `<img src="${student.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" alt="${student.name}">`
@@ -1458,8 +1494,9 @@ function renderClassroomGallery() {
   });
 }
 
-function getAssignmentTitle(taskId) {
-  const t = (appConfig.assignments || []).find(item => item.id === taskId);
+function getAssignmentTitle(taskId, grade = currentGrade, room = currentRoom) {
+  const tasks = getActiveAssignments(grade, room);
+  const t = tasks.find(item => item.id === taskId);
   return t ? t.title : taskId;
 }
 
@@ -2074,14 +2111,75 @@ function deleteStudent(studentId) {
 // ==========================================
 // 9. ASSIGNMENTS / TASKS MANAGER MODAL
 // ==========================================
+let taskManagerTargetGrade = currentGrade;
+let taskManagerTargetRoom = currentRoom;
+
+function populateTaskManagerSelectors() {
+  const gradeSel = document.getElementById('taskManagerGradeSelect');
+  const roomSel = document.getElementById('taskManagerRoomSelect');
+  const scopeBadge = document.getElementById('taskManagerScopeBadge');
+  const termBadge = document.getElementById('taskManagerTermBadge');
+
+  if (gradeSel) {
+    gradeSel.innerHTML = (appConfig.grades || []).map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+    gradeSel.value = taskManagerTargetGrade;
+  }
+
+  const rooms = (appConfig.rooms && appConfig.rooms[taskManagerTargetGrade]) || ['1'];
+  if (!rooms.includes(taskManagerTargetRoom)) {
+    taskManagerTargetRoom = rooms[0] || '1';
+  }
+
+  if (roomSel) {
+    roomSel.innerHTML = rooms.map(r => `<option value="${r}">ห้อง ${r}</option>`).join('');
+    roomSel.value = taskManagerTargetRoom;
+  }
+
+  if (scopeBadge) {
+    scopeBadge.textContent = `${getGradeLabel(taskManagerTargetGrade)} / ห้อง ${taskManagerTargetRoom}`;
+  }
+  if (termBadge) {
+    termBadge.textContent = `ภาคเรียนที่ ${appConfig.semester || '1'} ปีการศึกษา ${appConfig.academicYear || '2567'}`;
+  }
+}
+
 function openTaskManagerModal() {
+  taskManagerTargetGrade = currentGrade;
+  taskManagerTargetRoom = currentRoom;
   const modal = document.getElementById('taskManagerModal');
+  populateTaskManagerSelectors();
   renderTasksManagerList();
-  modal.classList.remove('hidden');
+  if (modal) modal.classList.remove('hidden');
 }
 
 function closeTaskManagerModal() {
   document.getElementById('taskManagerModal').classList.add('hidden');
+}
+
+function copyTasksToEntireGrade() {
+  const currentTasks = getActiveAssignments(taskManagerTargetGrade, taskManagerTargetRoom);
+  const rooms = (appConfig.rooms && appConfig.rooms[taskManagerTargetGrade]) || ['1'];
+  const gradeName = getGradeLabel(taskManagerTargetGrade);
+
+  if (!confirm(`คุณต้องการคัดลอกรายการชิ้นงานชุดนี้ (${currentTasks.length} งาน) ไปใช้กับทุกห้องใน ${gradeName} (ห้อง ${rooms.join(', ')}) ใช่หรือไม่?`)) {
+    return;
+  }
+
+  if (!appConfig.roomAssignments) appConfig.roomAssignments = {};
+
+  rooms.forEach(r => {
+    const key = getRoomAssignmentKey(taskManagerTargetGrade, r);
+    appConfig.roomAssignments[key] = JSON.parse(JSON.stringify(currentTasks));
+  });
+
+  saveConfigToStorage();
+  apiPost({ action: 'save_config', config: appConfig });
+
+  showToast(`คัดลอกชิ้นงานไปยังทุกห้องของ ${gradeName} สำเร็จแล้ว! 📋`);
+  artSound.playSaveChime();
+
+  if (currentView === 'teacher') renderTeacherView();
+  else if (currentView === 'leaderboard') renderLeaderboardView();
 }
 
 function openEditTaskModal(task) {
@@ -2119,7 +2217,8 @@ function handleEditTaskSubmit(e) {
     return;
   }
 
-  const task = (appConfig.assignments || []).find(t => t.id === id);
+  const roomTasks = ensureRoomAssignmentsMutable(taskManagerTargetGrade, taskManagerTargetRoom);
+  const task = roomTasks.find(t => t.id === id);
   if (task) {
     task.title = title;
     task.maxScore = maxScore;
@@ -2141,15 +2240,19 @@ function renderTasksManagerList() {
   const container = document.getElementById('tasksListContainer');
   const countLabel = document.getElementById('taskCountLabel');
   const totalBadge = document.getElementById('totalMaxScoreBadge');
-  const tasks = getActiveAssignments();
-  const totalMax = getTotalMaxScore();
+  const tasks = getActiveAssignments(taskManagerTargetGrade, taskManagerTargetRoom);
+  const totalMax = getTotalMaxScore(taskManagerTargetGrade, taskManagerTargetRoom);
+  const scale = getClassScoreScale(taskManagerTargetGrade);
 
-  countLabel.textContent = tasks.length;
-  totalBadge.textContent = `คะแนนเต็มรวม: ${totalMax} คะแนน`;
+  if (countLabel) countLabel.textContent = tasks.length;
+  if (totalBadge) {
+    totalBadge.textContent = `คะแนนเต็มรวม: ${totalMax} คะแนน (คะแนนเก็บฐาน ${scale.maxAssignment} คะแนน)`;
+  }
+  if (!container) return;
   container.innerHTML = '';
 
   if (tasks.length === 0) {
-    container.innerHTML = `<div style="text-align: center; padding: 20px; color: #94A3B8;">ยังไม่มีหัวข้องานที่สั่ง กรุณาเพิ่มชิ้นงานด้านบน</div>`;
+    container.innerHTML = `<div style="text-align: center; padding: 25px; color: #94A3B8;">ยังไม่มีหัวข้องานที่สั่งสำหรับห้องนี้ กรุณาเพิ่มชิ้นงานด้านบน</div>`;
     return;
   }
 
@@ -2174,7 +2277,7 @@ function renderTasksManagerList() {
     });
 
     card.querySelector('.delete-task-btn').addEventListener('click', () => {
-      if (confirm(`คุณต้องการลบ "${task.title}" ใช่หรือไม่? (คะแนนที่กรอกในช่องนี้จะถูกลบออกด้วย)`)) {
+      if (confirm(`คุณต้องการลบ "${task.title}" ของห้องนี้ใช่หรือไม่?`)) {
         deleteAssignment(task.id);
       }
     });
@@ -2196,9 +2299,9 @@ function addNewAssignment(title, maxScore) {
     return;
   }
 
+  const roomTasks = ensureRoomAssignmentsMutable(taskManagerTargetGrade, taskManagerTargetRoom);
   const newId = `task_${Date.now()}`;
-  if (!appConfig.assignments) appConfig.assignments = [];
-  appConfig.assignments.push({
+  roomTasks.push({
     id: newId,
     title: cleanTitle,
     maxScore: cleanMax
@@ -2211,13 +2314,14 @@ function addNewAssignment(title, maxScore) {
   artSound.playSaveChime();
 
   if (currentView === 'teacher') renderTeacherView();
-  else renderLeaderboardView();
+  else if (currentView === 'leaderboard') renderLeaderboardView();
 }
 
 function deleteAssignment(taskId) {
-  const idx = appConfig.assignments.findIndex(t => t.id === taskId);
+  const roomTasks = ensureRoomAssignmentsMutable(taskManagerTargetGrade, taskManagerTargetRoom);
+  const idx = roomTasks.findIndex(t => t.id === taskId);
   if (idx !== -1) {
-    const deleted = appConfig.assignments.splice(idx, 1)[0];
+    const deleted = roomTasks.splice(idx, 1)[0];
     saveConfigToStorage();
     apiPost({ action: 'save_config', config: appConfig });
     renderTasksManagerList();
@@ -2225,7 +2329,7 @@ function deleteAssignment(taskId) {
     artSound.playPop();
 
     if (currentView === 'teacher') renderTeacherView();
-    else renderLeaderboardView();
+    else if (currentView === 'leaderboard') renderLeaderboardView();
   }
 }
 
@@ -4332,6 +4436,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('taskManagerModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'taskManagerModal') closeTaskManagerModal();
   });
+
+  document.getElementById('taskManagerGradeSelect')?.addEventListener('change', (e) => {
+    taskManagerTargetGrade = e.target.value;
+    taskManagerTargetRoom = (appConfig.rooms[taskManagerTargetGrade] || ['1'])[0] || '1';
+    populateTaskManagerSelectors();
+    renderTasksManagerList();
+  });
+
+  document.getElementById('taskManagerRoomSelect')?.addEventListener('change', (e) => {
+    taskManagerTargetRoom = e.target.value;
+    populateTaskManagerSelectors();
+    renderTasksManagerList();
+  });
+
+  document.getElementById('copyTasksToGradeBtn')?.addEventListener('click', copyTasksToEntireGrade);
 
   // 10.5 Edit Task Modal Listeners
   document.getElementById('closeEditTaskModalBtn')?.addEventListener('click', closeEditTaskModal);

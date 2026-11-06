@@ -2083,6 +2083,65 @@ body {
   max-width: 660px;
 }
 
+/* Task Manager Room Scope Card */
+.task-manager-scope-card {
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.scope-info-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.scope-dot {
+  font-size: 0.85rem;
+}
+
+.scope-label {
+  font-size: 0.85rem;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.scope-badge {
+  font-size: 0.95rem;
+  color: #1E293B;
+  font-weight: 800;
+}
+
+.scope-term-badge {
+  font-size: 0.78rem;
+  background: #EEF2FF;
+  color: #4F46E5;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-weight: 700;
+  border: 1px solid #C7D2FE;
+}
+
+.scope-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.scope-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
 .task-create-row {
   display: flex;
   gap: 10px;

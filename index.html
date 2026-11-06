@@ -577,6 +577,32 @@
       </div>
 
       <div class="config-modal-body">
+        <!-- Room Scope Selector Banner (รองรับการตั้งค่าชิ้นงานแยกตามระดับชั้น ห้อง เทอม ปีการศึกษา) -->
+        <div class="task-manager-scope-card">
+          <div class="scope-info-line">
+            <span class="scope-dot">🎯</span>
+            <span class="scope-label">กำลังตั้งค่าชิ้นงานของ:</span>
+            <strong id="taskManagerScopeBadge" class="scope-badge">ชั้นประถมศึกษาปีที่ 4 / ห้อง 1</strong>
+            <span id="taskManagerTermBadge" class="scope-term-badge">ภาคเรียนที่ 1 ปีการศึกษา 2567</span>
+          </div>
+          <div class="scope-controls-row">
+            <div class="scope-select-wrap">
+              <label for="taskManagerGradeSelect">ระดับชั้น:</label>
+              <select id="taskManagerGradeSelect" class="form-input-sm"></select>
+            </div>
+            <div class="scope-select-wrap">
+              <label for="taskManagerRoomSelect">ห้อง:</label>
+              <select id="taskManagerRoomSelect" class="form-input-sm"></select>
+            </div>
+            <button type="button" id="copyTasksToGradeBtn" class="btn btn-sm btn-purple" style="border-radius: 9999px; padding: 4px 12px; font-size: 0.8rem;" title="คัดลอกรายการชิ้นงานชุดนี้ไปใช้กับทุกห้องในระดับชั้นเดียวกัน">
+              📋 คัดลอกไปทุกห้องในระดับชั้นนี้
+            </button>
+          </div>
+          <small style="color: #64748B; font-size: 0.78rem; display: block; margin-top: 6px; line-height: 1.35;">
+            💡 <em>แต่ละห้อง / แต่ละระดับชั้น / แต่ละภาคเรียน สามารถมีจำนวนชิ้นงานและคะแนนเต็มต่างกันได้ตามเวลาเรียนจริง</em>
+          </small>
+        </div>
+
         <!-- Add New Assignment Box -->
         <div class="config-create-box">
           <h4>➕ เพิ่มหัวข้องานใหม่</h4>
