@@ -2538,6 +2538,20 @@ function closeStudentDetailModal() {
 // 10.5 BADGE MANAGER & HOLOGRAPHIC CARD SYSTEM
 // ==========================================
 let currentBadgeStudent = null;
+let badgeSaveTimer = null;
+
+function scheduleStudentSave(student) {
+  clearTimeout(badgeSaveTimer);
+  badgeSaveTimer = setTimeout(() => {
+    saveDataToStorage();
+    apiPost({
+      action: 'save_student',
+      grade: currentGrade,
+      room: currentRoom,
+      student: student
+    });
+  }, 250);
+}
 
 function openBadgeManagerModal(student) {
   currentBadgeStudent = student;
@@ -2700,7 +2714,7 @@ function renderQuickGrantBadges(student) {
       <div class="quick-badge-card ${isGranted ? 'granted' : 'revoked'}" data-badge-id="${b.id}" title="${b.title}: ${b.desc} (คลิกเพื่อ ${isGranted ? 'ขอคืนเหรียญ' : 'มอบเหรียญ'})">
         <img src="assets/badges/${b.id}.jpg" class="badge-img-circle ${isGranted ? 'is-earned' : 'is-unearned'}" alt="${b.title}">
         <div class="quick-badge-info" style="flex: 1; min-width: 0;">
-          <div style="font-weight: 700; font-size: 0.88rem; color: ${isGranted ? '#1E293B' : '#64748B'}; line-height: 1.3;">
+          <div class="quick-badge-title" style="font-weight: 700; font-size: 0.88rem; color: ${isGranted ? '#1E293B' : '#64748B'}; line-height: 1.3;">
             ${b.title}
           </div>
           <div style="font-size: 0.74rem; color: #64748B; margin-top: 2px;">
@@ -2716,37 +2730,57 @@ function renderQuickGrantBadges(student) {
     `;
   }).join('');
 
+  // Instant in-place toggle handler (0ms latency)
   container.querySelectorAll('.quick-badge-card').forEach(card => {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+      e.stopPropagation();
       const bId = card.getAttribute('data-badge-id');
       const bDef = ART_BADGES.find(b => b.id === bId);
       const idx = student.badges.indexOf(bId);
+      let isNowGranted = false;
 
       if (idx !== -1) {
         student.badges.splice(idx, 1);
         if (!student.revoked_badges.includes(bId)) student.revoked_badges.push(bId);
         artSound.playPop();
-        showToast(`↩️ ขอคืนเหรียญ "${bDef ? bDef.title : bId}" จาก ${student.name} เรียบร้อยแล้ว`);
+        isNowGranted = false;
       } else {
         student.badges.push(bId);
         student.revoked_badges = student.revoked_badges.filter(id => id !== bId);
         artSound.playChime();
-        confettiEngine.fire(40);
-        showToast(`✨ มอบเหรียญ "${bDef ? bDef.title : bId}" ให้ ${student.name} เรียบร้อยแล้ว! 🏅`);
+        isNowGranted = true;
       }
 
-      saveDataToStorage();
-      apiPost({
-        action: 'save_student',
-        grade: currentGrade,
-        room: currentRoom,
-        student: student
-      });
+      // 1. Instant DOM updates in-place without rebuilding HTML
+      card.className = `quick-badge-card ${isNowGranted ? 'granted' : 'revoked'}`;
+      
+      const img = card.querySelector('img');
+      if (img) {
+        img.className = `badge-img-circle ${isNowGranted ? 'is-earned' : 'is-unearned'}`;
+      }
 
-      renderQuickGrantBadges(student);
-      renderBadgeChecklistTable(student);
+      const titleEl = card.querySelector('.quick-badge-title');
+      if (titleEl) {
+        titleEl.style.color = isNowGranted ? '#1E293B' : '#64748B';
+      }
+
+      const pill = card.querySelector('.badge-toggle-btn-pill');
+      if (pill) {
+        pill.className = `badge-toggle-btn-pill ${isNowGranted ? 'pill-earned' : 'pill-unearned'}`;
+        pill.textContent = isNowGranted ? '✅ ได้รับแล้ว (คลิกเพื่อขอคืน)' : '⚪ ยังไม่ได้มอบ (คลิกเพื่อมอบ)';
+      }
+
+      // 2. Update counter in modal header/footer instantly
       updateBadgeManagerCount(student);
-      renderTeacherView();
+
+      // 3. Update teacher table row badge count directly without table rebuild
+      const teacherRowBtn = document.querySelector(`.btn-badge-manage[data-student-id="${student.id}"]`);
+      if (teacherRowBtn) {
+        teacherRowBtn.innerHTML = `🏅 ${student.badges.length} เหรียญ`;
+      }
+
+      // 4. Debounced auto-save (smooth background persistence)
+      scheduleStudentSave(student);
     });
   });
 
@@ -2757,15 +2791,14 @@ function renderQuickGrantBadges(student) {
       if (confirm(`คุณต้องการมอบเหรียญทั้งหมด (20 เหรียญ) ให้ ${student.name} ใช่หรือไม่?`)) {
         student.badges = ART_BADGES.map(b => b.id);
         student.revoked_badges = [];
-        saveDataToStorage();
-        apiPost({ action: 'save_student', grade: currentGrade, room: currentRoom, student });
+        scheduleStudentSave(student);
         artSound.playFanfare();
-        confettiEngine.fire(70);
+        confettiEngine.fire(60);
         showToast(`✨ มอบเหรียญทั้งหมด 20 เหรียญให้ ${student.name} เรียบร้อยแล้ว! 👑`);
         renderQuickGrantBadges(student);
-        renderBadgeChecklistTable(student);
         updateBadgeManagerCount(student);
-        renderTeacherView();
+        const teacherRowBtn = document.querySelector(`.btn-badge-manage[data-student-id="${student.id}"]`);
+        if (teacherRowBtn) teacherRowBtn.innerHTML = `🏅 ${student.badges.length} เหรียญ`;
       }
     };
   }
@@ -2776,14 +2809,13 @@ function renderQuickGrantBadges(student) {
       if (confirm(`คุณต้องการขอคืนเหรียญทั้งหมดของ ${student.name} ใช่หรือไม่?`)) {
         student.revoked_badges = ART_BADGES.map(b => b.id);
         student.badges = [];
-        saveDataToStorage();
-        apiPost({ action: 'save_student', grade: currentGrade, room: currentRoom, student });
+        scheduleStudentSave(student);
         artSound.playPop();
         showToast(`↩️ ขอคืนเหรียญทั้งหมดของ ${student.name} เรียบร้อยแล้ว`);
         renderQuickGrantBadges(student);
-        renderBadgeChecklistTable(student);
         updateBadgeManagerCount(student);
-        renderTeacherView();
+        const teacherRowBtn = document.querySelector(`.btn-badge-manage[data-student-id="${student.id}"]`);
+        if (teacherRowBtn) teacherRowBtn.innerHTML = `🏅 ${student.badges.length} เหรียญ`;
       }
     };
   }
@@ -2805,6 +2837,17 @@ function saveBadgeManager() {
 }
 
 function closeBadgeManagerModal() {
+  if (badgeSaveTimer && currentBadgeStudent) {
+    clearTimeout(badgeSaveTimer);
+    saveDataToStorage();
+    apiPost({
+      action: 'save_student',
+      grade: currentGrade,
+      room: currentRoom,
+      student: currentBadgeStudent
+    });
+    badgeSaveTimer = null;
+  }
   const modal = document.getElementById('badgeManagerModal');
   if (modal) modal.classList.add('hidden');
   currentBadgeStudent = null;
