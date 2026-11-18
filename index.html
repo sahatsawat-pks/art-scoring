@@ -174,7 +174,7 @@
               <div class="mag-photo-wrap-fill" id="magWrapPic1" title="คลิกเพื่อดูรูปภาพขยาย">
                 <img id="magPic1" class="mag-photo-hero" src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80" alt="ศิลปะสร้างสรรค์">
                 <span class="mag-zoom-hint">🔍 คลิกเปิดดูรูปขยาย</span>
-                <span class="mag-photo-caption">🎨 การทดลองผสมสีน้ำสร้างโทนสีแห่งความสุข</span>
+                <span class="mag-photo-caption" id="magPicCaption1">🎨 การทดลองผสมสีน้ำสร้างโทนสีแห่งความสุข</span>
               </div>
               <div class="mag-box-pic-hidden-teacher hidden" id="teacherPlaceholderPic1" onclick="toggleMagazineImageVisibility(1)" title="คลิกเพื่อเปิดแสดงรูปภาพบทความหลัก">
                 <span style="font-size: 1.8rem;">🙈</span>
@@ -195,7 +195,7 @@
                 <div class="mag-photo-wrap-fill" id="magWrapPic2" title="คลิกเพื่อดูรูปภาพขยาย">
                   <img id="magPic2" class="mag-photo" src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80" alt="ผลงานภาพพิมพ์">
                   <span class="mag-zoom-hint">🔍 คลิกเปิดดูรูปขยาย</span>
-                  <span class="mag-photo-caption">🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ</span>
+                  <span class="mag-photo-caption" id="magPicCaption2">🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ</span>
                 </div>
                 <div class="mag-box-pic-hidden-teacher hidden" id="teacherPlaceholderPic2" onclick="toggleMagazineImageVisibility(2)" title="คลิกเพื่อเปิดแสดงรูปภาพไฮไลต์ 2">
                   <span style="font-size: 1.4rem;">🙈</span>
@@ -225,7 +225,7 @@
                 <div class="mag-photo-wrap-fill" id="magWrapPic3" title="คลิกเพื่อดูรูปภาพขยาย">
                   <img id="magPic3" class="mag-photo" src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" alt="ภาพวาดสัตว์ในจินตนาการ">
                   <span class="mag-zoom-hint">🔍 คลิกเปิดดูรูปขยาย</span>
-                  <span class="mag-photo-caption">🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด</span>
+                  <span class="mag-photo-caption" id="magPicCaption3">🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด</span>
                   <img id="magPic4" src="https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80" alt="ห้องเรียนศิลปะ" style="display:none;">
                 </div>
                 <div class="mag-box-pic-hidden-teacher hidden" id="teacherPlaceholderPic3" onclick="toggleMagazineImageVisibility(3)" title="คลิกเพื่อเปิดแสดงรูปภาพไฮไลต์ 3">
@@ -346,6 +346,32 @@
           <p>ลองค้นหาด้วยคำอื่น หรือเพิ่มรายชื่อในห้องพักครู</p>
         </div>
       </div>
+
+      <!-- ================= CLASSROOM ACTIVITY & ARTWORK GALLERY (เฉพาะห้องเรียนปัจจุบันเท่านั้น) ================= -->
+      <section class="classroom-gallery-section" id="classroomGallerySection">
+        <div class="gallery-section-header">
+          <div class="gallery-title-group">
+            <span class="gallery-header-icon">📸</span>
+            <div>
+              <h3 class="gallery-title" id="classroomGalleryHeaderTitle">ภาพรวมการเรียนการสอนและผลงานศิลปะประจำชิ้นงาน</h3>
+              <p class="gallery-subtitle" id="classroomGalleryHeaderSub">ภาพบรรยากาศห้องเรียน กระบวนการสร้างสรรค์ และผลงานของนักเรียนในห้องนี้ (ทุกคนเข้าดูและดาวน์โหลดรูปได้)</p>
+            </div>
+          </div>
+          <div class="gallery-header-actions" id="galleryHeaderActions">
+            <!-- Upload & folder buttons shown for teachers -->
+          </div>
+        </div>
+
+        <!-- Assignment & Folder Filter Tabs for Gallery -->
+        <div class="gallery-tasks-tabs" id="galleryTasksTabs">
+          <!-- Dynamically populated per assignment / folder -->
+        </div>
+
+        <!-- Photos Grid -->
+        <div class="gallery-photos-grid" id="galleryPhotosGrid">
+          <!-- Dynamically populated via JavaScript -->
+        </div>
+      </section>
 
     </section>
 
@@ -472,32 +498,6 @@
             </tbody>
           </table>
         </div>
-      </div>
-    </section>
-
-    <!-- ================= CLASSROOM ACTIVITY & ARTWORK GALLERY (แสดงผลด้านล่างของ THE ART TIME และ ทำเนียบแรงกิ้ง) ================= -->
-    <section class="classroom-gallery-section" id="classroomGallerySection">
-      <div class="gallery-section-header">
-        <div class="gallery-title-group">
-          <span class="gallery-header-icon">📸</span>
-          <div>
-            <h3 class="gallery-title">ภาพรวมการเรียนการสอนและผลงานศิลปะประจำชิ้นงาน</h3>
-            <p class="gallery-subtitle">ภาพบรรยากาศห้องเรียน กระบวนการสร้างสรรค์ และผลงานของนักเรียน (ทุกคนเข้าดูและดาวน์โหลดรูปได้)</p>
-          </div>
-        </div>
-        <div class="gallery-header-actions" id="galleryHeaderActions">
-          <!-- Upload & folder buttons shown for teachers -->
-        </div>
-      </div>
-
-      <!-- Assignment & Folder Filter Tabs for Gallery -->
-      <div class="gallery-tasks-tabs" id="galleryTasksTabs">
-        <!-- Dynamically populated per assignment / folder -->
-      </div>
-
-      <!-- Photos Grid -->
-      <div class="gallery-photos-grid" id="galleryPhotosGrid">
-        <!-- Dynamically populated via JavaScript -->
       </div>
     </section>
 
@@ -1406,6 +1406,10 @@
               <input type="text" id="editMagPic1" class="form-input-sm" style="margin-top: 6px; width: 100%;" placeholder="หรือใส่ URL รูปภาพ: https://...">
             </div>
           </div>
+          <div style="margin-top: 10px;">
+            <label for="editMagCaption1" style="font-size: 0.85rem; font-weight: 700; color: #334155;">💬 ข้อความ/คำบรรยายหน้ารูปภาพ 1 (แสดงใต้รูป):</label>
+            <input type="text" id="editMagCaption1" class="form-input-sm" style="margin-top: 4px; width: 100%;" placeholder="เช่น 🎨 การทดลองผสมสีน้ำสร้างโทนสีแห่งความสุข">
+          </div>
         </div>
 
         <hr style="margin: 16px 0; border: none; border-top: 1px dashed #CBD5E1;">
@@ -1439,6 +1443,10 @@
               <input type="text" id="editMagPic2" class="form-input-sm" style="margin-top: 6px; width: 100%;" placeholder="หรือใส่ URL รูปภาพ: https://...">
             </div>
           </div>
+          <div style="margin-top: 10px;">
+            <label for="editMagCaption2" style="font-size: 0.85rem; font-weight: 700; color: #334155;">💬 ข้อความ/คำบรรยายหน้ารูปภาพ 2 (แสดงใต้รูป):</label>
+            <input type="text" id="editMagCaption2" class="form-input-sm" style="margin-top: 4px; width: 100%;" placeholder="เช่น 🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ">
+          </div>
         </div>
         <div class="mag-toggle-row">
           <span class="mag-toggle-label">🖼️ เปิด-ปิด รูปภาพกลางล่าง 3</span>
@@ -1467,6 +1475,10 @@
               </div>
               <input type="text" id="editMagPic3" class="form-input-sm" style="margin-top: 6px; width: 100%;" placeholder="หรือใส่ URL รูปภาพ: https://...">
             </div>
+          </div>
+          <div style="margin-top: 10px;">
+            <label for="editMagCaption3" style="font-size: 0.85rem; font-weight: 700; color: #334155;">💬 ข้อความ/คำบรรยายหน้ารูปภาพ 3 (แสดงใต้รูป):</label>
+            <input type="text" id="editMagCaption3" class="form-input-sm" style="margin-top: 4px; width: 100%;" placeholder="เช่น 🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด">
           </div>
         </div>
 

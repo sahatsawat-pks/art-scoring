@@ -118,8 +118,11 @@ const DEFAULT_CONFIG = {
     head1: "ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ",
     copy1: "ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี",
     pic1: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80",
+    caption1: "🎨 การทดลองผสมสีน้ำสร้างโทนสีแห่งความสุข",
     pic2: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80",
+    caption2: "🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ",
     pic3: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80",
+    caption3: "🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด",
     head2: "เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า",
     copy2: "เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง",
     pic4: "https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80",
@@ -560,6 +563,7 @@ const CHECKLIST_CRITERIA = [
   { key: 'on_time', label: '⏱️ ส่งงานตรงเวลา', badgeId: 'completionist', desc: 'ส่งตรงกำหนดครบ 3 งาน' },
   { key: 'early_submit', label: '🚀 ส่งงานเร็วกว่ากำหนด', badgeId: 'fast_learner', desc: 'ส่งเร็วครบ 3 งาน' },
   { key: 'clean_neat', label: '🧼 ผลงานสะอาดเรียบร้อย', badgeId: 'master_of_details', desc: 'ผลงานสะอาดประณีต 3 งาน' },
+  { key: 'full_score', label: '💯 คะแนนเต็มในชิ้นงาน', badgeId: 'art_pro', desc: 'ได้คะแนนเต็มในงานนั้น (สะสม 3 งานรับเหรียญ Art Pro)' },
   { key: 'creative_idea', label: '🪐 ไอเดียแปลกใหม่', badgeId: 'beyond_the_future', desc: 'ไอเดียแปลกไม่ซ้ำใคร 3 งาน' },
   { key: 'color_lighting', label: '🧪 มิติแสงเงา/คู่สีงดงาม', badgeId: 'color_alchemist', desc: 'เกลี่ยสีสวยงาม 3 งาน' },
   { key: 'full_canvas', label: '🛡️ วาดเต็มแน่นทั้งแผ่น', badgeId: 'the_canvas_tank', desc: 'วาดเต็มแผ่น 3 งาน' },
@@ -1353,8 +1357,17 @@ function renderHomeView() {
   if (mag.head1 && document.getElementById('magHead1')) document.getElementById('magHead1').textContent = mag.head1;
   if (mag.copy1 && document.getElementById('magCopy1')) document.getElementById('magCopy1').textContent = mag.copy1;
   if (mag.pic1 && document.getElementById('magPic1')) document.getElementById('magPic1').src = mag.pic1;
+  if (document.getElementById('magPicCaption1')) {
+    document.getElementById('magPicCaption1').textContent = mag.caption1 !== undefined ? mag.caption1 : DEFAULT_MAGAZINE_DATA.caption1;
+  }
   if (mag.pic2 && document.getElementById('magPic2')) document.getElementById('magPic2').src = mag.pic2;
+  if (document.getElementById('magPicCaption2')) {
+    document.getElementById('magPicCaption2').textContent = mag.caption2 !== undefined ? mag.caption2 : DEFAULT_MAGAZINE_DATA.caption2;
+  }
   if (mag.pic3 && document.getElementById('magPic3')) document.getElementById('magPic3').src = mag.pic3;
+  if (document.getElementById('magPicCaption3')) {
+    document.getElementById('magPicCaption3').textContent = mag.caption3 !== undefined ? mag.caption3 : DEFAULT_MAGAZINE_DATA.caption3;
+  }
   if (mag.head2 && document.getElementById('magHead2')) document.getElementById('magHead2').textContent = mag.head2;
   if (mag.copy2 && document.getElementById('magCopy2')) document.getElementById('magCopy2').textContent = mag.copy2;
   if (mag.pic4 && document.getElementById('magPic4')) document.getElementById('magPic4').src = mag.pic4;
@@ -1751,6 +1764,44 @@ function buildPodiumSlotHtml(student, rank) {
   `;
 }
 
+function triggerStudentAvatarUpload(student) {
+  if (!student) return;
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+
+  input.onchange = async (e) => {
+    if (e.target.files && e.target.files[0]) {
+      try {
+        const resized = await resizeImageToCanvas(e.target.files[0], 250, 250, 0.85);
+        student.avatar = resized;
+        saveDataToStorage();
+        apiPost({
+          action: 'save_student',
+          grade: currentGrade,
+          room: currentRoom,
+          student: student
+        });
+        artSound.playCamera();
+        confettiEngine.fire(45);
+        showToast(`อัปเดตรูปประจำตัวของ ${student.name} เรียบร้อยแล้ว! 📸`);
+        if (currentView === 'leaderboard') renderLeaderboardView();
+        else if (currentView === 'teacher') renderTeacherView();
+        const profileModal = document.getElementById('studentProfileModal');
+        if (profileModal && !profileModal.classList.contains('hidden') && currentProfileStudent?.id === student.id) {
+          openStudentProfileModal(student);
+        }
+      } catch (err) {
+        alert("ไม่สามารถบันทึกรูปภาพได้: " + err.message);
+      }
+    }
+    input.remove();
+  };
+  input.click();
+}
+
 function renderRankTable(ranked) {
   const theadRow = document.getElementById('rankTableHeadRow');
   const tbody = document.getElementById('rankTableBody');
@@ -1834,7 +1885,10 @@ function renderRankTable(ranked) {
       </td>
       <td>
         <div class="student-cell-clickable" title="คลิกเพื่อดูโปรไฟล์และผลงานของ ${student.name}">
-          <div class="student-table-avatar">${avatarDisplay}</div>
+          <div class="student-table-avatar" title="แตะเพื่อเปลี่ยนรูปถ่ายประจำตัวของ ${student.name}">
+            ${avatarDisplay}
+            <span class="avatar-camera-pill" title="เปลี่ยนรูปประจำตัว">📸</span>
+          </div>
           <div class="student-table-details">
             <span class="student-table-name">${student.name}</span>
             <span class="student-table-nick">เลขที่ ${student.no} • ดูโปรไฟล์ & ผลงาน 🎨</span>
@@ -1868,6 +1922,14 @@ function renderRankTable(ranked) {
     tr.querySelector('.student-cell-clickable').addEventListener('click', openHandler);
     tr.querySelector('.btn-view-profile').addEventListener('click', openHandler);
 
+    const avatarBtn = tr.querySelector('.student-table-avatar');
+    if (avatarBtn) {
+      avatarBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        triggerStudentAvatarUpload(student);
+      });
+    }
+
     tbody.appendChild(tr);
   });
 }
@@ -1883,12 +1945,6 @@ function getActiveRoomGalleryDict(grade = currentGrade, room = currentRoom) {
   const key = getRoomAssignmentKey(grade, room);
   if (!appConfig.roomGalleries[key]) {
     appConfig.roomGalleries[key] = {};
-    // Seed default gallery photos to p4_1 if legacy galleries has photos
-    if (key.includes('p4_1') && appConfig.galleries && Object.keys(appConfig.galleries).length > 0) {
-      try {
-        appConfig.roomGalleries[key] = JSON.parse(JSON.stringify(appConfig.galleries));
-      } catch (e) {}
-    }
   }
   return appConfig.roomGalleries[key];
 }
@@ -1946,6 +2002,15 @@ function deleteCustomGalleryFolder(folderId) {
 }
 
 function renderClassroomGallery() {
+  const headerTitle = document.getElementById('classroomGalleryHeaderTitle');
+  if (headerTitle) {
+    headerTitle.textContent = `ภาพรวมการเรียนการสอนและผลงานศิลปะประจำชิ้นงาน • ${getGradeLabel(currentGrade)} ห้อง ${currentRoom}`;
+  }
+  const headerSub = document.getElementById('classroomGalleryHeaderSub');
+  if (headerSub) {
+    headerSub.textContent = `ภาพบรรยากาศห้องเรียนและผลงานของ ${getGradeLabel(currentGrade)} ห้อง ${currentRoom} (แยกตามห้องใครห้องมัน)`;
+  }
+
   const tabsContainer = document.getElementById('galleryTasksTabs');
   const photosGrid = document.getElementById('galleryPhotosGrid');
   const teacherActions = document.getElementById('galleryHeaderActions');
@@ -2297,6 +2362,9 @@ function openStudentProfileModal(student) {
           <div class="passport-rank-chip" style="margin-top: 6px;">
             <span>${tier.icon}</span> <span>${tier.label}</span>
           </div>
+          <button type="button" id="btnStudentSelfAvatar" class="btn btn-sm btn-art-primary" style="margin-top: 10px; border-radius: 9999px; font-weight: 700; font-size: 0.8rem; padding: 4px 14px; display: inline-flex; align-items: center; gap: 6px;">
+            <span>📸 ถ่ายรูป / เปลี่ยนรูปประจำตัว</span>
+          </button>
         </div>
       </div>
     </div>
@@ -2424,10 +2492,14 @@ function openStudentProfileModal(student) {
   const avatarBox = content.querySelector('#profileAvatarBox');
   if (avatarBox) {
     avatarBox.addEventListener('click', () => {
-      if (selfAvatarInput) {
-        selfAvatarInput.value = '';
-        selfAvatarInput.click();
-      }
+      triggerStudentAvatarUpload(student);
+    });
+  }
+
+  const btnSelfAvatar = content.querySelector('#btnStudentSelfAvatar');
+  if (btnSelfAvatar) {
+    btnSelfAvatar.addEventListener('click', () => {
+      triggerStudentAvatarUpload(student);
     });
   }
 
@@ -4981,8 +5053,11 @@ const DEFAULT_MAGAZINE_DATA = {
   head1: "ศิลปะกับพลังแห่งจินตนาการ: ปล่อยหัวใจให้โบยบินบนแผ่นกระดาษ",
   copy1: "ในห้องเรียนศิลปะ ความผิดพลาดไม่มีอยู่จริง มีเพียงการค้นพบสิ่งใหม่ ทุกหยดสีน้ำที่ไหลรวมกัน และทุกรอยแรเงาของดินสอ คือเสียงสะท้อนจากโลกภายในของเด็กๆ ที่กำลังเปล่งประกายอย่างเสรี",
   pic1: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80",
+  caption1: "🎨 การทดลองผสมสีน้ำสร้างโทนสีแห่งความสุข",
   pic2: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&auto=format&fit=crop&q=80",
+  caption2: "🖼️ ศิลปะภาพพิมพ์และงานตัดแปะคอลลาจ",
   pic3: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80",
+  caption3: "🦁 จินตนาการลายเส้นที่ไร้กรอบจำกัด",
   head2: "เทคนิคสีโปสเตอร์และคู่สีตรงข้าม: เปลี่ยนความกลัวเป็นความกล้า",
   copy2: "เด็กหลายคนมักกลัวการลงสีเข้ม แต่เมื่อได้เรียนรู้ที่จะก้าวข้ามความลังเล ภาพวาดธรรมดาก็กลับมีชีวิตและมิติที่น่าทึ่ง การฝึกฝนศิลปะจึงไม่ใช่แค่การวาดรูป แต่คือการฝึกความมั่นใจในตนเอง",
   pic4: "https://images.unsplash.com/photo-1569172122301-bc500f309134?w=800&auto=format&fit=crop&q=80",
@@ -5074,8 +5149,14 @@ function openMagazineModal() {
   if (h1) h1.value = mag.head1 || '';
   if (c1) c1.value = mag.copy1 || '';
   if (p1) p1.value = mag.pic1 || '';
+  const cap1 = document.getElementById('editMagCaption1');
+  if (cap1) cap1.value = mag.caption1 !== undefined ? mag.caption1 : DEFAULT_MAGAZINE_DATA.caption1;
   if (p2) p2.value = mag.pic2 || '';
+  const cap2 = document.getElementById('editMagCaption2');
+  if (cap2) cap2.value = mag.caption2 !== undefined ? mag.caption2 : DEFAULT_MAGAZINE_DATA.caption2;
   if (p3) p3.value = mag.pic3 || '';
+  const cap3 = document.getElementById('editMagCaption3');
+  if (cap3) cap3.value = mag.caption3 !== undefined ? mag.caption3 : DEFAULT_MAGAZINE_DATA.caption3;
   if (h2) h2.value = mag.head2 || '';
   if (c2) c2.value = mag.copy2 || '';
   if (p4) p4.value = mag.pic4 || '';
@@ -5131,8 +5212,14 @@ function fillDefaultMagazineValues() {
   if (h1) h1.value = DEFAULT_MAGAZINE_DATA.head1;
   if (c1) c1.value = DEFAULT_MAGAZINE_DATA.copy1;
   if (p1) p1.value = DEFAULT_MAGAZINE_DATA.pic1;
+  const cap1 = document.getElementById('editMagCaption1');
+  if (cap1) cap1.value = DEFAULT_MAGAZINE_DATA.caption1;
   if (p2) p2.value = DEFAULT_MAGAZINE_DATA.pic2;
+  const cap2 = document.getElementById('editMagCaption2');
+  if (cap2) cap2.value = DEFAULT_MAGAZINE_DATA.caption2;
   if (p3) p3.value = DEFAULT_MAGAZINE_DATA.pic3;
+  const cap3 = document.getElementById('editMagCaption3');
+  if (cap3) cap3.value = DEFAULT_MAGAZINE_DATA.caption3;
   if (h2) h2.value = DEFAULT_MAGAZINE_DATA.head2;
   if (c2) c2.value = DEFAULT_MAGAZINE_DATA.copy2;
   if (p4) p4.value = DEFAULT_MAGAZINE_DATA.pic4;
@@ -5188,8 +5275,14 @@ function handleMagazineSubmit(e) {
   appConfig.magazine.head1 = (h1 && h1.value.trim()) ? h1.value.trim() : DEFAULT_MAGAZINE_DATA.head1;
   appConfig.magazine.copy1 = (c1 && c1.value.trim()) ? c1.value.trim() : DEFAULT_MAGAZINE_DATA.copy1;
   appConfig.magazine.pic1 = (p1 && p1.value.trim()) ? p1.value.trim() : DEFAULT_MAGAZINE_DATA.pic1;
+  const cap1 = document.getElementById('editMagCaption1');
+  appConfig.magazine.caption1 = (cap1 && cap1.value.trim()) ? cap1.value.trim() : DEFAULT_MAGAZINE_DATA.caption1;
   appConfig.magazine.pic2 = (p2 && p2.value.trim()) ? p2.value.trim() : DEFAULT_MAGAZINE_DATA.pic2;
+  const cap2 = document.getElementById('editMagCaption2');
+  appConfig.magazine.caption2 = (cap2 && cap2.value.trim()) ? cap2.value.trim() : DEFAULT_MAGAZINE_DATA.caption2;
   appConfig.magazine.pic3 = (p3 && p3.value.trim()) ? p3.value.trim() : DEFAULT_MAGAZINE_DATA.pic3;
+  const cap3 = document.getElementById('editMagCaption3');
+  appConfig.magazine.caption3 = (cap3 && cap3.value.trim()) ? cap3.value.trim() : DEFAULT_MAGAZINE_DATA.caption3;
   appConfig.magazine.head2 = (h2 && h2.value.trim()) ? h2.value.trim() : DEFAULT_MAGAZINE_DATA.head2;
   appConfig.magazine.copy2 = (c2 && c2.value.trim()) ? c2.value.trim() : DEFAULT_MAGAZINE_DATA.copy2;
   appConfig.magazine.pic4 = (p4 && p4.value.trim()) ? p4.value.trim() : DEFAULT_MAGAZINE_DATA.pic4;
