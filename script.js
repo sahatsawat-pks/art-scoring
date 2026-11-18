@@ -291,6 +291,314 @@ let unlockedRooms = new Set();
 let activeGalleryTaskId = 'task_1';
 
 // ==========================================
+// 1.5 ART BADGES & CARDS DEFINITIONS (20 เหรียญตรา & 6 การ์ดพลัง)
+// ==========================================
+const ART_BADGES = [
+  {
+    id: 'fast_learner',
+    title: 'Fast Learner: สงครามส่งด่วน',
+    shortTitle: 'สงครามส่งด่วน',
+    icon: '🚀',
+    theme: 'linear-gradient(135deg, #EC4899, #8B5CF6)',
+    desc: 'ส่งงานเร็วกว่ากำหนดครบ 3 ครั้ง',
+    field: 'early_submit',
+    target: 3
+  },
+  {
+    id: 'mission_complete',
+    title: 'Mission Complete: มิชชั่นคอมพลีท',
+    shortTitle: 'มิชชั่นคอมพลีท',
+    icon: '✅',
+    theme: 'linear-gradient(135deg, #10B981, #06B6D4)',
+    desc: 'ส่งงานครบทุกชิ้นงานในภาคเรียน',
+    field: 'all_submitted'
+  },
+  {
+    id: 'beyond_the_future',
+    title: 'Beyond the Future: ไอเดียหลุดโลก',
+    shortTitle: 'ไอเดียหลุดโลก',
+    icon: '🪐',
+    theme: 'linear-gradient(135deg, #6366F1, #A855F7)',
+    desc: 'มีไอเดียแปลกใหม่ไม่ซ้ำใครครบ 3 งาน',
+    field: 'creative_idea',
+    target: 3
+  },
+  {
+    id: 'art_pro',
+    title: 'Art Pro: ดาวรุ่งพุ่งแรง',
+    shortTitle: 'ดาวรุ่งพุ่งแรง',
+    icon: '⭐',
+    theme: 'linear-gradient(135deg, #F59E0B, #EF4444)',
+    desc: 'ได้คะแนนเต็มครบ 3 งาน',
+    field: 'perfect_score',
+    target: 3
+  },
+  {
+    id: 'master_of_god',
+    title: 'Master of God: เทพเจ้าสายอาร์ต',
+    shortTitle: 'เทพเจ้าสายอาร์ต',
+    icon: '👑',
+    theme: 'linear-gradient(135deg, #F59E0B, #FBBF24, #D97706)',
+    desc: 'ได้คะแนนเต็มครบ 5 งาน',
+    field: 'perfect_score',
+    target: 5
+  },
+  {
+    id: 'master_of_details',
+    title: 'Master of Details: เป๊ะทุกกระเบียดนิ้ว',
+    shortTitle: 'เป๊ะทุกกระเบียดนิ้ว',
+    icon: '🔍',
+    theme: 'linear-gradient(135deg, #3B82F6, #14B8A6)',
+    desc: 'ผลงานสะอาดเรียบร้อยประณีตครบ 3 งาน',
+    field: 'clean_neat',
+    target: 3
+  },
+  {
+    id: 'color_alchemist',
+    title: 'Color Alchemist: เทพเจ้าเฉดสี',
+    shortTitle: 'เทพเจ้าเฉดสี',
+    icon: '🧪',
+    theme: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+    desc: 'มิติแสงเงาและเกลี่ยสีงดงามครบ 3 งาน',
+    field: 'color_lighting',
+    target: 3
+  },
+  {
+    id: 'ultimate_effort',
+    title: 'Ultimate Effort: หัวใจไม่ยอมแพ้',
+    shortTitle: 'หัวใจไม่ยอมแพ้',
+    icon: '💖',
+    theme: 'linear-gradient(135deg, #F43F5E, #FB7185)',
+    desc: 'มอบให้นักเรียนที่มีความพยายามยอดเยี่ยม (เด็กพิเศษ/ตั้งใจ)',
+    field: 'manual'
+  },
+  {
+    id: 'completionist',
+    title: 'Completionist: รักษามาตรฐาน',
+    shortTitle: 'รักษามาตรฐาน',
+    icon: '⏳',
+    theme: 'linear-gradient(135deg, #64748B, #94A3B8)',
+    desc: 'ส่งงานตรงตามกำหนดครบ 3 งาน',
+    field: 'on_time',
+    target: 3
+  },
+  {
+    id: 'the_minimalist',
+    title: 'The Minimalist: มินิมอลตัวแม่',
+    shortTitle: 'มินิมอลตัวแม่',
+    icon: '🐱',
+    theme: 'linear-gradient(135deg, #0EA5E9, #38BDF8)',
+    desc: 'งานน้อยแต่มาก สไตล์มินิมอลโดดเด่น',
+    field: 'manual'
+  },
+  {
+    id: 'the_cleanup_crew',
+    title: 'The Cleanup Crew: หน่วยกู้ภัยทำความสะอาด',
+    shortTitle: 'หน่วยกู้ภัยทำความสะอาด',
+    icon: '🧼',
+    theme: 'linear-gradient(135deg, #06B6D4, #3B82F6)',
+    desc: 'มีจิตอาสาช่วยเก็บ/ล้างอุปกรณ์ หรือทำความสะอาดห้องศิลปะ 3 ครั้ง',
+    field: 'clean_room',
+    target: 3
+  },
+  {
+    id: 'the_canvas_tank',
+    title: 'The Canvas Tank: นักรบสายแทงค์',
+    shortTitle: 'นักรบสายแทงค์',
+    icon: '🛡️',
+    theme: 'linear-gradient(135deg, #475569, #64748B)',
+    desc: 'วาดเต็มแผ่น รายละเอียดแน่นไม่เว้นที่ว่างครบ 3 งาน',
+    field: 'full_canvas',
+    target: 3
+  },
+  {
+    id: 'the_unique_soul',
+    title: 'The Unique Soul: ศิลปินอินดี้',
+    shortTitle: 'ศิลปินอินดี้',
+    icon: '🎭',
+    theme: 'linear-gradient(135deg, #A855F7, #EC4899)',
+    desc: 'มีสไตล์และลายเส้นเป็นเอกลักษณ์เฉพาะตัว',
+    field: 'manual'
+  },
+  {
+    id: 'the_most_improved',
+    title: 'The Most Improved: สุดยอดนักพัฒนา',
+    shortTitle: 'สุดยอดนักพัฒนา',
+    icon: '📈',
+    theme: 'linear-gradient(135deg, #10B981, #34D399)',
+    desc: 'มีพัฒนาการฝีมือดีขึ้นอย่างก้าวกระโดด',
+    field: 'manual'
+  },
+  {
+    id: 'never_give_up',
+    title: 'Never Give Up: นักสู้ไม่ยอมแพ้',
+    shortTitle: 'นักสู้ไม่ยอมแพ้',
+    icon: '🪽',
+    theme: 'linear-gradient(135deg, #0284C7, #38BDF8)',
+    desc: 'แก้ไขและปรับปรุงชิ้นงานตามคำแนะนำครูจนสมบูรณ์',
+    field: 'manual'
+  },
+  {
+    id: 'focus_mode',
+    title: 'Focus Mode: สมาธิขั้นสุด',
+    shortTitle: 'สมาธิขั้นสุด',
+    icon: '🧘',
+    theme: 'linear-gradient(135deg, #4F46E5, #818CF8)',
+    desc: 'ตั้งใจทำงานเงียบๆ ไม่วอกแวกตลอดทั้งคาบเรียนบ่อยครั้ง',
+    field: 'manual'
+  },
+  {
+    id: 'tiny_world',
+    title: 'Tiny World: โลกใบจิ๋ว',
+    shortTitle: 'โลกใบจิ๋ว',
+    icon: '🌍',
+    theme: 'linear-gradient(135deg, #14B8A6, #2DD4BF)',
+    desc: 'วาดรายละเอียดเล็กๆ ซ่อนไว้ในภาพได้อย่างน่าทึ่ง',
+    field: 'manual'
+  },
+  {
+    id: 'collector',
+    title: 'Collector: นักสะสมเหรียญตรา',
+    shortTitle: 'นักสะสมเหรียญตรา',
+    icon: '🏆',
+    theme: 'linear-gradient(135deg, #F59E0B, #FBBF24)',
+    desc: 'สะสมเหรียญตราครบ 10 เหรียญ',
+    field: 'badge_count',
+    target: 10
+  },
+  {
+    id: 'card_master',
+    title: 'Card Master: เจ้าแม่การ์ดนางฟ้า',
+    shortTitle: 'เจ้าแม่การ์ดนางฟ้า',
+    icon: '🎴',
+    theme: 'linear-gradient(135deg, #D946EF, #C084FC)',
+    desc: 'แลกหรือสะสมการ์ดพลังไปแล้วอย่างน้อย 3 ใบ',
+    field: 'card_count',
+    target: 3
+  },
+  {
+    id: 'echo_of_art',
+    title: 'Echo of Art: เสียงสะท้อนแห่งศิลปะ',
+    shortTitle: 'เสียงสะท้อนแห่งศิลปะ',
+    icon: '🗣️',
+    theme: 'linear-gradient(135deg, #F97316, #FB923C)',
+    desc: 'มีส่วนร่วมในการตอบคำถามและแสดงความคิดเห็นในห้องเรียนบ่อยครั้ง',
+    field: 'manual'
+  }
+];
+
+const ART_CARDS = [
+  {
+    id: 'card_masterpiece',
+    title: 'The Masterpiece',
+    thaiTitle: 'มหาผลงานชิ้นเอก',
+    rarity: 'legendary',
+    rarityLabel: '🌟 ระดับตำนาน (Legendary)',
+    power: 'พลังจินตนาการ +100',
+    desc: 'ผลงานระดับมาสเตอร์พีซที่ตราตรึงใจ เปล่งประกายดั่งแสงดาวบนท้องฟ้า',
+    gradient: 'linear-gradient(135deg, #B45309, #F59E0B, #EF4444)',
+    icon: '👑'
+  },
+  {
+    id: 'card_color_alchemist',
+    title: 'Color Alchemist',
+    thaiTitle: 'จอมเวทย์มนตร์เฉดสี',
+    rarity: 'epic',
+    rarityLabel: '💜 มหากาพย์ (Epic)',
+    power: 'ความเชี่ยวชาญคู่สี +80',
+    desc: 'ผู้ควบคุมแสงเงาและเกลี่ยสีได้อย่างมหัศจรรย์ ทุกหยดสีคือเวทมนตร์',
+    gradient: 'linear-gradient(135deg, #6D28D9, #8B5CF6, #3B82F6)',
+    icon: '🧪'
+  },
+  {
+    id: 'card_speed_rush',
+    title: 'Speed Rush',
+    thaiTitle: 'พู่กันสายฟ้าส่งด่วน',
+    rarity: 'rare',
+    rarityLabel: '💙 หายาก (Rare)',
+    power: 'ความคล่องแคล่ว +60',
+    desc: 'ส่งงานตรงเวลาและรวดเร็วกว่ากำหนด ว่องไวดั่งสายฟ้าฟาด',
+    gradient: 'linear-gradient(135deg, #0369A1, #0EA5E9, #10B981)',
+    icon: '⚡'
+  },
+  {
+    id: 'card_shield_of_focus',
+    title: 'Shield of Focus',
+    thaiTitle: 'โล่สมาธิไร้สิ่งรบกวน',
+    rarity: 'rare',
+    rarityLabel: '💙 หายาก (Rare)',
+    power: 'สมาธิแน่วแน่ +60',
+    desc: 'โฟกัสกับการสร้างสรรค์งานศิลปะอย่างสงบนิ่ง แม้มีเสียงรบกวนรอบตัว',
+    gradient: 'linear-gradient(135deg, #4338CA, #6366F1, #A855F7)',
+    icon: '🛡️'
+  },
+  {
+    id: 'card_spark_creativity',
+    title: 'Spark of Creativity',
+    thaiTitle: 'ประกายจินตนาการ',
+    rarity: 'common',
+    rarityLabel: '💚 ทั่วไป (Common)',
+    power: 'ความคิดริเริ่ม +40',
+    desc: 'จุดประกายไอเดียใหม่ๆ ลงบนผืนผ้าใบและแผ่นกระดาษ',
+    gradient: 'linear-gradient(135deg, #047857, #10B981, #F59E0B)',
+    icon: '✨'
+  },
+  {
+    id: 'card_spirit_cleaning',
+    title: 'Spirit of Cleaning',
+    thaiTitle: 'ภูติน้อยพิทักษ์ห้องศิลปะ',
+    rarity: 'common',
+    rarityLabel: '💚 ทั่วไป (Common)',
+    power: 'จิตอาสาและความสะอาด +40',
+    desc: 'ล้างพู่กัน เก็บจานสี และดูแลห้องเรียนศิลปะให้สะอาดสดใสอยู่เสมอ',
+    gradient: 'linear-gradient(135deg, #0F766E, #06B6D4, #3B82F6)',
+    icon: '🧹'
+  }
+];
+
+const CHECKLIST_CRITERIA = [
+  { key: 'on_time', label: '⏱️ ส่งงานตรงเวลา', badgeId: 'completionist', desc: 'ส่งตรงกำหนดครบ 3 งาน' },
+  { key: 'early_submit', label: '🚀 ส่งงานเร็วกว่ากำหนด', badgeId: 'fast_learner', desc: 'ส่งเร็วครบ 3 งาน' },
+  { key: 'clean_neat', label: '🧼 ผลงานสะอาดเรียบร้อย', badgeId: 'master_of_details', desc: 'ผลงานสะอาดประณีต 3 งาน' },
+  { key: 'creative_idea', label: '🪐 ไอเดียแปลกใหม่', badgeId: 'beyond_the_future', desc: 'ไอเดียแปลกไม่ซ้ำใคร 3 งาน' },
+  { key: 'color_lighting', label: '🧪 มิติแสงเงา/คู่สีงดงาม', badgeId: 'color_alchemist', desc: 'เกลี่ยสีสวยงาม 3 งาน' },
+  { key: 'full_canvas', label: '🛡️ วาดเต็มแน่นทั้งแผ่น', badgeId: 'the_canvas_tank', desc: 'วาดเต็มแผ่น 3 งาน' },
+  { key: 'clean_room', label: '🧹 จิตอาสาทำความสะอาด', badgeId: 'the_cleanup_crew', desc: 'ช่วยล้างอุปกรณ์/ห้อง 3 ครั้ง' }
+];
+
+function autoEvaluateStudentBadges(student) {
+  if (!student) return;
+  if (!student.badges) student.badges = [];
+  const tasks = getActiveAssignments();
+  let perfectCount = 0;
+  let submittedCount = 0;
+
+  tasks.forEach(t => {
+    const sc = student.scores ? student.scores[t.id] : undefined;
+    if (sc !== undefined && sc !== null && sc !== '') {
+      submittedCount++;
+      if (Number(sc) === t.maxScore) perfectCount++;
+    }
+  });
+
+  if (perfectCount >= 3 && !student.badges.includes('art_pro')) {
+    student.badges.push('art_pro');
+  }
+  if (perfectCount >= 5 && !student.badges.includes('master_of_god')) {
+    student.badges.push('master_of_god');
+  }
+  if (tasks.length > 0 && submittedCount === tasks.length && !student.badges.includes('mission_complete')) {
+    student.badges.push('mission_complete');
+  }
+  if (student.badges.length >= 10 && !student.badges.includes('collector')) {
+    student.badges.push('collector');
+  }
+  if ((student.cards || []).length >= 3 && !student.badges.includes('card_master')) {
+    student.badges.push('card_master');
+  }
+}
+
+// ==========================================
 // 2. AUDIO SYNTHESIS ENGINE (Web Audio API)
 // ==========================================
 class ArtSoundPlayer {
@@ -785,6 +1093,7 @@ function getSubmittedTasksCount(student, grade = currentGrade, room = currentRoo
 
 function getRankedStudents(grade = currentGrade, room = currentRoom) {
   const list = [...getStudentsList(grade, room)];
+  list.forEach(s => autoEvaluateStudentBadges(s));
   return list.sort((a, b) => {
     const scoreA = calcStudentTotalScore(a, grade, room);
     const scoreB = calcStudentTotalScore(b, grade, room);
@@ -1406,12 +1715,22 @@ function buildPodiumSlotHtml(student, rank) {
     ? `<img src="${student.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" alt="${student.name}">`
     : (student.avatar || '🎨');
 
+  const miniBadgesHtml = (student.badges && student.badges.length > 0)
+    ? `<div class="student-mini-badges" style="justify-content: center; margin-top: 6px;">
+        ${student.badges.map(bId => {
+          const bDef = ART_BADGES.find(b => b.id === bId);
+          return bDef ? `<span class="mini-badge-pill" title="${bDef.title}"><span>${bDef.icon}</span></span>` : "";
+        }).join("")}
+      </div>`
+    : "";
+
   return `
     <div class="podium-student-card" title="คลิกเพื่อดูโปรไฟล์และผลงานศิลปะของ ${student.name}">
       <div class="rank-badge-floater" title="อันดับที่ ${rank}">${badgeEmojis[rank]}</div>
       <div class="avatar-halo">${avatarDisplay}</div>
       <h3 class="podium-student-name">${student.name}</h3>
       <div class="podium-task-summary">📝 ส่งครบ ${submittedCount}/${tasks.length} งาน</div>
+      ${miniBadgesHtml}
       <div class="podium-score-tag">
         ${totalScore} <span class="unit">/ ${scale.maxTotal} คะแนน</span>
       </div>
@@ -1496,6 +1815,15 @@ function renderRankTable(ranked) {
       ? `<img src="${student.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" alt="${student.name}">`
       : (student.avatar || '🎨');
 
+    const miniBadgesHtml = (student.badges && student.badges.length > 0)
+      ? `<div class="student-mini-badges" style="margin-top: 4px;">
+          ${student.badges.map(bId => {
+            const bDef = ART_BADGES.find(b => b.id === bId);
+            return bDef ? `<span class="mini-badge-pill" title="${bDef.title}"><span>${bDef.icon}</span></span>` : '';
+          }).join('')}
+        </div>`
+      : '';
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="col-rank" style="text-align: center;">
@@ -1507,6 +1835,7 @@ function renderRankTable(ranked) {
           <div class="student-table-details">
             <span class="student-table-name">${student.name}</span>
             <span class="student-table-nick">เลขที่ ${student.no} • ดูโปรไฟล์ & ผลงาน 🎨</span>
+            ${miniBadgesHtml}
           </div>
         </div>
       </td>
@@ -1541,14 +1870,30 @@ function renderRankTable(ranked) {
 }
 
 // ==========================================
-// 9. CLASSROOM ACTIVITY & ARTWORK GALLERY
+// 9. CLASSROOM ACTIVITY & ARTWORK GALLERY (แยกตามห้องใครห้องมัน)
 // ==========================================
 let currentLightboxTaskId = null;
 let currentLightboxPhotoId = null;
 
+function getActiveRoomGalleryDict(grade = currentGrade, room = currentRoom) {
+  if (!appConfig.roomGalleries) appConfig.roomGalleries = {};
+  const key = getRoomAssignmentKey(grade, room);
+  if (!appConfig.roomGalleries[key]) {
+    appConfig.roomGalleries[key] = {};
+    // Seed default gallery photos to p4_1 if legacy galleries has photos
+    if (key.includes('p4_1') && appConfig.galleries && Object.keys(appConfig.galleries).length > 0) {
+      try {
+        appConfig.roomGalleries[key] = JSON.parse(JSON.stringify(appConfig.galleries));
+      } catch (e) {}
+    }
+  }
+  return appConfig.roomGalleries[key];
+}
+
 function deleteGalleryPhoto(taskId, photoId) {
-  if (!appConfig.galleries || !appConfig.galleries[taskId]) return;
-  const list = appConfig.galleries[taskId];
+  const roomDict = getActiveRoomGalleryDict();
+  if (!roomDict || !roomDict[taskId]) return;
+  const list = roomDict[taskId];
   const idx = list.findIndex(p => p.id === photoId);
   if (idx === -1) return;
 
@@ -1578,6 +1923,10 @@ function deleteCustomGalleryFolder(folderId) {
   }
 
   folders.splice(idx, 1);
+  const roomDict = getActiveRoomGalleryDict();
+  if (roomDict && roomDict[folderId]) {
+    delete roomDict[folderId];
+  }
   if (appConfig.galleries && appConfig.galleries[folderId]) {
     delete appConfig.galleries[folderId];
   }
@@ -1609,14 +1958,14 @@ function renderClassroomGallery() {
     return;
   }
 
-  if (!appConfig.galleries) appConfig.galleries = {};
+  const roomDict = getActiveRoomGalleryDict();
   if (!activeGalleryTaskId || !allCategories.some(c => c.id === activeGalleryTaskId)) {
     activeGalleryTaskId = allCategories[0].id;
   }
 
   // Render Tabs
   tabsContainer.innerHTML = allCategories.map(c => {
-    const count = (appConfig.galleries[c.id] || []).length;
+    const count = (roomDict[c.id] || []).length;
     const isActive = c.id === activeGalleryTaskId;
     return `
       <button class="gallery-task-tab ${isActive ? 'active' : ''}" data-task-id="${c.id}">
@@ -1669,8 +2018,8 @@ function renderClassroomGallery() {
     }
   }
 
-  // Render Photos for Active Assignment
-  const photos = appConfig.galleries[activeGalleryTaskId] || [];
+  // Render Photos for Active Assignment in this Classroom
+  const photos = roomDict[activeGalleryTaskId] || [];
 
   let cardsHtml = '';
 
@@ -1806,6 +2155,11 @@ function openStudentProfileModal(student) {
   const content = document.getElementById('studentProfileContent');
   if (!modal || !content) return;
 
+  if (!student.badges) student.badges = [];
+  if (!student.cards) student.cards = [];
+  if (!student.checklist) student.checklist = {};
+  autoEvaluateStudentBadges(student);
+
   const scale = getClassScoreScale(currentGrade);
   const totalScore = calcStudentTotalScore(student, currentGrade);
   const sc = calcStudentAssignmentScore(student, currentGrade);
@@ -1868,12 +2222,69 @@ function openStudentProfileModal(student) {
     </div>
   `;
 
+  // Badges Showcase (20 Illustrated Badges)
+  const earnedBadges = student.badges || [];
+  const earnedBadgesCount = earnedBadges.length;
+  const badgesListHtml = ART_BADGES.map(b => {
+    const isEarned = earnedBadges.includes(b.id);
+    return `
+      <div class="profile-badge-card ${isEarned ? 'badge-earned' : 'badge-locked'}" title="${b.title}: ${b.desc}">
+        <div class="badge-icon-wrap" style="${isEarned ? `background: ${b.theme};` : ''}">
+          ${isEarned ? b.icon : '🔒'}
+        </div>
+        <div class="badge-info-wrap">
+          <div class="badge-card-title">${b.title}</div>
+          <div class="badge-card-desc">${b.desc}</div>
+          <div class="badge-card-status">${isEarned ? '✨ ปลดล็อกแล้ว' : 'ยังไม่ปลดล็อก'}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Holographic Cards Vault (6 Art Cards)
+  const earnedCards = student.cards || [];
+  const totalDrawTickets = Math.floor(earnedBadgesCount / 5);
+  const remainingTickets = Math.max(0, totalDrawTickets - earnedCards.length);
+
+  const cardsListHtml = ART_CARDS.map(card => {
+    const isUnlocked = earnedCards.includes(card.id);
+    if (isUnlocked) {
+      return `
+        <div class="art-holo-card holo-unlocked" style="background: ${card.gradient};" title="${card.thaiTitle} - ${card.power}">
+          <div class="holo-shimmer"></div>
+          <div class="holo-card-inner">
+            <div class="holo-card-rarity">${card.rarityLabel}</div>
+            <div class="holo-card-icon">${card.icon}</div>
+            <div class="holo-card-title">${card.title}</div>
+            <div class="holo-card-thai">${card.thaiTitle}</div>
+            <div class="holo-card-power">${card.power}</div>
+            <div class="holo-card-desc">${card.desc}</div>
+          </div>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="art-holo-card holo-locked" title="การ์ดพลังศิลปะ (ยังไม่ปลดล็อก)">
+          <div class="holo-shimmer"></div>
+          <div class="holo-card-inner">
+            <div class="holo-card-rarity" style="color: #94A3B8;">🔒 ยังไม่ปลดล็อก</div>
+            <div class="holo-card-icon" style="filter: grayscale(1); opacity: 0.5;">🎴</div>
+            <div class="holo-card-title" style="color: #64748B;">LOCKED CARD</div>
+            <div class="holo-card-desc" style="color: #94A3B8; font-size: 0.75rem; margin-top: 10px;">
+              สะสมเหรียญตราครบ 5 เหรียญ เพื่อรับสิทธิ์สุ่มการ์ดพลัง!
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }).join('');
+
   content.innerHTML = `
     <div class="passport-hero-banner">
       <div class="passport-student-header">
-        <div class="passport-avatar-box" id="profileAvatarBox" style="position: relative; cursor: ${isTeacher ? 'pointer' : 'default'};" title="${isTeacher ? 'คลิกเพื่อเปลี่ยนรูปถ่าย' : student.name}">
+        <div class="passport-avatar-box" id="profileAvatarBox" style="position: relative; cursor: pointer;" title="แตะเพื่อเปลี่ยนรูปถ่ายประจำตัว (ถ่ายรูปหรือเลือกรูป)">
           ${avatarDisplay}
-          ${isTeacher ? '<div style="position: absolute; bottom: -6px; right: -6px; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 1rem;">📷</div>' : ''}
+          <div style="position: absolute; bottom: -4px; right: -4px; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.25); font-size: 0.95rem; line-height: 1;" title="เปลี่ยนรูปถ่าย">📷</div>
         </div>
         <div class="passport-info">
           <h3>${student.name}</h3>
@@ -1914,7 +2325,44 @@ function openStudentProfileModal(student) {
         </div>
       </div>
 
-      <!-- Student Artwork Portfolio Section (อาจารย์อัปได้เท่านั้น) -->
+      <!-- ART BADGES SECTION (20 Badges Collection) -->
+      <div class="passport-scores-card">
+        <div class="scores-card-header">
+          <div>
+            <h4 style="font-size: 1.05rem; font-weight: 800; color: #1E293B;">🏅 คอลเลกชันเหรียญตราศิลปะ (${earnedBadgesCount} / 20 เหรียญ)</h4>
+            <p style="font-size: 0.8rem; color: #64748B;">เหรียญเกียรติยศสะท้อนทักษะ พฤติกรรม และความตั้งใจในห้องเรียนศิลปะ</p>
+          </div>
+        </div>
+        <div class="profile-badges-grid">
+          ${badgesListHtml}
+        </div>
+      </div>
+
+      <!-- HOLOGRAPHIC CARDS VAULT (Placeholder & Draw System) -->
+      <div class="passport-scores-card">
+        <div class="scores-card-header" style="flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h4 style="font-size: 1.05rem; font-weight: 800; color: #1E293B;">✨ คลังการ์ดพลังศิลปะโฮโลแกรม (${earnedCards.length} / ${ART_CARDS.length} ใบ)</h4>
+            <p style="font-size: 0.8rem; color: #64748B;">
+              สะสมเหรียญตราครบทุก 5 เหรียญ = สิทธิ์สุ่มการ์ดพลัง 1 ใบ (สิทธิ์สุ่มคงเหลือ: <strong style="color: #4F46E5;">${remainingTickets}</strong> สิทธิ์)
+            </p>
+          </div>
+          ${remainingTickets > 0 ? `
+            <button type="button" id="btnDrawCard" class="btn btn-sm btn-art-primary" style="animation: pulse 1.8s infinite; background: linear-gradient(135deg, #EC4899, #8B5CF6); border: none;">
+              <span>🎴 สุ่มจับการ์ดพลัง (เหลือ ${remainingTickets} สิทธิ์)</span>
+            </button>
+          ` : `
+            <span style="font-size: 0.8rem; color: #94A3B8; background: #F1F5F9; padding: 4px 12px; border-radius: 9999px;">
+              สะสมอีก ${5 - (earnedBadgesCount % 5 === 0 && earnedBadgesCount > 0 && remainingTickets === 0 ? 5 : earnedBadgesCount % 5)} เหรียญเพื่อรับสิทธิ์สุ่มถัดไป
+            </span>
+          `}
+        </div>
+        <div class="profile-cards-grid">
+          ${cardsListHtml}
+        </div>
+      </div>
+
+      <!-- Student Artwork Portfolio Section -->
       <div class="passport-scores-card">
         <div class="scores-card-header">
           <div>
@@ -1940,44 +2388,51 @@ function openStudentProfileModal(student) {
     </div>
   `;
 
-  // Hidden File input for changing Avatar
-  const avatarFileHidden = document.createElement('input');
-  avatarFileHidden.type = 'file';
-  avatarFileHidden.accept = 'image/*';
-  avatarFileHidden.style.display = 'none';
-  document.body.appendChild(avatarFileHidden);
-
-  content.querySelector('#profileAvatarBox').addEventListener('click', () => {
-    if (!getLoggedInTeacher()) {
-      showToast("🔒 สำหรับอาจารย์ผู้สอนเท่านั้น กรุณาเข้าสู่ระบบครูเพื่อเปลี่ยนรูปถ่าย");
-      return;
-    }
-    avatarFileHidden.click();
-  });
-
-  avatarFileHidden.addEventListener('change', async (e) => {
-    if (e.target.files.length > 0) {
-      try {
-        const resizedBase64 = await resizeImageToCanvas(e.target.files[0], 250, 250, 0.85);
-        student.avatar = resizedBase64;
-        saveDataToStorage();
-        apiPost({
-          action: 'save_student',
-          grade: currentGrade,
-          room: currentRoom,
-          student: student
-        });
-        artSound.playCamera();
-        showToast(`อัปเดตรูปถ่ายของ ${student.name} เรียบร้อยแล้ว! 📸`);
-        openStudentProfileModal(student);
-        if (currentView === 'leaderboard') renderLeaderboardView();
-        else if (currentView === 'teacher') renderTeacherView();
-      } catch (err) {
-        alert("ไม่สามารถบันทึกรูปภาพได้: " + err.message);
+  // Student Self-Avatar Upload Handler (Direct click on avatar box)
+  const selfAvatarInput = document.getElementById('studentAvatarSelfFileInput');
+  if (selfAvatarInput) {
+    selfAvatarInput.onchange = async (e) => {
+      if (e.target.files && e.target.files[0]) {
+        try {
+          const resizedBase64 = await resizeImageToCanvas(e.target.files[0], 250, 250, 0.85);
+          student.avatar = resizedBase64;
+          saveDataToStorage();
+          apiPost({
+            action: 'save_student',
+            grade: currentGrade,
+            room: currentRoom,
+            student: student
+          });
+          artSound.playCamera();
+          confettiEngine.fire(40);
+          showToast(`อัปเดตรูปประจำตัวของ ${student.name} เรียบร้อยแล้ว! 📸`);
+          openStudentProfileModal(student);
+          if (currentView === 'leaderboard') renderLeaderboardView();
+          else if (currentView === 'teacher') renderTeacherView();
+        } catch (err) {
+          alert("ไม่สามารถบันทึกรูปภาพได้: " + err.message);
+        }
       }
-    }
-    avatarFileHidden.remove();
-  });
+    };
+  }
+
+  const avatarBox = content.querySelector('#profileAvatarBox');
+  if (avatarBox) {
+    avatarBox.addEventListener('click', () => {
+      if (selfAvatarInput) {
+        selfAvatarInput.value = '';
+        selfAvatarInput.click();
+      }
+    });
+  }
+
+  // Draw Card Button Listener
+  const btnDraw = content.querySelector('#btnDrawCard');
+  if (btnDraw) {
+    btnDraw.addEventListener('click', () => {
+      drawRandomCard(student);
+    });
+  }
 
   // Upload Artwork Listener (Teacher Only)
   const uploadArtBtn = content.querySelector('#uploadMyArtworkBtn');
@@ -2024,12 +2479,12 @@ function openStudentProfileModal(student) {
               student: student
             });
 
-            artSound.playFanfare();
+            artSound.playSaveChime();
             confettiEngine.fire(50);
-            showToast(`เพิ่มผลงาน "${title}" เข้าสู่แกลเลอรีของ ${student.name} แล้ว! 🎨`);
+            showToast(`เพิ่มผลงานศิลปะ "${title.trim()}" เรียบร้อยแล้ว! 🎨`);
             openStudentProfileModal(student);
           } catch (err) {
-            alert("เกิดข้อผิดพลาดในการอัปโหลด: " + err.message);
+            alert("ไม่สามารถบันทึกภาพผลงานได้: " + err.message);
           }
         }
         artFileHidden.remove();
@@ -2037,7 +2492,7 @@ function openStudentProfileModal(student) {
     });
   }
 
-  // Delete Artwork Listener
+  // Delete Artwork Listeners (Teacher Only)
   content.querySelectorAll('.delete-art-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -2073,6 +2528,324 @@ function openStudentDetailModal(student) {
 function closeStudentDetailModal() {
   closeStudentProfileModal();
 }
+
+// ==========================================
+// 10.5 BADGE MANAGER & HOLOGRAPHIC CARD SYSTEM
+// ==========================================
+let currentBadgeStudent = null;
+
+function openBadgeManagerModal(student) {
+  currentBadgeStudent = student;
+  const modal = document.getElementById('badgeManagerModal');
+  if (!modal || !student) return;
+
+  if (!student.badges) student.badges = [];
+  if (!student.cards) student.cards = [];
+  if (!student.checklist) student.checklist = {};
+
+  const titleEl = document.getElementById('badgeManagerStudentTitle');
+  const subEl = document.getElementById('badgeManagerStudentSub');
+  if (titleEl) {
+    titleEl.textContent = `🏅 จัดการเหรียญตรา & เช็คเกณฑ์งาน: ${student.name} (เลขที่ ${student.no})`;
+  }
+  if (subEl) {
+    subEl.textContent = `${getGradeLabel(currentGrade)} ห้อง ${currentRoom} • ติ๊กเกณฑ์รายชิ้นงานครบ 3 ครั้งปลดล็อกเหรียญทันที หรือมอบเหรียญพิเศษได้โดยตรง`;
+  }
+
+  // Set active tab to checklist by default
+  const tabChecklistBtn = document.getElementById('tabChecklistBtn');
+  const tabQuickBadgesBtn = document.getElementById('tabQuickBadgesBtn');
+  const paneChecklist = document.getElementById('badgeTabChecklistContent');
+  const paneQuick = document.getElementById('badgeTabQuickBadgesContent');
+
+  if (tabChecklistBtn && tabQuickBadgesBtn && paneChecklist && paneQuick) {
+    tabChecklistBtn.classList.add('active');
+    tabQuickBadgesBtn.classList.remove('active');
+    paneChecklist.classList.remove('hidden');
+    paneQuick.classList.add('hidden');
+  }
+
+  renderBadgeChecklistTable(student);
+  renderQuickGrantBadges(student);
+  updateBadgeManagerCount(student);
+
+  modal.classList.remove('hidden');
+  artSound.playPop();
+}
+
+function updateBadgeManagerCount(student) {
+  const countEl = document.getElementById('badgeManagerEarnedCount');
+  if (countEl) {
+    const count = (student.badges || []).length;
+    countEl.innerHTML = `ปลดล็อกแล้ว: <strong>${count}</strong> / 20 เหรียญ (ได้รับสิทธิ์การ์ด ${Math.floor(count / 5)} ใบ)`;
+  }
+}
+
+function renderBadgeChecklistTable(student) {
+  const thead = document.getElementById('badgeChecklistTableHead');
+  const tbody = document.getElementById('badgeChecklistTableBody');
+  if (!thead || !tbody) return;
+
+  const tasks = getActiveAssignments();
+  if (!student.checklist) student.checklist = {};
+
+  thead.innerHTML = `
+    <tr>
+      <th style="min-width: 190px; text-align: left;">เกณฑ์ประเมิน (จากภาพบรีฟครู)</th>
+      ${tasks.map((t, idx) => `
+        <th style="min-width: 75px; text-align: center;" title="${t.title}">งาน ${idx + 1}</th>
+      `).join('')}
+      <th style="min-width: 95px; text-align: center;">สะสม (ครั้ง)</th>
+      <th style="min-width: 140px; text-align: center;">สถานะเหรียญตรา</th>
+    </tr>
+  `;
+
+  tbody.innerHTML = CHECKLIST_CRITERIA.map(crit => {
+    let checkCount = 0;
+    const taskCells = tasks.map(t => {
+      const taskChecklist = student.checklist[t.id] || {};
+      const isChecked = !!taskChecklist[crit.key];
+      if (isChecked) checkCount++;
+      return `
+        <td style="text-align: center;">
+          <input type="checkbox" class="checklist-cell-checkbox" 
+            data-student-id="${student.id}" 
+            data-task-id="${t.id}" 
+            data-key="${crit.key}" 
+            ${isChecked ? 'checked' : ''} 
+            style="width: 18px; height: 18px; cursor: pointer; accent-color: #4F46E5;">
+        </td>
+      `;
+    }).join('');
+
+    const bDef = ART_BADGES.find(b => b.id === crit.badgeId);
+    const hasBadge = (student.badges || []).includes(crit.badgeId);
+    const target = (bDef && bDef.target) ? bDef.target : 3;
+    const isUnlocked = hasBadge || checkCount >= target;
+
+    return `
+      <tr>
+        <td>
+          <div style="font-weight: 700; color: #1E293B;">${crit.label}</div>
+          <div style="font-size: 0.75rem; color: #64748B;">${crit.desc}</div>
+        </td>
+        ${taskCells}
+        <td style="text-align: center; font-weight: 800; font-size: 0.95rem; color: ${checkCount >= target ? '#059669' : '#475569'};">
+          ${checkCount} / ${target}
+        </td>
+        <td style="text-align: center;">
+          ${isUnlocked ? `
+            <span style="display: inline-flex; align-items: center; gap: 4px; background: #ECFDF5; color: #065F46; padding: 3px 8px; border-radius: 9999px; font-weight: 700; font-size: 0.78rem; border: 1px solid #A7F3D0;">
+              <span>${bDef ? bDef.icon : '✨'}</span> ปลดล็อกแล้ว!
+            </span>
+          ` : `
+            <span style="font-size: 0.78rem; color: #94A3B8;">
+              ขาดอีก ${Math.max(0, target - checkCount)} ครั้ง
+            </span>
+          `}
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('.checklist-cell-checkbox').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const taskId = e.target.getAttribute('data-task-id');
+      const key = e.target.getAttribute('data-key');
+      const checked = e.target.checked;
+
+      if (!student.checklist[taskId]) student.checklist[taskId] = {};
+      student.checklist[taskId][key] = checked;
+
+      const crit = CHECKLIST_CRITERIA.find(c => c.key === key);
+      if (crit && crit.badgeId) {
+        const bDef = ART_BADGES.find(b => b.id === crit.badgeId);
+        const target = (bDef && bDef.target) ? bDef.target : 3;
+        let cnt = 0;
+        tasks.forEach(t => {
+          if (student.checklist[t.id] && student.checklist[t.id][key]) cnt++;
+        });
+
+        if (cnt >= target && !student.badges.includes(crit.badgeId)) {
+          student.badges.push(crit.badgeId);
+          artSound.playChime();
+          confettiEngine.fire(50);
+          showToast(`🎉 ยินดีด้วย! ${student.name} ได้รับเหรียญ "${bDef ? bDef.title : crit.badgeId}" เรียบร้อยแล้ว!`);
+        }
+      }
+
+      autoEvaluateStudentBadges(student);
+      renderBadgeChecklistTable(student);
+      renderQuickGrantBadges(student);
+      updateBadgeManagerCount(student);
+    });
+  });
+}
+
+function renderQuickGrantBadges(student) {
+  const container = document.getElementById('quickGrantBadgesGrid');
+  if (!container) return;
+
+  if (!student.badges) student.badges = [];
+
+  container.innerHTML = ART_BADGES.map(b => {
+    const isGranted = student.badges.includes(b.id);
+    return `
+      <div class="quick-badge-card ${isGranted ? 'granted' : ''}" data-badge-id="${b.id}" style="
+        display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; cursor: pointer; transition: all 0.2s ease;
+        border: 2px solid ${isGranted ? '#F59E0B' : '#E2E8F0'};
+        background: ${isGranted ? '#FEF9C3' : '#F8FAFC'};
+      ">
+        <div style="
+          width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+          background: ${isGranted ? b.theme : '#CBD5E1'}; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        ">
+          ${b.icon}
+        </div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-weight: 700; font-size: 0.82rem; color: #1E293B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${b.title}
+          </div>
+          <div style="font-size: 0.72rem; color: #64748B;">${b.desc}</div>
+        </div>
+        <div style="font-size: 1.1rem; flex-shrink: 0;">
+          ${isGranted ? '✅' : '⚪'}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.quick-badge-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const bId = card.getAttribute('data-badge-id');
+      const bDef = ART_BADGES.find(b => b.id === bId);
+      const idx = student.badges.indexOf(bId);
+      if (idx !== -1) {
+        student.badges.splice(idx, 1);
+        artSound.playPop();
+      } else {
+        student.badges.push(bId);
+        artSound.playChime();
+        confettiEngine.fire(40);
+        showToast(`มอบเหรียญ "${bDef ? bDef.title : bId}" ให้ ${student.name} เรียบร้อย! ✨`);
+      }
+
+      autoEvaluateStudentBadges(student);
+      renderBadgeChecklistTable(student);
+      renderQuickGrantBadges(student);
+      updateBadgeManagerCount(student);
+    });
+  });
+}
+
+function saveBadgeManager() {
+  if (!currentBadgeStudent) return;
+  saveDataToStorage();
+  apiPost({
+    action: 'save_student',
+    grade: currentGrade,
+    room: currentRoom,
+    student: currentBadgeStudent
+  });
+  artSound.playSaveChime();
+  showToast(`บันทึกข้อมูลเหรียญและเกณฑ์งานของ ${currentBadgeStudent.name} เรียบร้อยแล้ว! 🏅`);
+  closeBadgeManagerModal();
+  renderTeacherView();
+}
+
+function closeBadgeManagerModal() {
+  const modal = document.getElementById('badgeManagerModal');
+  if (modal) modal.classList.add('hidden');
+  currentBadgeStudent = null;
+}
+
+function drawRandomCard(student) {
+  if (!student) return;
+  if (!student.badges) student.badges = [];
+  if (!student.cards) student.cards = [];
+
+  const earnedBadgesCount = student.badges.length;
+  const cardsCount = student.cards.length;
+  const totalTickets = Math.floor(earnedBadgesCount / 5);
+  const remainingTickets = Math.max(0, totalTickets - cardsCount);
+
+  if (remainingTickets <= 0) {
+    showToast("⚠️ ยังไม่มีสิทธิ์สุ่มการ์ด ต้องสะสมเหรียญตราครบทุก 5 เหรียญเพื่อรับ 1 สิทธิ์!");
+    return;
+  }
+
+  const unownedCards = ART_CARDS.filter(c => !student.cards.includes(c.id));
+  const pool = unownedCards.length > 0 ? unownedCards : ART_CARDS;
+  const drawnCard = pool[Math.floor(Math.random() * pool.length)];
+
+  if (!student.cards.includes(drawnCard.id)) {
+    student.cards.push(drawnCard.id);
+  }
+
+  if (student.cards.length >= 3 && !student.badges.includes('card_master')) {
+    student.badges.push('card_master');
+  }
+
+  saveDataToStorage();
+  apiPost({
+    action: 'save_student',
+    grade: currentGrade,
+    room: currentRoom,
+    student: student
+  });
+
+  const modal = document.getElementById('cardDrawModal');
+  const container = document.getElementById('cardDrawContainer');
+  if (modal && container) {
+    container.innerHTML = `
+      <div class="card-draw-reveal" style="text-align: center; padding: 20px;">
+        <div style="font-size: 2.4rem; animation: bounce 1s infinite;">🎉✨</div>
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: #1E293B; margin-top: 6px;">
+          ยินดีด้วย! คุณได้รับการ์ดพลังใหม่
+        </h2>
+        <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 20px;">
+          สิทธิ์สุ่มการ์ดจากการสะสมเหรียญตราของ ${student.name}
+        </p>
+
+        <div class="art-holo-card holo-unlocked" style="background: ${drawnCard.gradient}; margin: 0 auto; width: 220px; height: 320px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);">
+          <div class="holo-shimmer"></div>
+          <div class="holo-card-inner">
+            <div class="holo-card-rarity">${drawnCard.rarityLabel}</div>
+            <div class="holo-card-icon" style="font-size: 3.5rem;">${drawnCard.icon}</div>
+            <div class="holo-card-title">${drawnCard.title}</div>
+            <div class="holo-card-thai">${drawnCard.thaiTitle}</div>
+            <div class="holo-card-power">${drawnCard.power}</div>
+            <div class="holo-card-desc" style="font-size: 0.78rem;">${drawnCard.desc}</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <button type="button" id="confirmCardDrawBtn" class="btn btn-art-primary" style="padding: 10px 28px; font-size: 1rem; border-radius: 9999px;">
+            ✨ เก็บเข้าคลังการ์ด
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+    artSound.playFanfare();
+    confettiEngine.fire(80);
+
+    const confirmBtn = container.querySelector('#confirmCardDrawBtn');
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', () => {
+        closeCardDrawModal();
+        openStudentProfileModal(student);
+      });
+    }
+  }
+}
+
+function closeCardDrawModal() {
+  const modal = document.getElementById('cardDrawModal');
+  if (modal) modal.classList.add('hidden');
+}
+
 
 // ==========================================
 // 11. TEACHER PORTAL & SCORING TABLE (ตรงตามบรีฟภาพ 3)
@@ -2126,6 +2899,7 @@ function renderTeacherView() {
     headHtml += `<th style="min-width: 65px; text-align: center;">เกรด</th>`;
   }
 
+  headHtml += `<th style="min-width: 95px; text-align: center;">เหรียญตรา</th>`;
   headHtml += `<th style="width: 90px; text-align: center;">จัดการ</th>`;
 
   theadRow.innerHTML = headHtml;
@@ -2133,7 +2907,7 @@ function renderTeacherView() {
   const tbody = document.getElementById('teacherTableBody');
   tbody.innerHTML = '';
 
-  const colSpanCount = (scale.hasGrade ? 7 : 6) + tasks.length;
+  const colSpanCount = (scale.hasGrade ? 8 : 7) + tasks.length;
 
   if (sortedByNo.length === 0) {
     tbody.innerHTML = `
@@ -2221,6 +2995,11 @@ function renderTeacherView() {
     }
 
     rowHtml += `
+      <td style="text-align: center;">
+        <button type="button" class="btn btn-sm btn-badge-manage" data-student-id="${student.id}" style="background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #B45309; border: 1px solid #FCD34D; font-weight: 700; border-radius: 9999px; padding: 3px 10px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="เปิดระบบเช็กเกณฑ์เหรียญ & มอบเหรียญตรา">
+          🏅 ${(student.badges || []).length} เหรียญ
+        </button>
+      </td>
       <td>
         <div class="table-actions-cell">
           <button class="btn-icon-sm view-profile-btn" title="ดูผลงาน & โปรไฟล์">👁️</button>
@@ -2231,6 +3010,11 @@ function renderTeacherView() {
     `;
 
     tr.innerHTML = rowHtml;
+
+    const badgeManageBtn = tr.querySelector('.btn-badge-manage');
+    if (badgeManageBtn) {
+      badgeManageBtn.addEventListener('click', () => openBadgeManagerModal(student));
+    }
 
     // Helper to refresh calculated columns in row
     const refreshRowCalculations = () => {
@@ -3286,7 +4070,7 @@ function switchView(viewName) {
 
   const gallerySec = document.getElementById('classroomGallerySection');
   if (gallerySec) {
-    if (viewName === 'home' || viewName === 'leaderboard') {
+    if (viewName === 'leaderboard') {
       gallerySec.style.display = 'block';
       renderClassroomGallery();
     } else {
@@ -3866,8 +4650,8 @@ async function handleGalleryUploadSubmit(e) {
     return;
   }
 
-  if (!appConfig.galleries) appConfig.galleries = {};
-  if (!appConfig.galleries[taskId]) appConfig.galleries[taskId] = [];
+  const roomDict = getActiveRoomGalleryDict();
+  if (!roomDict[taskId]) roomDict[taskId] = [];
 
   const newPhoto = {
     id: `photo_${Date.now()}`,
@@ -3876,13 +4660,13 @@ async function handleGalleryUploadSubmit(e) {
     url: currentGalleryUploadBase64
   };
 
-  appConfig.galleries[taskId].push(newPhoto);
+  roomDict[taskId].push(newPhoto);
   saveConfigToStorage();
   apiPost({ action: 'save_config', config: appConfig });
 
   artSound.playFanfare();
   confettiEngine.fire(60);
-  showToast("บันทึกภาพกิจกรรมเข้าสู่แกลเลอรีเรียบร้อยแล้ว! 📸");
+  showToast("บันทึกภาพกิจกรรมเข้าสู่แกลเลอรีของห้องเรียบร้อยแล้ว! 📸");
   closeGalleryUploadModal();
   renderClassroomGallery();
 }
@@ -4987,6 +5771,36 @@ document.addEventListener('DOMContentLoaded', () => {
       renderTeacherView();
     }
   });
+
+  // Badge Manager Modal Tabs & Buttons
+  const closeBadgeModalBtn = document.getElementById('closeBadgeManagerModalBtn');
+  if (closeBadgeModalBtn) closeBadgeModalBtn.addEventListener('click', closeBadgeManagerModal);
+
+  const saveBadgeModalBtn = document.getElementById('saveBadgeManagerBtn');
+  if (saveBadgeModalBtn) saveBadgeModalBtn.addEventListener('click', saveBadgeManager);
+
+  const tabChecklistBtn = document.getElementById('tabChecklistBtn');
+  const tabQuickBadgesBtn = document.getElementById('tabQuickBadgesBtn');
+  const paneChecklist = document.getElementById('badgeTabChecklistContent');
+  const paneQuick = document.getElementById('badgeTabQuickBadgesContent');
+
+  if (tabChecklistBtn && tabQuickBadgesBtn && paneChecklist && paneQuick) {
+    tabChecklistBtn.addEventListener('click', () => {
+      tabChecklistBtn.classList.add('active');
+      tabQuickBadgesBtn.classList.remove('active');
+      paneChecklist.classList.remove('hidden');
+      paneQuick.classList.add('hidden');
+    });
+    tabQuickBadgesBtn.addEventListener('click', () => {
+      tabQuickBadgesBtn.classList.add('active');
+      tabChecklistBtn.classList.remove('active');
+      paneQuick.classList.remove('hidden');
+      paneChecklist.classList.add('hidden');
+    });
+  }
+
+  const closeCardDrawBtn = document.getElementById('closeCardDrawModalBtn');
+  if (closeCardDrawBtn) closeCardDrawBtn.addEventListener('click', closeCardDrawModal);
 
   // 15. Initial Render, Auth State & Cloud DB Sync
   updateTeacherAuthUI();

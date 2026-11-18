@@ -48,12 +48,21 @@ async function ensureTables() {
     );
   `;
 
-  // Auto-migrate avatar to TEXT and add portfolio column if not exist
+  // Auto-migrate avatar to TEXT and add portfolio, badges, cards, checklist columns if not exist
   try {
     await sql`ALTER TABLE art_students ALTER COLUMN avatar TYPE TEXT;`;
   } catch (err) {}
   try {
     await sql`ALTER TABLE art_students ADD COLUMN IF NOT EXISTS portfolio JSONB DEFAULT '[]'::jsonb;`;
+  } catch (err) {}
+  try {
+    await sql`ALTER TABLE art_students ADD COLUMN IF NOT EXISTS badges JSONB DEFAULT '[]'::jsonb;`;
+  } catch (err) {}
+  try {
+    await sql`ALTER TABLE art_students ADD COLUMN IF NOT EXISTS cards JSONB DEFAULT '[]'::jsonb;`;
+  } catch (err) {}
+  try {
+    await sql`ALTER TABLE art_students ADD COLUMN IF NOT EXISTS checklist JSONB DEFAULT '{}'::jsonb;`;
   } catch (err) {}
 
   // Initialize default art_config ONLY if it does not exist yet (never overwrite user edits)

@@ -1092,6 +1092,86 @@
     </div>
   </div>
 
+  <!-- Hidden File Input for Student Self Avatar Upload -->
+  <input type="file" id="studentAvatarSelfFileInput" accept="image/*" style="display: none;">
+
+  <!-- ================= MODAL: TEACHER BADGE & CHECKLIST MANAGER (จัดการเหรียญและเกณฑ์งาน) ================= -->
+  <div id="badgeManagerModal" class="modal-overlay hidden">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-emoji">🏅</span>
+          <div>
+            <h3 id="badgeManagerStudentTitle">จัดการเหรียญตรา & เช็คเกณฑ์งาน</h3>
+            <p id="badgeManagerStudentSub" style="font-size: 0.85rem; color: #64748B; margin-top: 2px;">
+              ติ๊กเกณฑ์การตรวจงานรายชิ้นเพื่อปลดล็อกเหรียญตรา หรือคลิกมอบเหรียญพิเศษได้โดยตรง
+            </p>
+          </div>
+        </div>
+        <button id="closeBadgeManagerModalBtn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <div class="badge-manager-body">
+        <!-- Tabs: Checklist Matrix vs Quick Grant Badges -->
+        <div class="badge-manager-tabs">
+          <button type="button" class="badge-tab-btn active" id="tabChecklistBtn">
+            📋 ตารางเช็คเกณฑ์รายชิ้นงาน
+          </button>
+          <button type="button" class="badge-tab-btn" id="tabQuickBadgesBtn">
+            🏅 มอบเหรียญตราโดยตรง (20 เหรียญ)
+          </button>
+        </div>
+
+        <!-- Tab 1: Checklist Matrix (matching client's sketch in Image 2) -->
+        <div id="badgeTabChecklistContent" class="badge-tab-pane">
+          <p style="font-size: 0.82rem; color: #64748B; margin-bottom: 10px;">
+            💡 ติ๊กเกณฑ์ในแต่ละชิ้นงานที่นักเรียนทำได้ เมื่อสะสมครบตามเกณฑ์ (เช่น 3 ครั้ง) เหรียญตราจะปลดล็อกอัตโนมัติ:
+          </p>
+          <div class="table-responsive">
+            <table class="badge-checklist-table" id="badgeChecklistTable">
+              <thead id="badgeChecklistTableHead">
+                <!-- Dynamically rendered -->
+              </thead>
+              <tbody id="badgeChecklistTableBody">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 2: Quick Grant Badges (20 Badges) -->
+        <div id="badgeTabQuickBadgesContent" class="badge-tab-pane hidden">
+          <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 12px;">
+            คลิกที่เหรียญตราเพื่อเปิด/ปิดการมอบเหรียญให้นักเรียนคนนี้ทันที:
+          </p>
+          <div class="quick-grant-badges-grid" id="quickGrantBadgesGrid">
+            <!-- 20 badges togglable -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center;">
+        <span id="badgeManagerEarnedCount" style="font-size: 0.9rem; font-weight: 700; color: #4F46E5;">
+          ปลดล็อกแล้ว: 0 / 20 เหรียญ
+        </span>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="closeBadgeManagerFooterBtn" class="btn btn-outline">ปิดหน้าต่าง</button>
+          <button type="button" id="saveBadgeManagerBtn" class="btn btn-art-primary">💾 บันทึกเหรียญตรา</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CARD DRAW CELEBRATION (เปิดสุ่มการ์ดพลัง) ================= -->
+  <div id="cardDrawModal" class="modal-overlay hidden">
+    <div class="modal-card modal-card-draw">
+      <button id="closeCardDrawModalBtn" class="close-modal-btn">&times;</button>
+      <div class="card-draw-container" id="cardDrawContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
   <!-- ================= MODAL 12: CLASSROOM GALLERY PHOTO LIGHTBOX ================= -->
   <div id="galleryPhotoModal" class="modal-overlay hidden">
     <div class="modal-card modal-lightbox-card">

@@ -35,7 +35,10 @@ module.exports = async (req, res) => {
           avatar: s.avatar,
           scores: typeof s.scores === 'string' ? JSON.parse(s.scores) : (s.scores || {}),
           feedback: s.feedback,
-          portfolio: typeof s.portfolio === 'string' ? JSON.parse(s.portfolio) : (s.portfolio || [])
+          portfolio: typeof s.portfolio === 'string' ? JSON.parse(s.portfolio) : (s.portfolio || []),
+          badges: typeof s.badges === 'string' ? JSON.parse(s.badges) : (s.badges || []),
+          cards: typeof s.cards === 'string' ? JSON.parse(s.cards) : (s.cards || []),
+          checklist: typeof s.checklist === 'string' ? JSON.parse(s.checklist) : (s.checklist || {})
         });
       });
 
@@ -58,9 +61,12 @@ module.exports = async (req, res) => {
         const { grade, room, student } = body;
         const scoresJson = JSON.stringify(student.scores || {});
         const portfolioJson = JSON.stringify(student.portfolio || []);
+        const badgesJson = JSON.stringify(student.badges || []);
+        const cardsJson = JSON.stringify(student.cards || []);
+        const checklistJson = JSON.stringify(student.checklist || {});
         await sql`
-          INSERT INTO art_students (id, grade_id, room_id, no, name, nickname, avatar, scores, feedback, portfolio, updated_at)
-          VALUES (${student.id}, ${grade}, ${room}, ${student.no}, ${student.name}, ${student.nickname}, ${student.avatar}, ${scoresJson}::jsonb, ${student.feedback || ''}, ${portfolioJson}::jsonb, NOW())
+          INSERT INTO art_students (id, grade_id, room_id, no, name, nickname, avatar, scores, feedback, portfolio, badges, cards, checklist, updated_at)
+          VALUES (${student.id}, ${grade}, ${room}, ${student.no}, ${student.name}, ${student.nickname}, ${student.avatar}, ${scoresJson}::jsonb, ${student.feedback || ''}, ${portfolioJson}::jsonb, ${badgesJson}::jsonb, ${cardsJson}::jsonb, ${checklistJson}::jsonb, NOW())
           ON CONFLICT (id) DO UPDATE SET
             no = EXCLUDED.no,
             name = EXCLUDED.name,
@@ -69,6 +75,9 @@ module.exports = async (req, res) => {
             scores = EXCLUDED.scores,
             feedback = EXCLUDED.feedback,
             portfolio = EXCLUDED.portfolio,
+            badges = EXCLUDED.badges,
+            cards = EXCLUDED.cards,
+            checklist = EXCLUDED.checklist,
             updated_at = NOW();
         `;
         return res.status(200).json({ success: true });
@@ -119,9 +128,12 @@ module.exports = async (req, res) => {
         for (const s of students) {
           const scoresJson = JSON.stringify(s.scores || {});
           const portfolioJson = JSON.stringify(s.portfolio || []);
+          const badgesJson = JSON.stringify(s.badges || []);
+          const cardsJson = JSON.stringify(s.cards || []);
+          const checklistJson = JSON.stringify(s.checklist || {});
           await sql`
-            INSERT INTO art_students (id, grade_id, room_id, no, name, nickname, avatar, scores, feedback, portfolio, updated_at)
-            VALUES (${s.id}, ${grade}, ${room}, ${s.no}, ${s.name}, ${s.nickname}, ${s.avatar}, ${scoresJson}::jsonb, ${s.feedback || ''}, ${portfolioJson}::jsonb, NOW())
+            INSERT INTO art_students (id, grade_id, room_id, no, name, nickname, avatar, scores, feedback, portfolio, badges, cards, checklist, updated_at)
+            VALUES (${s.id}, ${grade}, ${room}, ${s.no}, ${s.name}, ${s.nickname}, ${s.avatar}, ${scoresJson}::jsonb, ${s.feedback || ''}, ${portfolioJson}::jsonb, ${badgesJson}::jsonb, ${cardsJson}::jsonb, ${checklistJson}::jsonb, NOW())
             ON CONFLICT (id) DO UPDATE SET
               no = EXCLUDED.no,
               name = EXCLUDED.name,
@@ -130,6 +142,9 @@ module.exports = async (req, res) => {
               scores = EXCLUDED.scores,
               feedback = EXCLUDED.feedback,
               portfolio = EXCLUDED.portfolio,
+              badges = EXCLUDED.badges,
+              cards = EXCLUDED.cards,
+              checklist = EXCLUDED.checklist,
               updated_at = NOW();
           `;
         }
