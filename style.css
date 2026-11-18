@@ -65,25 +65,51 @@ body, button, input, select, textarea {
   font-family: var(--font-main);
 }
 
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-main);
   background-color: #F8FAFC;
-  background-image: 
-    linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.92)), 
-    url('assets/school_bg.jpg');
-  background-size: cover;
-  background-attachment: fixed;
-  background-position: 28% top; /* Anchors the school building & flagpole */
-  background-repeat: no-repeat;
   color: var(--text-main);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hardware-accelerated fixed background to completely eliminate scroll flickering */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  pointer-events: none;
+  background-color: #F8FAFC;
+  background-image: 
+    linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.92)), 
+    url('assets/school_bg.jpg');
+  background-size: cover;
+  background-position: 28% top; /* Anchors the school building & flagpole */
+  background-repeat: no-repeat;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 @media (max-width: 768px) {
-  body {
+  body::before {
     /* Crop in portrait/vertical mode to prominently display the flagpole (เสาธง) */
     background-position: 30% 12%;
     background-image: 
@@ -97,16 +123,24 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
   overflow: hidden;
+  contain: strict;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
 }
 
 .paint-blob {
   position: absolute;
-  filter: blur(55px);
-  opacity: 0.18;
+  filter: blur(50px);
+  opacity: 0.16;
   border-radius: 50%;
-  animation: floatMorph 16s ease-in-out infinite alternate;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  animation: floatMorph 18s ease-in-out infinite alternate;
 }
 
 .blob-1 { width: 480px; height: 480px; background: #FF5E7E; top: -100px; right: -80px; animation-duration: 20s; }
@@ -130,6 +164,11 @@ body {
   position: absolute;
   font-size: 2rem;
   opacity: 0.28;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   animation: floatDrift 14s infinite ease-in-out;
   user-select: none;
 }
@@ -140,15 +179,16 @@ body {
 .item-star { top: 75%; right: 18%; animation-delay: -8s; font-size: 1.8rem; }
 .item-easel { top: 5%; left: 45%; animation-delay: -11s; font-size: 2.1rem; }
 
+/* GPU-friendly pure 3D transform without border-radius redraws */
 @keyframes floatMorph {
-  0% { transform: translate(0, 0) scale(1) rotate(0deg); border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%; }
-  50% { transform: translate(30px, 40px) scale(1.1) rotate(120deg); border-radius: 60% 40% 30% 70% / 40% 60% 40% 60%; }
-  100% { transform: translate(-20px, -30px) scale(0.95) rotate(240deg); border-radius: 50% 50% 40% 60% / 50% 40% 60% 50%; }
+  0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate3d(30px, 40px, 0) scale(1.08) rotate(120deg); }
+  100% { transform: translate3d(-20px, -30px, 0) scale(0.95) rotate(240deg); }
 }
 
 @keyframes floatDrift {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-22px) rotate(15deg); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -22px, 0) rotate(15deg); }
 }
 
 /* Confetti Canvas */
@@ -157,6 +197,9 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 999;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
 }
 
 /* Layout Container */
@@ -258,14 +301,19 @@ body {
 
 /* Header */
 .app-header {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 2px dashed rgba(220, 224, 235, 0.8);
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .header-container {
