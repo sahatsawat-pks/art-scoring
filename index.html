@@ -1112,18 +1112,38 @@
       </div>
 
       <div class="badge-manager-body">
-        <!-- Tabs: Checklist Matrix vs Quick Grant Badges -->
+        <!-- Tabs: Quick Grant Badges vs Checklist Matrix -->
         <div class="badge-manager-tabs">
-          <button type="button" class="badge-tab-btn active" id="tabChecklistBtn">
-            📋 ตารางเช็คเกณฑ์รายชิ้นงาน
+          <button type="button" class="badge-tab-btn active" id="tabQuickBadgesBtn">
+            🏅 จัดการเหรียญรางวัล (20 เหรียญ)
           </button>
-          <button type="button" class="badge-tab-btn" id="tabQuickBadgesBtn">
-            🏅 มอบเหรียญตราโดยตรง (20 เหรียญ)
+          <button type="button" class="badge-tab-btn" id="tabChecklistBtn">
+            📋 ตารางเช็คเกณฑ์รายชิ้นงาน
           </button>
         </div>
 
-        <!-- Tab 1: Checklist Matrix (matching client's sketch in Image 2) -->
-        <div id="badgeTabChecklistContent" class="badge-tab-pane">
+        <!-- Tab 1: Quick Grant Badges (20 Badges) -->
+        <div id="badgeTabQuickBadgesContent" class="badge-tab-pane">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <p style="font-size: 0.85rem; color: #64748B; margin: 0;">
+              💡 <strong>คลิกที่เหรียญเพื่อเปิด (ให้) หรือ ปิด (ขอคืน)</strong>: เหรียญที่ได้รับจะ<strong>ขึ้นสี</strong> เหรียญที่ไม่ได้จะ<strong>ขึ้นสีเทา</strong>
+            </p>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" id="btnGrantAllBadges" class="btn btn-sm btn-outline" style="font-size: 0.75rem; padding: 3px 10px;">
+                ✨ มอบทั้งหมด
+              </button>
+              <button type="button" id="btnRevokeAllBadges" class="btn btn-sm btn-outline-danger" style="font-size: 0.75rem; padding: 3px 10px;">
+                ↩️ ขอคืนทั้งหมด
+              </button>
+            </div>
+          </div>
+          <div class="quick-grant-badges-grid" id="quickGrantBadgesGrid">
+            <!-- 20 badges togglable -->
+          </div>
+        </div>
+
+        <!-- Tab 2: Checklist Matrix -->
+        <div id="badgeTabChecklistContent" class="badge-tab-pane hidden">
           <p style="font-size: 0.82rem; color: #64748B; margin-bottom: 10px;">
             💡 ติ๊กเกณฑ์ในแต่ละชิ้นงานที่นักเรียนทำได้ เมื่อสะสมครบตามเกณฑ์ (เช่น 3 ครั้ง) เหรียญตราจะปลดล็อกอัตโนมัติ:
           </p>
@@ -1136,16 +1156,6 @@
                 <!-- Dynamically rendered -->
               </tbody>
             </table>
-          </div>
-        </div>
-
-        <!-- Tab 2: Quick Grant Badges (20 Badges) -->
-        <div id="badgeTabQuickBadgesContent" class="badge-tab-pane hidden">
-          <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 12px;">
-            คลิกที่เหรียญตราเพื่อเปิด/ปิดการมอบเหรียญให้นักเรียนคนนี้ทันที:
-          </p>
-          <div class="quick-grant-badges-grid" id="quickGrantBadgesGrid">
-            <!-- 20 badges togglable -->
           </div>
         </div>
       </div>

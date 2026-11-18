@@ -569,6 +569,7 @@ const CHECKLIST_CRITERIA = [
 function autoEvaluateStudentBadges(student) {
   if (!student) return;
   if (!student.badges) student.badges = [];
+  const revoked = student.revoked_badges || [];
   const tasks = getActiveAssignments();
   let perfectCount = 0;
   let submittedCount = 0;
@@ -581,19 +582,19 @@ function autoEvaluateStudentBadges(student) {
     }
   });
 
-  if (perfectCount >= 3 && !student.badges.includes('art_pro')) {
+  if (perfectCount >= 3 && !student.badges.includes('art_pro') && !revoked.includes('art_pro')) {
     student.badges.push('art_pro');
   }
-  if (perfectCount >= 5 && !student.badges.includes('master_of_god')) {
+  if (perfectCount >= 5 && !student.badges.includes('master_of_god') && !revoked.includes('master_of_god')) {
     student.badges.push('master_of_god');
   }
-  if (tasks.length > 0 && submittedCount === tasks.length && !student.badges.includes('mission_complete')) {
+  if (tasks.length > 0 && submittedCount === tasks.length && !student.badges.includes('mission_complete') && !revoked.includes('mission_complete')) {
     student.badges.push('mission_complete');
   }
-  if (student.badges.length >= 10 && !student.badges.includes('collector')) {
+  if (student.badges.length >= 10 && !student.badges.includes('collector') && !revoked.includes('collector')) {
     student.badges.push('collector');
   }
-  if ((student.cards || []).length >= 3 && !student.badges.includes('card_master')) {
+  if ((student.cards || []).length >= 3 && !student.badges.includes('card_master') && !revoked.includes('card_master')) {
     student.badges.push('card_master');
   }
 }
@@ -1721,7 +1722,7 @@ function buildPodiumSlotHtml(student, rank) {
     ? `<div class="student-mini-badges" style="justify-content: center; margin-top: 6px;">
         ${student.badges.map(bId => {
           const bDef = ART_BADGES.find(b => b.id === bId);
-          return bDef ? `<span class="mini-badge-pill" title="${bDef.title}"><span>${bDef.icon}</span></span>` : "";
+          return bDef ? `<img src="assets/badges/${bDef.id}.jpg" class="mini-badge-img" title="${bDef.title}: ${bDef.desc}" alt="${bDef.title}">` : "";
         }).join("")}
       </div>`
     : "";
@@ -1821,7 +1822,7 @@ function renderRankTable(ranked) {
       ? `<div class="student-mini-badges" style="margin-top: 4px;">
           ${student.badges.map(bId => {
             const bDef = ART_BADGES.find(b => b.id === bId);
-            return bDef ? `<span class="mini-badge-pill" title="${bDef.title}"><span>${bDef.icon}</span></span>` : '';
+            return bDef ? `<img src="assets/badges/${bDef.id}.jpg" class="mini-badge-img" title="${bDef.title}: ${bDef.desc}" alt="${bDef.title}">` : '';
           }).join('')}
         </div>`
       : '';
@@ -2224,20 +2225,22 @@ function openStudentProfileModal(student) {
     </div>
   `;
 
-  // Badges Showcase (20 Illustrated Badges)
+  // Badges Showcase (20 Illustrated Badges - Full Color when earned, Grayscale when unearned)
   const earnedBadges = student.badges || [];
   const earnedBadgesCount = earnedBadges.length;
   const badgesListHtml = ART_BADGES.map(b => {
     const isEarned = earnedBadges.includes(b.id);
     return `
       <div class="profile-badge-card ${isEarned ? 'badge-earned' : 'badge-locked'}" title="${b.title}: ${b.desc}">
-        <div class="badge-icon-wrap" style="${isEarned ? `background: ${b.theme};` : ''}">
-          ${isEarned ? b.icon : '🔒'}
-        </div>
-        <div class="badge-info-wrap">
-          <div class="badge-card-title">${b.title}</div>
-          <div class="badge-card-desc">${b.desc}</div>
-          <div class="badge-card-status">${isEarned ? '✨ ปลดล็อกแล้ว' : 'ยังไม่ปลดล็อก'}</div>
+        <img src="assets/badges/${b.id}.jpg" class="badge-img-circle ${isEarned ? 'is-earned' : 'is-unearned'}" alt="${b.title}" style="width: 72px; height: 72px; margin-bottom: 8px;">
+        <div class="badge-info-wrap" style="text-align: center; width: 100%;">
+          <div class="badge-card-title" style="font-weight: 700; font-size: 0.84rem; color: ${isEarned ? '#1E293B' : '#64748B'}; line-height: 1.3;">${b.title}</div>
+          <div class="badge-card-desc" style="font-size: 0.72rem; color: #64748B; margin-top: 3px;">${b.desc}</div>
+          <div style="margin-top: 6px;">
+            <span class="badge-status-chip ${isEarned ? 'unlocked' : 'locked'}">
+              ${isEarned ? '✨ ได้รับแล้ว' : '🔒 ยังไม่ได้รับ'}
+            </span>
+          </div>
         </div>
       </div>
     `;
@@ -2554,17 +2557,17 @@ function openBadgeManagerModal(student) {
     subEl.textContent = `${getGradeLabel(currentGrade)} ห้อง ${currentRoom} • ติ๊กเกณฑ์รายชิ้นงานครบ 3 ครั้งปลดล็อกเหรียญทันที หรือมอบเหรียญพิเศษได้โดยตรง`;
   }
 
-  // Set active tab to checklist by default
+  // Set active tab to 20 badges manager by default (ผู้สอนเปิด/ปิดให้เหรียญเด็กแต่ละคน)
   const tabChecklistBtn = document.getElementById('tabChecklistBtn');
   const tabQuickBadgesBtn = document.getElementById('tabQuickBadgesBtn');
   const paneChecklist = document.getElementById('badgeTabChecklistContent');
   const paneQuick = document.getElementById('badgeTabQuickBadgesContent');
 
   if (tabChecklistBtn && tabQuickBadgesBtn && paneChecklist && paneQuick) {
-    tabChecklistBtn.classList.add('active');
-    tabQuickBadgesBtn.classList.remove('active');
-    paneChecklist.classList.remove('hidden');
-    paneQuick.classList.add('hidden');
+    tabQuickBadgesBtn.classList.add('active');
+    tabChecklistBtn.classList.remove('active');
+    paneQuick.classList.remove('hidden');
+    paneChecklist.classList.add('hidden');
   }
 
   renderBadgeChecklistTable(student);
@@ -2689,29 +2692,25 @@ function renderQuickGrantBadges(student) {
   if (!container) return;
 
   if (!student.badges) student.badges = [];
+  if (!student.revoked_badges) student.revoked_badges = [];
 
   container.innerHTML = ART_BADGES.map(b => {
     const isGranted = student.badges.includes(b.id);
     return `
-      <div class="quick-badge-card ${isGranted ? 'granted' : ''}" data-badge-id="${b.id}" style="
-        display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; cursor: pointer; transition: all 0.2s ease;
-        border: 2px solid ${isGranted ? '#F59E0B' : '#E2E8F0'};
-        background: ${isGranted ? '#FEF9C3' : '#F8FAFC'};
-      ">
-        <div style="
-          width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-          background: ${isGranted ? b.theme : '#CBD5E1'}; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        ">
-          ${b.icon}
-        </div>
-        <div style="flex: 1; min-width: 0;">
-          <div style="font-weight: 700; font-size: 0.82rem; color: #1E293B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      <div class="quick-badge-card ${isGranted ? 'granted' : 'revoked'}" data-badge-id="${b.id}" title="${b.title}: ${b.desc} (คลิกเพื่อ ${isGranted ? 'ขอคืนเหรียญ' : 'มอบเหรียญ'})">
+        <img src="assets/badges/${b.id}.jpg" class="badge-img-circle ${isGranted ? 'is-earned' : 'is-unearned'}" alt="${b.title}">
+        <div class="quick-badge-info" style="flex: 1; min-width: 0;">
+          <div style="font-weight: 700; font-size: 0.88rem; color: ${isGranted ? '#1E293B' : '#64748B'}; line-height: 1.3;">
             ${b.title}
           </div>
-          <div style="font-size: 0.72rem; color: #64748B;">${b.desc}</div>
-        </div>
-        <div style="font-size: 1.1rem; flex-shrink: 0;">
-          ${isGranted ? '✅' : '⚪'}
+          <div style="font-size: 0.74rem; color: #64748B; margin-top: 2px;">
+            ${b.desc}
+          </div>
+          <div style="margin-top: 6px;">
+            <span class="badge-toggle-btn-pill ${isGranted ? 'pill-earned' : 'pill-unearned'}">
+              ${isGranted ? '✅ ได้รับแล้ว (คลิกเพื่อขอคืน)' : '⚪ ยังไม่ได้มอบ (คลิกเพื่อมอบ)'}
+            </span>
+          </div>
         </div>
       </div>
     `;
@@ -2722,22 +2721,72 @@ function renderQuickGrantBadges(student) {
       const bId = card.getAttribute('data-badge-id');
       const bDef = ART_BADGES.find(b => b.id === bId);
       const idx = student.badges.indexOf(bId);
+
       if (idx !== -1) {
         student.badges.splice(idx, 1);
+        if (!student.revoked_badges.includes(bId)) student.revoked_badges.push(bId);
         artSound.playPop();
+        showToast(`↩️ ขอคืนเหรียญ "${bDef ? bDef.title : bId}" จาก ${student.name} เรียบร้อยแล้ว`);
       } else {
         student.badges.push(bId);
+        student.revoked_badges = student.revoked_badges.filter(id => id !== bId);
         artSound.playChime();
         confettiEngine.fire(40);
-        showToast(`มอบเหรียญ "${bDef ? bDef.title : bId}" ให้ ${student.name} เรียบร้อย! ✨`);
+        showToast(`✨ มอบเหรียญ "${bDef ? bDef.title : bId}" ให้ ${student.name} เรียบร้อยแล้ว! 🏅`);
       }
 
-      autoEvaluateStudentBadges(student);
-      renderBadgeChecklistTable(student);
+      saveDataToStorage();
+      apiPost({
+        action: 'save_student',
+        grade: currentGrade,
+        room: currentRoom,
+        student: student
+      });
+
       renderQuickGrantBadges(student);
+      renderBadgeChecklistTable(student);
       updateBadgeManagerCount(student);
+      renderTeacherView();
     });
   });
+
+  // Grant All / Revoke All buttons
+  const grantAllBtn = document.getElementById('btnGrantAllBadges');
+  if (grantAllBtn) {
+    grantAllBtn.onclick = () => {
+      if (confirm(`คุณต้องการมอบเหรียญทั้งหมด (20 เหรียญ) ให้ ${student.name} ใช่หรือไม่?`)) {
+        student.badges = ART_BADGES.map(b => b.id);
+        student.revoked_badges = [];
+        saveDataToStorage();
+        apiPost({ action: 'save_student', grade: currentGrade, room: currentRoom, student });
+        artSound.playFanfare();
+        confettiEngine.fire(70);
+        showToast(`✨ มอบเหรียญทั้งหมด 20 เหรียญให้ ${student.name} เรียบร้อยแล้ว! 👑`);
+        renderQuickGrantBadges(student);
+        renderBadgeChecklistTable(student);
+        updateBadgeManagerCount(student);
+        renderTeacherView();
+      }
+    };
+  }
+
+  const revokeAllBtn = document.getElementById('btnRevokeAllBadges');
+  if (revokeAllBtn) {
+    revokeAllBtn.onclick = () => {
+      if (confirm(`คุณต้องการขอคืนเหรียญทั้งหมดของ ${student.name} ใช่หรือไม่?`)) {
+        student.revoked_badges = ART_BADGES.map(b => b.id);
+        student.badges = [];
+        saveDataToStorage();
+        apiPost({ action: 'save_student', grade: currentGrade, room: currentRoom, student });
+        artSound.playPop();
+        showToast(`↩️ ขอคืนเหรียญทั้งหมดของ ${student.name} เรียบร้อยแล้ว`);
+        renderQuickGrantBadges(student);
+        renderBadgeChecklistTable(student);
+        updateBadgeManagerCount(student);
+        renderTeacherView();
+      }
+    };
+  }
 }
 
 function saveBadgeManager() {
