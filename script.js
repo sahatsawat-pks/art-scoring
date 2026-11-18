@@ -2517,13 +2517,25 @@ function openStudentProfileModal(student) {
     });
   });
 
+  // Direct close binding
+  const closeProfileBtn = document.getElementById('closeProfileModalBtn');
+  if (closeProfileBtn) closeProfileBtn.onclick = closeStudentProfileModal;
+
+  modal.onclick = (e) => {
+    if (e.target === modal) closeStudentProfileModal();
+  };
+
   modal.classList.remove('hidden');
+  modal.style.display = 'flex';
   artSound.playPop();
 }
 
 function closeStudentProfileModal() {
   const modal = document.getElementById('studentProfileModal');
-  if (modal) modal.classList.add('hidden');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
 }
 
 // Backward compatibility
@@ -2588,7 +2600,23 @@ function openBadgeManagerModal(student) {
   renderQuickGrantBadges(student);
   updateBadgeManagerCount(student);
 
+  // Bind close and save buttons directly
+  const closeBtn = document.getElementById('closeBadgeManagerModalBtn');
+  if (closeBtn) closeBtn.onclick = closeBadgeManagerModal;
+
+  const footerCloseBtn = document.getElementById('closeBadgeManagerFooterBtn');
+  if (footerCloseBtn) footerCloseBtn.onclick = closeBadgeManagerModal;
+
+  const saveBtn = document.getElementById('saveBadgeManagerBtn');
+  if (saveBtn) saveBtn.onclick = saveBadgeManager;
+
+  // Backdrop click closes modal
+  modal.onclick = (e) => {
+    if (e.target === modal) closeBadgeManagerModal();
+  };
+
   modal.classList.remove('hidden');
+  modal.style.display = 'flex';
   artSound.playPop();
 }
 
@@ -2837,19 +2865,26 @@ function saveBadgeManager() {
 }
 
 function closeBadgeManagerModal() {
-  if (badgeSaveTimer && currentBadgeStudent) {
-    clearTimeout(badgeSaveTimer);
-    saveDataToStorage();
-    apiPost({
-      action: 'save_student',
-      grade: currentGrade,
-      room: currentRoom,
-      student: currentBadgeStudent
-    });
-    badgeSaveTimer = null;
+  try {
+    if (badgeSaveTimer && currentBadgeStudent) {
+      clearTimeout(badgeSaveTimer);
+      saveDataToStorage();
+      apiPost({
+        action: 'save_student',
+        grade: currentGrade,
+        room: currentRoom,
+        student: currentBadgeStudent
+      });
+      badgeSaveTimer = null;
+    }
+  } catch (err) {
+    console.warn("Auto-save on modal close error:", err);
   }
   const modal = document.getElementById('badgeManagerModal');
-  if (modal) modal.classList.add('hidden');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
   currentBadgeStudent = null;
 }
 
@@ -5895,6 +5930,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const closeCardDrawBtn = document.getElementById('closeCardDrawModalBtn');
   if (closeCardDrawBtn) closeCardDrawBtn.addEventListener('click', closeCardDrawModal);
+
+  const cardDrawModal = document.getElementById('cardDrawModal');
+  if (cardDrawModal) {
+    cardDrawModal.addEventListener('click', (e) => {
+      if (e.target.id === 'cardDrawModal') closeCardDrawModal();
+    });
+  }
+
+  const closeBadgeFooterBtn = document.getElementById('closeBadgeManagerFooterBtn');
+  if (closeBadgeFooterBtn) closeBadgeFooterBtn.addEventListener('click', closeBadgeManagerModal);
+
+  const badgeManagerModal = document.getElementById('badgeManagerModal');
+  if (badgeManagerModal) {
+    badgeManagerModal.addEventListener('click', (e) => {
+      if (e.target.id === 'badgeManagerModal') closeBadgeManagerModal();
+    });
+  }
+
+  // Global Escape key listener to close active modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      closeBadgeManagerModal();
+      closeStudentProfileModal();
+      closeCardDrawModal();
+      closeStudentModal();
+      closeTaskManagerModal();
+      closeEditTaskModal();
+      closeRoomConfigModal();
+      closePromoteModal();
+      closeImportModal();
+      closePhotoLightbox();
+      closeGalleryUploadModal();
+      closeTeacherLoginModal();
+      closeLogoutConfirmModal();
+      closeAccountManagerModal();
+      closeRankCriteriaModal();
+      closeSchoolSettingsModal();
+      closeMagazineModal();
+    }
+  });
 
   // 15. Initial Render, Auth State & Cloud DB Sync
   updateTeacherAuthUI();
