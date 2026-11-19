@@ -2433,9 +2433,15 @@ function openStudentProfileModal(student) {
           <div class="holo-card-power">${power}</div>
           <div class="holo-card-desc">${desc}</div>
           <div style="margin-top: 10px;">
-            <button type="button" class="btn btn-sm btn-bounce btn-use-card" data-card-idx="${idx}" style="background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; font-weight: 800; border-radius: 9999px; padding: 6px 14px; font-size: 0.8rem; width: 100%; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); cursor: pointer;">
-              ⚡ กดใช้การ์ดใบนี้
-            </button>
+            ${isTeacher ? `
+              <button type="button" class="btn btn-sm btn-bounce btn-use-card" data-card-idx="${idx}" style="background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; font-weight: 800; border-radius: 9999px; padding: 6px 14px; font-size: 0.8rem; width: 100%; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); cursor: pointer;">
+                ⚡ คุณครูกดใช้การ์ดใบนี้
+              </button>
+            ` : `
+              <div style="background: #F8FAFC; border: 1px dashed #CBD5E1; color: #64748B; font-size: 0.74rem; font-weight: 700; padding: 6px 10px; border-radius: 9999px; text-align: center;">
+                🔒 แจ้งคุณครูเพื่อใช้การ์ดในคาบเรียน
+              </div>
+            `}
           </div>
         </div>
       </div>
@@ -2521,14 +2527,26 @@ function openStudentProfileModal(student) {
             </div>
           </div>
           <div>
-            ${remainingWheelSpins > 0 ? `
-              <button type="button" id="btnOpenLuckyWheelModal" class="btn btn-sm btn-bounce" style="background: linear-gradient(135deg, #EC4899, #8B5CF6); color: white; border: none; font-weight: 800; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4); padding: 8px 20px; border-radius: 9999px;">
-                <span>🎡 ไปหมุนวงล้อเลย! (เหลือ ${remainingWheelSpins} ครั้ง)</span>
-              </button>
+            ${isTeacher ? `
+              ${remainingWheelSpins > 0 ? `
+                <button type="button" id="btnOpenLuckyWheelModal" class="btn btn-sm btn-bounce" style="background: linear-gradient(135deg, #EC4899, #8B5CF6); color: white; border: none; font-weight: 800; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4); padding: 8px 20px; border-radius: 9999px;">
+                  <span>🎡 คุณครูกดหมุนวงล้อให้นักเรียน (เหลือ ${remainingWheelSpins} ครั้ง)</span>
+                </button>
+              ` : `
+                <span style="font-size: 0.8rem; color: #7C3AED; background: #EDE9FE; padding: 6px 14px; border-radius: 9999px; font-weight: 700;">
+                  มี ${totalBadges}/5 เหรียญ (ขาดอีก ${Math.max(1, 5 - (totalBadges % 5))} เหรียญ เพื่อหมุน)
+                </span>
+              `}
             ` : `
-              <span style="font-size: 0.8rem; color: #7C3AED; background: #EDE9FE; padding: 6px 14px; border-radius: 9999px; font-weight: 700;">
-                มี ${totalBadges}/5 เหรียญ (ขาดอีก ${Math.max(1, 5 - (totalBadges % 5))} เหรียญ เพื่อหมุน)
-              </span>
+              ${remainingWheelSpins > 0 ? `
+                <button type="button" id="btnOpenLuckyWheelModal" class="btn btn-sm" style="background: linear-gradient(135deg, #FAF5FF, #F3E8FF); color: #7C3AED; border: 1.5px solid #DDD6FE; font-weight: 800; padding: 8px 18px; border-radius: 9999px;">
+                  <span>🎉 มีสิทธิ์หมุน ${remainingWheelSpins} ครั้ง (รอลุ้นกับคุณครูหน้าห้อง)</span>
+                </button>
+              ` : `
+                <span style="font-size: 0.8rem; color: #64748B; background: #F1F5F9; padding: 6px 14px; border-radius: 9999px; font-weight: 700;">
+                  มี ${totalBadges}/5 เหรียญ (สะสมครบ 5 เหรียญเพื่อหมุน)
+                </span>
+              `}
             `}
           </div>
         </div>
@@ -2653,10 +2671,14 @@ function openStudentProfileModal(student) {
     });
   }
 
-  // Use Card Listener (เมื่อกดใช้ การ์ดจะหายไปจากคลัง)
+  // Use Card Listener (เฉพาะคุณครูเท่านั้นที่มีสิทธิ์กดยืนยันใช้การ์ดในคาบเรียน)
   content.querySelectorAll('.btn-use-card').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (!getLoggedInTeacher()) {
+        showToast("🔒 การใช้การ์ดพลังต้องให้คุณครูผู้สอนเป็นผู้กดยืนยันในคาบเรียนเท่านั้นครับ 🎨");
+        return;
+      }
       const idx = parseInt(btn.getAttribute('data-card-idx'), 10);
       const card = student.cards[idx];
       if (!card) return;
@@ -3404,25 +3426,50 @@ function openLuckyWheelModal(student = null) {
   const modal = document.getElementById('luckyWheelModal');
   if (!modal) return;
 
+  const isTeacher = !!getLoggedInTeacher();
+  const selectWrap = document.getElementById('wheelStudentSelectWrap');
   const roomStudents = getStudentsList(currentGrade, currentRoom);
-  const selector = document.getElementById('wheelStudentSelector');
 
-  if (selector) {
-    let optionsHtml = `<option value="__demo__">🎮 โหมดทดลองหมุน / สาธิตหน้าห้อง (ไม่จำกัดครั้ง)</option>`;
-    roomStudents.forEach(s => {
-      const badgesCount = (s.badges || []).length;
-      const totalSpins = Math.floor(badgesCount / 5);
-      const spent = s.checklist?.spent_spins || 0;
-      const rem = Math.max(0, totalSpins - spent);
-      const isSelected = student && student.id === s.id ? 'selected' : '';
-      optionsHtml += `<option value="${s.id}" ${isSelected}>เลขที่ ${s.no} ${s.name} (มี ${badgesCount} เหรียญ • หมุนได้ ${rem} ครั้ง)</option>`;
-    });
-    selector.innerHTML = optionsHtml;
-
-    if (student) {
-      selector.value = student.id;
+  if (selectWrap) {
+    if (!isTeacher) {
+      if (student) {
+        selectWrap.innerHTML = `
+          <div style="font-size: 0.88rem; font-weight: 700; color: #4F46E5; background: #EEF2FF; padding: 6px 18px; border-radius: 9999px; display: inline-block; border: 1px solid #C7D2FE;">
+            👤 นักเรียน: <strong>${student.name}</strong> (เลขที่ ${student.no})
+          </div>
+        `;
+        selectWrap.style.display = 'block';
+      } else {
+        selectWrap.style.display = 'none';
+      }
     } else {
-      selector.value = '__demo__';
+      selectWrap.style.display = 'block';
+      selectWrap.innerHTML = `
+        <div style="font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">🎯 เลือกนักเรียนที่จะหมุนรางวัล:</div>
+        <select id="wheelStudentSelector" class="form-select" style="max-width: 380px; font-weight: 600; border-radius: 10px; margin: 0 auto; display: block;">
+        </select>
+      `;
+      const selector = document.getElementById('wheelStudentSelector');
+      let optionsHtml = `<option value="__demo__">🎮 โหมดทดลองหมุน / สาธิตหน้าห้อง (ไม่จำกัดครั้ง)</option>`;
+      roomStudents.forEach(s => {
+        const badgesCount = (s.badges || []).length;
+        const totalSpins = Math.floor(badgesCount / 5);
+        const spent = s.checklist?.spent_spins || 0;
+        const rem = Math.max(0, totalSpins - spent);
+        const isSelected = student && student.id === s.id ? 'selected' : '';
+        optionsHtml += `<option value="${s.id}" ${isSelected}>เลขที่ ${s.no} ${s.name} (มี ${badgesCount} เหรียญ • หมุนได้ ${rem} ครั้ง)</option>`;
+      });
+      selector.innerHTML = optionsHtml;
+      selector.value = student ? student.id : '__demo__';
+      selector.onchange = (e) => {
+        const val = e.target.value;
+        if (val === '__demo__') {
+          updateWheelModalUI(null);
+        } else {
+          const target = roomStudents.find(st => st.id === val);
+          updateWheelModalUI(target || null);
+        }
+      };
     }
   }
 
@@ -3435,6 +3482,7 @@ function openLuckyWheelModal(student = null) {
 
 function updateWheelModalUI(student) {
   currentWheelStudent = student;
+  const isTeacher = !!getLoggedInTeacher();
   const titleElem = document.getElementById('wheelModalTitle');
   const subElem = document.getElementById('wheelModalSub');
   const textRemaining = document.getElementById('wheelSpinsRemainingText');
@@ -3449,6 +3497,7 @@ function updateWheelModalUI(student) {
     if (textRemaining) textRemaining.innerHTML = 'สิทธิ์หมุน: <strong style="color: #059669; font-size: 1rem;">🎮 โหมดสาธิต (หมุนได้ไม่จำกัดครั้ง)</strong>';
     if (btnSpin) {
       btnSpin.disabled = false;
+      btnSpin.innerHTML = '<span>🎮 กดหมุนทดลอง (โหมดสาธิต)</span>';
       btnSpin.style.opacity = '1';
       btnSpin.style.cursor = 'pointer';
     }
@@ -3461,24 +3510,37 @@ function updateWheelModalUI(student) {
 
     if (titleElem) titleElem.textContent = `🎡 วงล้อรางวัล: ${student.name}`;
     if (subElem) {
-      subElem.innerHTML = `สะสมเหรียญตราครบ 5 เหรียญ = สิทธิ์หมุน 1 ครั้ง (ปัจจุบันมี <strong>${totalBadges}</strong> เหรียญ)`;
+      subElem.innerHTML = isTeacher
+        ? `สะสมเหรียญตราครบ 5 เหรียญ = สิทธิ์หมุน 1 ครั้ง (ปัจจุบันมี <strong>${totalBadges}</strong> เหรียญ)`
+        : `สะสมครบ 5 เหรียญ = สิทธิ์หมุน 1 ครั้ง (หมุนต่อหน้าคุณครูในคาบเรียน)`;
     }
     if (textRemaining) {
       if (remainingSpins > 0) {
-        textRemaining.innerHTML = `สิทธิ์หมุนคงเหลือ: <strong style="color: #7C3AED; font-size: 1.05rem;">${remainingSpins}</strong> ครั้ง (ใช้ไปแล้ว ${spentSpins} ครั้ง)`;
+        textRemaining.innerHTML = isTeacher
+          ? `สิทธิ์หมุนคงเหลือ: <strong style="color: #7C3AED; font-size: 1.05rem;">${remainingSpins}</strong> ครั้ง (ใช้ไปแล้ว ${spentSpins} ครั้ง)`
+          : `สิทธิ์หมุนคงเหลือ: <strong style="color: #7C3AED; font-size: 1.05rem;">${remainingSpins}</strong> ครั้ง (🎉 รอลุ้นหมุนกับคุณครูหน้าห้อง!)`;
       } else {
         const needed = Math.max(1, 5 - (totalBadges % 5));
         textRemaining.innerHTML = `<span style="color: #DC2626;">ยังไม่มีสิทธิ์หมุน (มี ${totalBadges}/5 เหรียญ • ขาดอีก ${needed} เหรียญ)</span>`;
       }
     }
     if (btnSpin) {
-      btnSpin.disabled = remainingSpins <= 0;
-      btnSpin.style.opacity = remainingSpins <= 0 ? '0.6' : '1';
-      btnSpin.style.cursor = remainingSpins <= 0 ? 'not-allowed' : 'pointer';
+      if (!isTeacher) {
+        btnSpin.disabled = true;
+        btnSpin.innerHTML = '<span>🔒 สำหรับคุณครูเป็นผู้กดหมุนในคาบเรียน</span>';
+        btnSpin.style.opacity = '0.75';
+        btnSpin.style.cursor = 'not-allowed';
+      } else {
+        btnSpin.disabled = remainingSpins <= 0;
+        btnSpin.innerHTML = remainingSpins > 0
+          ? `<span>🎯 คุณครูกดหมุนวงล้อให้นักเรียน! (${remainingSpins} ครั้ง)</span>`
+          : `<span>⚠️ สิทธิ์หมุนหมดแล้ว (0 ครั้ง)</span>`;
+        btnSpin.style.opacity = remainingSpins <= 0 ? '0.6' : '1';
+        btnSpin.style.cursor = remainingSpins <= 0 ? 'not-allowed' : 'pointer';
+      }
     }
   }
 
-  const isTeacher = !!getLoggedInTeacher();
   const teacherControls = document.getElementById('wheelTeacherControls');
   if (teacherControls) {
     teacherControls.style.display = isTeacher ? 'block' : 'none';
@@ -3506,6 +3568,10 @@ function triggerLuckyWheelSpin() {
 
   const student = currentWheelStudent;
   if (student) {
+    if (!getLoggedInTeacher()) {
+      showToast("🔒 การหมุนวงล้อแลกรางวัลจริงต้องให้คุณครูผู้สอนเป็นผู้กดหมุนในคาบเรียนเท่านั้นครับ 🎨");
+      return;
+    }
     const totalBadges = (student.badges || []).length;
     const totalSpins = Math.floor(totalBadges / 5);
     const spentSpins = student.checklist && typeof student.checklist.spent_spins === 'number' ? student.checklist.spent_spins : 0;
