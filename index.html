@@ -72,6 +72,10 @@
             <span class="tab-icon">🏆</span>
             <span class="tab-text">ทำเนียบแรงกิ้ง</span>
           </button>
+          <button id="navLuckyWheelBtn" class="nav-tab" title="วงล้อรางวัลศิลปะนำโชค">
+            <span class="tab-icon">🎡</span>
+            <span class="tab-text">วงล้อรางวัล</span>
+          </button>
           <button id="viewTeacherBtn" class="nav-tab" title="เข้าสู่ห้องพักครู">
             <span class="tab-icon">👩‍🏫</span>
             <span class="tab-text">ห้องพักครู</span>
@@ -316,6 +320,9 @@
               <input type="text" id="studentSearchInput" placeholder="ค้นหาชื่อนักเรียน...">
               <button id="clearSearchBtn" class="clear-search-btn" title="ล้างการค้นหา">&times;</button>
             </div>
+            <button id="openLuckyWheelLeaderboardBtn" class="btn btn-bounce" style="background: linear-gradient(135deg, #EC4899, #8B5CF6); color: white; border: none; font-weight: 800; border-radius: var(--radius-full); font-size: 0.84rem; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35); padding: 7px 16px;" title="เปิดหมุนวงล้อรางวัลศิลปะนำโชค">
+              <span>🎡 วงล้อรางวัล</span>
+            </button>
             <button id="viewRankCriteriaBtn" class="btn btn-outline" style="border-radius: var(--radius-full); font-weight: 700; font-size: 0.84rem; display: inline-flex; align-items: center; gap: 5px; background: white;" title="ดูเกณฑ์และฉายาของทั้ง 7 อันดับแรงก์">
               <span>🎖️ เกณฑ์ 7 อันดับแรงก์</span>
             </button>
@@ -435,6 +442,10 @@
               <a href="#" id="exportAllCsvBtn" class="dropdown-item">📑 ส่งออกทุกห้องเรียน (.csv)</a>
             </div>
           </div>
+
+          <button id="openTeacherLuckyWheelBtn" class="btn btn-secondary-art" style="background: linear-gradient(135deg, #FDF4FF, #FAF5FF); border-color: #D8B4FE; color: #7E22CE; font-weight: 700;" title="เปิดหมุนวงล้อรางวัลศิลปะนำโชค">
+            <span>🎡 วงล้อรางวัล</span>
+          </button>
 
           <button id="resetRoomBadgesBtn" class="btn btn-outline-danger" title="เอาเหรียญตราออกและรีเซ็ตเกณฑ์งานของนักเรียนทุกคนในห้องปัจจุบัน">
             <span>🏅 เอาเหรียญออกทุกคน (รีเซ็ต)</span>
@@ -1196,12 +1207,20 @@
     <div class="modal-card modal-lucky-wheel">
       <button type="button" id="closeLuckyWheelModalBtn" class="close-modal-btn" title="ปิดหน้าต่าง">&times;</button>
       <div class="lucky-wheel-container">
-        <div class="wheel-header" style="text-align: center; margin-bottom: 12px;">
+        <div class="wheel-header" style="text-align: center; margin-bottom: 10px;">
           <div style="font-size: 2.2rem; line-height: 1; margin-bottom: 4px;">🎡✨</div>
           <h3 id="wheelModalTitle" style="font-size: 1.35rem; font-weight: 800; color: #1E293B; margin: 0;">วงล้อรางวัลศิลปะนำโชค</h3>
           <p id="wheelModalSub" style="font-size: 0.85rem; color: #64748B; margin-top: 4px;">
             สะสมการ์ดพลังครบ 5 ใบ = สิทธิ์หมุนวงล้อ 1 ครั้ง
           </p>
+        </div>
+
+        <!-- Student Selector for Direct Wheel Access -->
+        <div id="wheelStudentSelectWrap" style="margin: 4px auto 14px; text-align: center; max-width: 380px; width: 100%;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">🎯 เลือกนักเรียนที่จะหมุนรางวัล:</div>
+          <select id="wheelStudentSelector" class="form-select-sm" style="width: 100%; border-radius: 9999px; padding: 6px 14px; font-weight: 700; border: 1.5px solid #8B5CF6; background: #FAF5FF; color: #5B21B6; font-size: 0.84rem; text-align: center; cursor: pointer; outline: none;">
+            <!-- Populated via JS -->
+          </select>
         </div>
 
         <!-- Wheel Canvas & Pointer Wrap -->
