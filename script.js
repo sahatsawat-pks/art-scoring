@@ -3776,6 +3776,7 @@ function onWheelFinished(student, prize) {
   // Update Result Card Celebration with Image Support!
   const resultBox = document.getElementById('wheelResultBox');
   if (resultBox) {
+    const isDemo = !student;
     resultBox.innerHTML = `
       <div style="text-align: center;">
         ${prize.image ? `
@@ -3785,15 +3786,24 @@ function onWheelFinished(student, prize) {
         ` : `
           <div style="font-size: 3rem; animation: bounce 1s infinite;" id="wheelResultIcon">${prize.icon || '🎉'}</div>
         `}
-        <h4 style="font-weight: 800; font-size: 1.25rem; color: #047857; margin-top: 4px;">ยินดีด้วย! คุณได้รับรางวัล:</h4>
+        <h4 style="font-weight: 800; font-size: 1.25rem; color: ${isDemo ? '#0284C7' : '#047857'}; margin-top: 4px;">
+          ${isDemo ? '🎮 ผลการทดลองหมุน (โหมดสาธิตหน้าห้อง):' : '🎉 ยินดีด้วย! นักเรียนได้รับรางวัล:'}
+        </h4>
         <div id="wheelResultName" style="font-size: 1.15rem; font-weight: 800; color: #1E293B; margin: 4px 0 6px;">
           ${prize.icon || ''} ${prize.name}
         </div>
         <p id="wheelResultDesc" style="font-size: 0.85rem; color: #64748B; margin: 0 0 12px 0;">${prize.desc || ''}</p>
         <div>
-          <button type="button" id="btnCollectWheelPrize" class="btn btn-emerald" style="border-radius: 9999px; padding: 8px 24px; font-size: 0.95rem; font-weight: 700;">
-            🎁 รับรางวัล & บันทึกประวัติ
-          </button>
+          ${isDemo ? `
+            <button type="button" id="btnCollectWheelPrize" class="btn btn-primary" style="border-radius: 9999px; padding: 8px 26px; font-size: 0.92rem; font-weight: 700; background: #0284C7;">
+              👌 รับทราบ / ลองหมุนใหม่
+            </button>
+            <div style="font-size: 0.74rem; color: #94A3B8; margin-top: 6px;">* โหมดสาธิต ไม่มีการหักเหรียญและไม่มีการบันทึกประวัติใด ๆ</div>
+          ` : `
+            <button type="button" id="btnCollectWheelPrize" class="btn btn-emerald" style="border-radius: 9999px; padding: 8px 26px; font-size: 0.95rem; font-weight: 700;">
+              🎁 มอบรางวัล & บันทึกประวัติ
+            </button>
+          `}
         </div>
       </div>
     `;
@@ -3802,8 +3812,12 @@ function onWheelFinished(student, prize) {
     const collectBtn = resultBox.querySelector('#btnCollectWheelPrize');
     if (collectBtn) {
       collectBtn.onclick = () => {
-        closeLuckyWheelModal();
-        if (student) openStudentProfileModal(student);
+        if (isDemo) {
+          resultBox.classList.add('hidden');
+        } else {
+          closeLuckyWheelModal();
+          if (student) openStudentProfileModal(student);
+        }
       };
     }
   }
