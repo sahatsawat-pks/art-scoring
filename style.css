@@ -1988,6 +1988,9 @@ body::before {
   border: none;
   width: 34px;
   height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  flex-shrink: 0;
   border-radius: 50%;
   font-size: 1.4rem;
   line-height: 1;
@@ -1997,6 +2000,7 @@ body::before {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  z-index: 10;
 }
 
 .close-modal-btn:hover {
@@ -4928,6 +4932,32 @@ body::before {
   padding: 24px 28px;
 }
 
+.modal-badge-manager .modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #EDF2F7;
+}
+
+.modal-badge-manager .modal-title-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-badge-manager .modal-title-group h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 0 0 4px 0;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
 .quick-grant-badges-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -5187,4 +5217,108 @@ body::before {
   font-weight: 700;
   color: #334155;
   margin: 3px;
+}
+
+/* Badge Multipliers & Stepper Controls */
+.badge-img-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.badge-multiplier-pill {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #DC2626;
+  color: #FFFFFF;
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 5;
+  user-select: none;
+}
+
+.quick-badge-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.btn-step-minus, .btn-step-plus {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #CBD5E1;
+  background: #FFFFFF;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.btn-step-minus:hover {
+  background: #FEE2E2;
+  border-color: #EF4444;
+  color: #DC2626;
+}
+
+.btn-step-plus {
+  background: #4F46E5;
+  color: #FFFFFF;
+  border-color: #4F46E5;
+}
+
+.btn-step-plus:hover {
+  background: #4338CA;
+  transform: scale(1.08);
+}
+
+.badge-count-pill {
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: #EEF2FF;
+  color: #4338CA;
+  border: 1px solid #C7D2FE;
+}
+
+/* Prize Row in Wheel Editor */
+.wheel-prize-edit-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.wheel-prize-edit-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wheel-prize-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #CBD5E1;
+  background: #F8FAFC;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
 }
