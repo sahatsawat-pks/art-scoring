@@ -1814,9 +1814,7 @@ function buildPodiumSlotHtml(student, rank) {
       <div class="podium-tier-label ${tier.class}">
         <span>${tier.icon}</span> <span>${tier.label}</span>
       </div>
-      <button type="button" class="btn btn-sm btn-outline" style="margin-top: 8px; font-size: 0.76rem; border-radius: var(--radius-full);">
-        🎨 ดูผลงาน & โปรไฟล์
-      </button>
+
     </div>
     <div class="podium-block">
       <div class="podium-step-number">${rank}</div>
@@ -1952,7 +1950,7 @@ function renderRankTable(ranked) {
           </div>
           <div class="student-table-details">
             <span class="student-table-name">${student.name}</span>
-            <span class="student-table-nick">เลขที่ ${student.no} • ดูโปรไฟล์ & ผลงาน 🎨</span>
+            <span class="student-table-nick">เลขที่ ${student.no}${student.nickname ? ` (${student.nickname})` : ''}</span>
             ${miniBadgesHtml}
           </div>
         </div>
