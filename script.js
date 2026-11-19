@@ -3195,7 +3195,6 @@ function drawRandomCard(student) {
     if (confirmBtn) {
       confirmBtn.addEventListener('click', () => {
         closeCardDrawModal();
-      closeLuckyWheelModal();
         openStudentProfileModal(student);
       });
     }
@@ -3211,16 +3210,23 @@ function closeCardDrawModal() {
 // 10.6 ART LUCKY WHEEL SYSTEM (วงล้อรางวัลศิลปะนำโชค)
 // การ์ด 5 ใบ กดวงล้อได้ 1 ครั้ง
 // ==========================================
-const ART_WHEEL_PRIZES = [
-  { id: 'prize_tools', name: 'เลือกอุปกรณ์ก่อนใคร', icon: '🎨', color: '#F43F5E', desc: 'ได้สิทธิ์เลือกพู่กัน สี หรืออุปกรณ์พิเศษก่อนเพื่อนในคาบถัดไป' },
-  { id: 'prize_bonus', name: 'คะแนนพิเศษ +2', icon: '⭐', color: '#8B5CF6', desc: 'ได้รับคะแนนโบนัสสะสมวิชาศิลปะเพิ่ม 2 คะแนน' },
-  { id: 'prize_snack', name: 'ขนมรางวัลจากครู', icon: '🍬', color: '#06B6D4', desc: 'รับขนมอร่อยๆ 1 ชิ้นจากโต๊ะคุณครูศิลปะ' },
-  { id: 'prize_time', name: 'ตั๋วต่อเวลา +2 วัน', icon: '🎟️', color: '#10B981', desc: 'ขยายเวลาส่งงานศิลปะชิ้นต่อไปได้อีก 2 วัน' },
-  { id: 'prize_leader', name: 'หัวหน้ากลุ่มศิลปะ 1 วัน', icon: '👑', color: '#F59E0B', desc: 'ได้สิทธิ์เป็นผู้ช่วยครูจัดแจงอุปกรณ์และดูแลเพื่อน 1 วัน' },
-  { id: 'prize_brush', name: 'สติ๊กเกอร์พรีเมียม', icon: '🖌️', color: '#EC4899', desc: 'รับสติ๊กเกอร์โฮโลแกรมศิลปะสุดเท่ไปสะสม' },
-  { id: 'prize_title', name: 'ฉายาปรมาจารย์ศิลป์', icon: '🌟', color: '#3B82F6', desc: 'ได้รับการโปรโมตชื่อและผลงานเด่นในหน้า THE ART TIME' },
-  { id: 'prize_respin', name: 'ดวงดีสองต่อ (หมุนฟรี)', icon: '🔄', color: '#14B8A6', desc: 'รับสิทธิ์หมุนวงล้อนำโชคเพิ่มฟรีอีก 1 รอบทันที!' }
+const DEFAULT_WHEEL_PRIZES = [
+  { id: 'prize_tools', name: 'สิทธิ์เลือกอุปกรณ์ก่อนใคร', icon: '🎨', color: '#F43F5E', desc: 'สิทธิ์เลือกพู่กัน สี หรืออุปกรณ์ศิลปะพิเศษก่อนใครในคาบถัดไป' },
+  { id: 'prize_bonus', name: 'คะแนนโบนัสศิลปะ +2', icon: '⭐', color: '#8B5CF6', desc: 'คะแนนโบนัสพิเศษวิชาศิลปะ +2 คะแนน เพิ่มลงในคะแนนเก็บ' },
+  { id: 'prize_snack', name: 'ขนมรางวัลจากครูผู้สอน', icon: '🍬', color: '#06B6D4', desc: 'รับขนมอร่อยๆ 1 ชิ้นจากโต๊ะคุณครูศิลปะ' },
+  { id: 'prize_time', name: 'ตั๋วต่อเวลาส่งงาน 2 วัน', icon: '🎟️', color: '#10B981', desc: 'ส่งช้าได้ 2 วันโดยไม่ถูกหักคะแนนส่งงาน' },
+  { id: 'prize_leader', name: 'หัวหน้ากลุ่มศิลปะ 1 วัน', icon: '👑', color: '#F59E0B', desc: 'สิทธิ์เป็นหัวหน้ากลุ่มศิลปะ 1 วัน ช่วยครูดูแลกิจกรรมและอุปกรณ์' },
+  { id: 'prize_brush', name: 'พู่กันนำโชค / สติ๊กเกอร์', icon: '🖌️', color: '#EC4899', desc: 'รับสติ๊กเกอร์โฮโลแกรมศิลปะหรือพู่กันนำโชคสุดเท่' },
+  { id: 'prize_title', name: 'มหาศิลปินระดับตำนาน', icon: '🌟', color: '#3B82F6', desc: 'ฉายานาม "มหาศิลปินระดับตำนาน" ประจำสัปดาห์ใน THE ART TIME' },
+  { id: 'prize_respin', name: 'ดวงดีสองต่อ (หมุนฟรี)', icon: '🔄', color: '#14B8A6', desc: 'ได้สิทธิ์หมุนวงล้อนำโชคเพิ่มฟรีอีก 1 ครั้งทันที!' }
 ];
+
+function getWheelPrizes() {
+  if (appConfig && Array.isArray(appConfig.wheelPrizes) && appConfig.wheelPrizes.length === 8) {
+    return appConfig.wheelPrizes;
+  }
+  return DEFAULT_WHEEL_PRIZES;
+}
 
 let currentWheelStudent = null;
 let isWheelSpinning = false;
@@ -3235,7 +3241,8 @@ function drawLuckyWheel(canvas, angle) {
   const cx = w / 2;
   const cy = h / 2;
   const radius = cx - 18;
-  const numPrizes = ART_WHEEL_PRIZES.length;
+  const prizes = getWheelPrizes();
+  const numPrizes = prizes.length;
   const arc = (2 * Math.PI) / numPrizes;
 
   ctx.clearRect(0, 0, w, h);
@@ -3267,7 +3274,7 @@ function drawLuckyWheel(canvas, angle) {
 
   // Draw Slices
   for (let i = 0; i < numPrizes; i++) {
-    const p = ART_WHEEL_PRIZES[i];
+    const p = prizes[i];
     const startAngle = angle + i * arc;
     const endAngle = startAngle + arc;
 
@@ -3293,14 +3300,16 @@ function drawLuckyWheel(canvas, angle) {
 
     // Text Label
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 12.5px Kanit, sans-serif';
+    ctx.font = 'bold 11px Kanit, sans-serif';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
     ctx.shadowBlur = 4;
-    ctx.fillText(p.name, radius - 38, 0);
+    let label = p.name;
+    if (label.length > 17) label = label.substring(0, 16) + '...';
+    ctx.fillText(label, radius - 38, 0);
 
     // Icon Emoji
-    ctx.font = '22px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
-    ctx.fillText(p.icon, radius - 10, 0);
+    ctx.font = '20px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+    ctx.fillText(p.icon, radius - 12, 0);
 
     ctx.restore();
     ctx.restore();
@@ -3351,6 +3360,14 @@ function openLuckyWheelModal(student) {
     btnSpin.style.cursor = remainingSpins <= 0 ? 'not-allowed' : 'pointer';
   }
 
+  const isTeacher = !!getLoggedInTeacher();
+  const teacherControls = document.getElementById('wheelTeacherControls');
+  if (teacherControls) {
+    teacherControls.style.display = isTeacher ? 'block' : 'none';
+  }
+  const editorPanel = document.getElementById('wheelPrizeEditorPanel');
+  if (editorPanel) editorPanel.classList.add('hidden');
+
   const canvas = document.getElementById('luckyWheelCanvas');
   if (canvas) {
     drawLuckyWheel(canvas, wheelCurrentAngle);
@@ -3397,12 +3414,13 @@ function triggerLuckyWheelSpin() {
   const resultBox = document.getElementById('wheelResultBox');
   if (resultBox) resultBox.classList.add('hidden');
 
-  const numPrizes = ART_WHEEL_PRIZES.length;
+  const prizes = getWheelPrizes();
+  const numPrizes = prizes.length;
   const arc = (2 * Math.PI) / numPrizes;
 
   // Choose winning prize index
   const winnerIndex = Math.floor(Math.random() * numPrizes);
-  const prize = ART_WHEEL_PRIZES[winnerIndex];
+  const prize = prizes[winnerIndex];
 
   // The pointer pin is at the top (angle = 1.5 * PI)
   const pinAngle = 1.5 * Math.PI;
@@ -3512,6 +3530,87 @@ function onWheelFinished(student, prize) {
     resultName.textContent = `${prize.icon} ${prize.name}`;
     resultDesc.textContent = prize.desc;
     resultBox.classList.remove('hidden');
+  }
+}
+
+// Teacher Wheel Prize Editor
+function renderWheelPrizeEditor() {
+  const container = document.getElementById('wheelPrizeInputsContainer');
+  if (!container) return;
+  const prizes = getWheelPrizes();
+
+  container.innerHTML = prizes.map((p, idx) => `
+    <div class="wheel-prize-edit-row" data-index="${idx}" style="display: flex; gap: 6px; align-items: center; background: white; padding: 6px 8px; border-radius: 10px; border: 1px solid #E2E8F0;">
+      <span style="font-size: 0.78rem; font-weight: 800; color: #8B5CF6; width: 24px; text-align: center;">#${idx + 1}</span>
+      <input type="text" class="prize-input-icon" value="${p.icon || '🎁'}" style="width: 36px; text-align: center; border-radius: 8px; border: 1px solid #CBD5E1; padding: 4px; font-size: 1.05rem;" title="อิโมจิ">
+      <input type="text" class="prize-input-name" value="${p.name || ''}" style="flex: 1.1; border-radius: 8px; border: 1px solid #CBD5E1; padding: 4px 8px; font-size: 0.82rem; font-weight: 700;" placeholder="ชื่อของรางวัล" title="ชื่อรางวัล">
+      <input type="text" class="prize-input-desc" value="${p.desc || ''}" style="flex: 1.5; border-radius: 8px; border: 1px solid #CBD5E1; padding: 4px 8px; font-size: 0.76rem;" placeholder="เงื่อนไข/คำอธิบาย" title="คำอธิบาย">
+    </div>
+  `).join('');
+}
+
+function toggleWheelPrizeEditor() {
+  const panel = document.getElementById('wheelPrizeEditorPanel');
+  if (!panel) return;
+  const isHidden = panel.classList.contains('hidden');
+  if (isHidden) {
+    renderWheelPrizeEditor();
+    panel.classList.remove('hidden');
+  } else {
+    panel.classList.add('hidden');
+  }
+}
+
+function saveWheelCustomPrizes() {
+  const container = document.getElementById('wheelPrizeInputsContainer');
+  if (!container) return;
+  const rows = container.querySelectorAll('.wheel-prize-edit-row');
+  const basePrizes = getWheelPrizes();
+  const updated = [];
+
+  rows.forEach((row, idx) => {
+    const iconInp = row.querySelector('.prize-input-icon');
+    const nameInp = row.querySelector('.prize-input-name');
+    const descInp = row.querySelector('.prize-input-desc');
+    const base = basePrizes[idx] || DEFAULT_WHEEL_PRIZES[idx];
+
+    updated.push({
+      id: base.id || `prize_${idx + 1}`,
+      color: base.color,
+      icon: (iconInp && iconInp.value.trim()) || base.icon || '🎁',
+      name: (nameInp && nameInp.value.trim()) || base.name || `รางวัลที่ ${idx + 1}`,
+      desc: (descInp && descInp.value.trim()) || base.desc || ''
+    });
+  });
+
+  if (updated.length === 8) {
+    appConfig.wheelPrizes = updated;
+    saveConfigToStorage();
+    apiPost({ action: 'save_config', config: appConfig });
+
+    const canvas = document.getElementById('luckyWheelCanvas');
+    if (canvas) drawLuckyWheel(canvas, wheelCurrentAngle);
+
+    showToast("บันทึกการปรับแต่ง 8 ของรางวัลบนวงล้อเรียบร้อยแล้ว! 🎡✨", "success");
+    try { artSound.playSaveChime(); } catch (e) {}
+
+    const panel = document.getElementById('wheelPrizeEditorPanel');
+    if (panel) panel.classList.add('hidden');
+  }
+}
+
+function resetWheelDefaultPrizes() {
+  if (confirm("ต้องการคืนค่าของรางวัลทั้ง 8 ช่องกลับเป็นค่าเริ่มต้นใช่หรือไม่?")) {
+    appConfig.wheelPrizes = JSON.parse(JSON.stringify(DEFAULT_WHEEL_PRIZES));
+    saveConfigToStorage();
+    apiPost({ action: 'save_config', config: appConfig });
+
+    renderWheelPrizeEditor();
+    const canvas = document.getElementById('luckyWheelCanvas');
+    if (canvas) drawLuckyWheel(canvas, wheelCurrentAngle);
+
+    showToast("คืนค่า 8 ของรางวัลเริ่มต้นเรียบร้อยแล้ว! 🔄", "success");
+    try { artSound.playPop(); } catch (e) {}
   }
 }
 
@@ -6504,6 +6603,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Teacher Wheel Prize Editor Buttons
+  const btnToggleWheelEditor = document.getElementById('btnToggleWheelPrizeEditor');
+  if (btnToggleWheelEditor) btnToggleWheelEditor.addEventListener('click', toggleWheelPrizeEditor);
+
+  const btnCloseWheelEditor = document.getElementById('btnClosePrizeEditor');
+  if (btnCloseWheelEditor) btnCloseWheelEditor.addEventListener('click', () => {
+    const panel = document.getElementById('wheelPrizeEditorPanel');
+    if (panel) panel.classList.add('hidden');
+  });
+
+  const btnSaveWheelPrizes = document.getElementById('btnSaveCustomWheelPrizes');
+  if (btnSaveWheelPrizes) btnSaveWheelPrizes.addEventListener('click', saveWheelCustomPrizes);
+
+  const btnResetWheelPrizes = document.getElementById('btnResetDefaultPrizes');
+  if (btnResetWheelPrizes) btnResetWheelPrizes.addEventListener('click', resetWheelDefaultPrizes);
+
   // 14. Reset Data Button
   document.getElementById('resetSampleDataBtn')?.addEventListener('click', () => {
     if (confirm("คุณต้องการรีเซ็ตข้อมูลและห้องเรียนทั้งหมดกลับเป็นค่าเริ่มต้นใช่หรือไม่?")) {
@@ -6572,6 +6687,7 @@ document.addEventListener('DOMContentLoaded', () => {
       closeBadgeManagerModal();
       closeStudentProfileModal();
       closeCardDrawModal();
+      closeLuckyWheelModal();
       closeStudentModal();
       closeTaskManagerModal();
       closeEditTaskModal();

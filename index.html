@@ -1236,6 +1236,36 @@
             </button>
           </div>
         </div>
+
+        <!-- Teacher Customization Button & Panel -->
+        <div id="wheelTeacherControls" style="text-align: center; margin-top: 16px; width: 100%;">
+          <button type="button" id="btnToggleWheelPrizeEditor" class="btn btn-sm btn-outline" style="font-size: 0.78rem; padding: 4px 14px; border-radius: 9999px; border-color: #CBD5E1; color: #475569;">
+            <span>⚙️ ปรับแต่ง 8 ของรางวัลวงล้อ (สำหรับคุณครู)</span>
+          </button>
+        </div>
+
+        <div id="wheelPrizeEditorPanel" class="hidden" style="margin-top: 14px; width: 100%; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 16px; padding: 14px; text-align: left;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 0.88rem; color: #1E293B;">🎨 ตั้งค่า 8 ของรางวัลบนวงล้อ</strong>
+            <button type="button" id="btnResetDefaultPrizes" class="btn btn-sm btn-outline" style="font-size: 0.72rem; padding: 2px 8px;">
+              🔄 คืนค่าเริ่มต้น
+            </button>
+          </div>
+          <p style="font-size: 0.75rem; color: #64748B; margin-top: 0; margin-bottom: 8px;">
+            คุณครูสามารถพิมพ์เปลี่ยนชื่อ อิโมจิ หรือเงื่อนไขของรางวัลทั้ง 8 ช่องได้ตามความเหมาะสมของห้องเรียน
+          </p>
+          <div id="wheelPrizeInputsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
+            <!-- 8 Prize rows dynamically populated -->
+          </div>
+          <div style="margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" id="btnClosePrizeEditor" class="btn btn-sm btn-outline" style="font-size: 0.8rem; border-radius: 9999px; padding: 4px 12px;">
+              ปิด
+            </button>
+            <button type="button" id="btnSaveCustomWheelPrizes" class="btn btn-sm btn-art-primary" style="border-radius: 9999px; padding: 5px 16px; font-size: 0.82rem;">
+              💾 บันทึกของรางวัล
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
