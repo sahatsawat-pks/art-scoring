@@ -38,7 +38,8 @@ module.exports = async (req, res) => {
           portfolio: typeof s.portfolio === 'string' ? JSON.parse(s.portfolio) : (s.portfolio || []),
           badges: typeof s.badges === 'string' ? JSON.parse(s.badges) : (s.badges || []),
           cards: typeof s.cards === 'string' ? JSON.parse(s.cards) : (s.cards || []),
-          checklist: typeof s.checklist === 'string' ? JSON.parse(s.checklist) : (s.checklist || {})
+          checklist: typeof s.checklist === 'string' ? JSON.parse(s.checklist) : (s.checklist || {}),
+          updatedAt: s.updated_at ? new Date(s.updated_at).getTime() : 0
         });
       });
 

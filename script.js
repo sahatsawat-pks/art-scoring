@@ -1163,22 +1163,60 @@ function getSubmittedTasksCount(student, grade = currentGrade, room = currentRoo
   return count;
 }
 
+function getStudentScoreTimestamp(student, currentScore) {
+  if (currentScore <= 0) return Infinity; // ยังไม่มีคะแนน
+  // 1. ตรวจสอบเวลาที่บันทึกคะแนนสะสมไว้ใน checklist
+  if (student.checklist && typeof student.checklist.score_reached_at === 'number' && student.checklist.score_reached_at > 0) {
+    return student.checklist.score_reached_at;
+  }
+  // 2. ตรวจสอบเวลาแก้ไขล่าสุดจากฐานข้อมูล Neon PostgreSQL
+  if (typeof student.updatedAt === 'number' && student.updatedAt > 0) {
+    return student.updatedAt;
+  }
+  // 3. ตรวจสอบ timestamp ใน student ID (เช่น p4_1_1732000000000)
+  if (student.id && student.id.includes('_')) {
+    const parts = student.id.split('_');
+    const ts = parseInt(parts[parts.length - 1], 10);
+    if (!isNaN(ts) && ts > 1000000000000) return ts;
+  }
+  // 4. Fallback ลำดับเลขที่นักเรียน
+  return (student.no || 999) * 1000;
+}
+
+function updateStudentScoreTimestamp(student, grade = currentGrade, room = currentRoom) {
+  if (!student) return;
+  if (!student.checklist) student.checklist = {};
+  const currentTotal = calcStudentTotalScore(student, grade, room);
+  // ถ้าคะแนนมีการเปลี่ยนแปลงจากเดิม จึงจะประทับเวลาใหม่ (คนส่งงานก่อนจะได้เวลาเดิมไม่หายไป)
+  if (student.checklist.last_recorded_score !== currentTotal) {
+    student.checklist.last_recorded_score = currentTotal;
+    student.checklist.score_reached_at = Date.now();
+  }
+}
+
 function getRankedStudents(grade = currentGrade, room = currentRoom) {
   const list = [...getStudentsList(grade, room)];
   list.forEach(s => autoEvaluateStudentBadges(s));
   return list.sort((a, b) => {
     const scoreA = calcStudentTotalScore(a, grade, room);
     const scoreB = calcStudentTotalScore(b, grade, room);
+    // 1. คะแนนรวมสูงสุดขึ้นก่อน
     if (scoreB !== scoreA) {
       return scoreB - scoreA;
     }
-    // Tie-breaker: submitted tasks count
+    // 2. กติกาส่งก่อนได้ก่อน (First-Come, First-Served): คนที่ทำคะแนนได้ก่อน จะได้อันดับสูงกว่าเสมอ!
+    const timeA = getStudentScoreTimestamp(a, scoreA);
+    const timeB = getStudentScoreTimestamp(b, scoreB);
+    if (timeA !== timeB) {
+      return timeA - timeB; // เวลาที่เกิดขึ้นก่อน (ค่าน้อยกว่า) ชนะ!
+    }
+    // 3. ลำดับรอง: จำนวนชิ้นงานที่ส่งแล้ว
     const submittedA = getSubmittedTasksCount(a, grade, room);
     const submittedB = getSubmittedTasksCount(b, grade, room);
     if (submittedB !== submittedA) {
       return submittedB - submittedA;
     }
-    // Final tie-breaker: student number
+    // 4. ลำดับสุดท้าย: เลขที่นักเรียน
     return (a.no || 0) - (b.no || 0);
   });
 }
@@ -3490,47 +3528,74 @@ function updateWheelModalUI(student) {
   const resultBox = document.getElementById('wheelResultBox');
   if (resultBox) resultBox.classList.add('hidden');
 
-  if (!student) {
-    // Demo Mode
-    if (titleElem) titleElem.textContent = '🎡 วงล้อรางวัลศิลปะนำโชค (โหมดสาธิตหน้าห้อง)';
-    if (subElem) subElem.innerHTML = '✨ สิทธิ์หมุนสนุก ๆ สำหรับทดลองและสาธิตของรางวัลหน้ากระดานห้องเรียน';
-    if (textRemaining) textRemaining.innerHTML = 'สิทธิ์หมุน: <strong style="color: #059669; font-size: 1rem;">🎮 โหมดสาธิต (หมุนได้ไม่จำกัดครั้ง)</strong>';
-    if (btnSpin) {
-      btnSpin.disabled = false;
-      btnSpin.innerHTML = '<span>🎮 กดหมุนทดลอง (โหมดสาธิต)</span>';
-      btnSpin.style.opacity = '1';
-      btnSpin.style.cursor = 'pointer';
-    }
-  } else {
-    // Student Mode: 5 Badges = 1 Spin! (เหรียญไม่หาย แต่ใช้ซ้ำไม่ได้)
-    const totalBadges = (student.badges || []).length;
-    const totalSpins = Math.floor(totalBadges / 5);
-    const spentSpins = student.checklist && typeof student.checklist.spent_spins === 'number' ? student.checklist.spent_spins : 0;
-    const remainingSpins = Math.max(0, totalSpins - spentSpins);
+  if (!isTeacher) {
+    // Non-Teacher (นักเรียนหรือยังไม่ได้ล็อกอินบัญชีครู: ล็อกวงล้อ ไม่อนุญาตให้หมุนแทนกัน)
+    if (!student) {
+      if (titleElem) titleElem.textContent = '🎡 วงล้อรางวัลศิลปะนำโชค';
+      if (subElem) subElem.innerHTML = '✨ สิทธิ์หมุนรางวัลจะดำเนินการโดยคุณครูผู้สอนที่มีบัญชีในห้องเรียนเท่านั้น';
+      if (textRemaining) textRemaining.innerHTML = 'สถานะ: <strong style="color: #64748B;">สำหรับคุณครูเข้าสู่ระบบเพื่อกดหมุนในคาบเรียน</strong>';
+    } else {
+      const totalBadges = (student.badges || []).length;
+      const totalSpins = Math.floor(totalBadges / 5);
+      const spentSpins = student.checklist && typeof student.checklist.spent_spins === 'number' ? student.checklist.spent_spins : 0;
+      const remainingSpins = Math.max(0, totalSpins - spentSpins);
 
-    if (titleElem) titleElem.textContent = `🎡 วงล้อรางวัล: ${student.name}`;
-    if (subElem) {
-      subElem.innerHTML = isTeacher
-        ? `สะสมเหรียญตราครบ 5 เหรียญ = สิทธิ์หมุน 1 ครั้ง (ปัจจุบันมี <strong>${totalBadges}</strong> เหรียญ)`
-        : `สะสมครบ 5 เหรียญ = สิทธิ์หมุน 1 ครั้ง (หมุนต่อหน้าคุณครูในคาบเรียน)`;
-    }
-    if (textRemaining) {
-      if (remainingSpins > 0) {
-        textRemaining.innerHTML = isTeacher
-          ? `สิทธิ์หมุนคงเหลือ: <strong style="color: #7C3AED; font-size: 1.05rem;">${remainingSpins}</strong> ครั้ง (ใช้ไปแล้ว ${spentSpins} ครั้ง)`
-          : `สิทธิ์หมุนคงเหลือ: <strong style="color: #7C3AED; font-size: 1.05rem;">${remainingSpins}</strong> ครั้ง (🎉 รอลุ้นหมุนกับคุณครูหน้าห้อง!)`;
-      } else {
-        const needed = Math.max(1, 5 - (totalBadges % 5));
-        textRemaining.innerHTML = `<span style="color: #DC2626;">ยังไม่มีสิทธิ์หมุน (มี ${totalBadges}/5 เหรียญ • ขาดอีก ${needed} เหรียญ)</span>`;
+      if (titleElem) titleElem.textContent = `🎡 วงล้อรางวัล: ${student.name}`;
+      if (subElem) subElem.innerHTML = `สะสมครบ 5 เหรียญ = สิทธิ์หมุน 1 ครั้ง (หมุนต่อหน้าคุณครูในคาบเรียน)`;
+      if (textRemaining) {
+        if (remainingSpins > 0) {
+          textRemaining.innerHTML = `สิทธิ์หมุนคงเหลือ: <strong style="color: #7C3AED; font-size: 1.05rem;">${remainingSpins}</strong> ครั้ง (🎉 รอลุ้นหมุนกับคุณครูหน้าห้อง!)`;
+        } else {
+          const needed = Math.max(1, 5 - (totalBadges % 5));
+          textRemaining.innerHTML = `<span style="color: #DC2626;">ยังไม่มีสิทธิ์หมุน (มี ${totalBadges}/5 เหรียญ • ขาดอีก ${needed} เหรียญ)</span>`;
+        }
       }
     }
     if (btnSpin) {
-      if (!isTeacher) {
-        btnSpin.disabled = true;
-        btnSpin.innerHTML = '<span>🔒 สำหรับคุณครูเป็นผู้กดหมุนในคาบเรียน</span>';
-        btnSpin.style.opacity = '0.75';
-        btnSpin.style.cursor = 'not-allowed';
-      } else {
+      btnSpin.disabled = false;
+      btnSpin.innerHTML = '<span>🔒 เฉพาะคุณครูที่มีบัญชีกดได้ (คลิกเพื่อเข้าสู่ระบบ)</span>';
+      btnSpin.style.opacity = '0.9';
+      btnSpin.style.cursor = 'pointer';
+      btnSpin.onclick = () => {
+        showToast("🔒 วงล้อเปิดให้กดได้เฉพาะคุณครูผู้สอนที่เข้าสู่ระบบบัญชีครูเท่านั้นครับ 🎨");
+        openTeacherLoginModal();
+      };
+    }
+  } else {
+    // Teacher logged in with account!
+    if (btnSpin) btnSpin.onclick = null;
+
+    if (!student) {
+      // Demo Mode for Teacher
+      if (titleElem) titleElem.textContent = '🎡 วงล้อรางวัลศิลปะนำโชค (โหมดสาธิตหน้าห้อง)';
+      if (subElem) subElem.innerHTML = '✨ โหมดสาธิตสำหรับคุณครูเปิดทดสอบของรางวัลหน้ากระดาน';
+      if (textRemaining) textRemaining.innerHTML = 'สิทธิ์หมุน: <strong style="color: #059669; font-size: 1rem;">🎮 โหมดสาธิตคุณครู (หมุนได้ไม่จำกัดครั้ง)</strong>';
+      if (btnSpin) {
+        btnSpin.disabled = false;
+        btnSpin.innerHTML = '<span>🎯 คุณครูกดหมุนทดลอง (โหมดสาธิต)</span>';
+        btnSpin.style.opacity = '1';
+        btnSpin.style.cursor = 'pointer';
+      }
+    } else {
+      // Student Mode: 5 Badges = 1 Spin! (เหรียญไม่หาย แต่ใช้ซ้ำไม่ได้)
+      const totalBadges = (student.badges || []).length;
+      const totalSpins = Math.floor(totalBadges / 5);
+      const spentSpins = student.checklist && typeof student.checklist.spent_spins === 'number' ? student.checklist.spent_spins : 0;
+      const remainingSpins = Math.max(0, totalSpins - spentSpins);
+
+      if (titleElem) titleElem.textContent = `🎡 วงล้อรางวัล: ${student.name}`;
+      if (subElem) {
+        subElem.innerHTML = `สะสมเหรียญตราครบ 5 เหรียญ = สิทธิ์หมุน 1 ครั้ง (ปัจจุบันมี <strong>${totalBadges}</strong> เหรียญ)`;
+      }
+      if (textRemaining) {
+        if (remainingSpins > 0) {
+          textRemaining.innerHTML = `สิทธิ์หมุนคงเหลือ: <strong style="color: #7C3AED; font-size: 1.05rem;">${remainingSpins}</strong> ครั้ง (ใช้ไปแล้ว ${spentSpins} ครั้ง)`;
+        } else {
+          const needed = Math.max(1, 5 - (totalBadges % 5));
+          textRemaining.innerHTML = `<span style="color: #DC2626;">ยังไม่มีสิทธิ์หมุน (มี ${totalBadges}/5 เหรียญ • ขาดอีก ${needed} เหรียญ)</span>`;
+        }
+      }
+      if (btnSpin) {
         btnSpin.disabled = remainingSpins <= 0;
         btnSpin.innerHTML = remainingSpins > 0
           ? `<span>🎯 คุณครูกดหมุนวงล้อให้นักเรียน! (${remainingSpins} ครั้ง)</span>`
@@ -3566,12 +3631,16 @@ function closeLuckyWheelModal() {
 function triggerLuckyWheelSpin() {
   if (isWheelSpinning) return;
 
+  // วงล้อกดได้เฉพาะคุณครูที่เป็นแอคเคานท์เข้าสู่ระบบเท่านั้น
+  const loggedTeacher = getLoggedInTeacher();
+  if (!loggedTeacher) {
+    showToast("🔒 วงล้อเปิดให้กดได้เฉพาะคุณครูผู้สอนที่เข้าสู่ระบบบัญชีครูเท่านั้นครับ 🎨");
+    openTeacherLoginModal();
+    return;
+  }
+
   const student = currentWheelStudent;
   if (student) {
-    if (!getLoggedInTeacher()) {
-      showToast("🔒 การหมุนวงล้อแลกรางวัลจริงต้องให้คุณครูผู้สอนเป็นผู้กดหมุนในคาบเรียนเท่านั้นครับ 🎨");
-      return;
-    }
     const totalBadges = (student.badges || []).length;
     const totalSpins = Math.floor(totalBadges / 5);
     const spentSpins = student.checklist && typeof student.checklist.spent_spins === 'number' ? student.checklist.spent_spins : 0;
@@ -4149,6 +4218,7 @@ function renderTeacherView() {
       if (commit) input.value = rawVal === '' ? '' : val;
 
       student.scores[taskId] = val;
+      updateStudentScoreTimestamp(student, currentGrade, currentRoom);
       refreshRowCalculations();
 
       if (commit) {
@@ -4182,6 +4252,7 @@ function renderTeacherView() {
 
       student.scores.examScore = val;
       student.examScore = val;
+      updateStudentScoreTimestamp(student, currentGrade, currentRoom);
       refreshRowCalculations();
 
       if (commit) {
@@ -4625,12 +4696,15 @@ function handleStudentFormSubmit(e) {
     showToast(`เพิ่มข้อมูล ${name} เรียบร้อยแล้ว!`);
   }
 
+  const targetStudent = id ? list.find(s => s.id === id) : list[list.length - 1];
+  if (targetStudent) updateStudentScoreTimestamp(targetStudent, currentGrade, currentRoom);
+
   saveDataToStorage();
   apiPost({
     action: 'save_student',
     grade: currentGrade,
     room: currentRoom,
-    student: id ? list.find(s => s.id === id) : list[list.length - 1]
+    student: targetStudent
   });
   artSound.playSaveChime();
   closeStudentModal();
