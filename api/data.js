@@ -89,6 +89,29 @@ module.exports = async (req, res) => {
         return res.status(200).json({ success: true });
       }
 
+      if (action === 'reset_badges') {
+        const { grade, room, mode } = body;
+        if (mode === 'all') {
+          await sql`
+            UPDATE art_students SET 
+              badges = '[]'::jsonb, 
+              cards = '[]'::jsonb, 
+              checklist = '{}'::jsonb, 
+              updated_at = NOW();
+          `;
+        } else {
+          await sql`
+            UPDATE art_students SET 
+              badges = '[]'::jsonb, 
+              cards = '[]'::jsonb, 
+              checklist = '{}'::jsonb, 
+              updated_at = NOW()
+            WHERE grade_id = ${grade} AND room_id = ${room};
+          `;
+        }
+        return res.status(200).json({ success: true });
+      }
+
       if (action === 'save_config') {
         const { config } = body;
         await sql`

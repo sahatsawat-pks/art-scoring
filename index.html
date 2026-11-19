@@ -436,6 +436,10 @@
             </div>
           </div>
 
+          <button id="resetRoomBadgesBtn" class="btn btn-outline-danger" title="เอาเหรียญตราออกและรีเซ็ตเกณฑ์งานของนักเรียนทุกคนในห้องปัจจุบัน">
+            <span>🏅 เอาเหรียญออกทุกคน (รีเซ็ต)</span>
+          </button>
+
           <button id="resetSampleDataBtn" class="btn btn-outline" title="รีเซ็ตข้อมูลตัวอย่างกลับเป็นค่าเริ่มต้น">
             <span>🔄 รีเซ็ตข้อมูล</span>
           </button>
@@ -1183,6 +1187,55 @@
       <button type="button" id="closeCardDrawModalBtn" class="close-modal-btn" title="ปิดหน้าต่าง">&times;</button>
       <div class="card-draw-container" id="cardDrawContainer">
         <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ART LUCKY WHEEL (วงล้อรางวัลศิลปะนำโชค) ================= -->
+  <div id="luckyWheelModal" class="modal-overlay hidden">
+    <div class="modal-card modal-lucky-wheel">
+      <button type="button" id="closeLuckyWheelModalBtn" class="close-modal-btn" title="ปิดหน้าต่าง">&times;</button>
+      <div class="lucky-wheel-container">
+        <div class="wheel-header" style="text-align: center; margin-bottom: 12px;">
+          <div style="font-size: 2.2rem; line-height: 1; margin-bottom: 4px;">🎡✨</div>
+          <h3 id="wheelModalTitle" style="font-size: 1.35rem; font-weight: 800; color: #1E293B; margin: 0;">วงล้อรางวัลศิลปะนำโชค</h3>
+          <p id="wheelModalSub" style="font-size: 0.85rem; color: #64748B; margin-top: 4px;">
+            สะสมการ์ดพลังครบ 5 ใบ = สิทธิ์หมุนวงล้อ 1 ครั้ง
+          </p>
+        </div>
+
+        <!-- Wheel Canvas & Pointer Wrap -->
+        <div class="wheel-stage-wrap">
+          <div class="wheel-pointer-pin">🔻</div>
+          <canvas id="luckyWheelCanvas" width="380" height="380"></canvas>
+          <div class="wheel-center-hub" id="wheelSpinCenterBtn" title="กดเพื่อหมุนวงล้อ">
+            <span>SPIN!</span>
+            <small>หมุนเลย</small>
+          </div>
+        </div>
+
+        <!-- Spin Action Bar -->
+        <div style="text-align: center; margin-top: 20px;">
+          <button type="button" id="btnTriggerWheelSpin" class="btn btn-bounce" style="background: linear-gradient(135deg, #EC4899, #8B5CF6); color: white; border: none; font-size: 1.05rem; padding: 12px 36px; border-radius: 9999px; box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4); font-weight: 800;">
+            <span>🎯 หมุนวงล้อรับรางวัล!</span>
+          </button>
+          <div id="wheelSpinsRemainingText" style="font-size: 0.82rem; color: #64748B; margin-top: 8px; font-weight: 700;">
+            สิทธิ์หมุนคงเหลือ: 1 ครั้ง
+          </div>
+        </div>
+
+        <!-- Result Celebration Card (hidden until landed) -->
+        <div id="wheelResultBox" class="wheel-result-card hidden">
+          <div style="font-size: 2.5rem; animation: bounce 1s infinite;" id="wheelResultIcon">🎉</div>
+          <h4 style="font-weight: 800; font-size: 1.25rem; color: #047857; margin-top: 6px;">ยินดีด้วย! คุณได้รับรางวัล:</h4>
+          <div id="wheelResultName" style="font-size: 1.15rem; font-weight: 800; color: #1E293B; margin: 8px 0;"></div>
+          <p id="wheelResultDesc" style="font-size: 0.82rem; color: #64748B; margin: 0;"></p>
+          <div style="margin-top: 16px;">
+            <button type="button" id="btnCollectWheelPrize" class="btn btn-emerald" style="border-radius: 9999px; padding: 8px 24px; font-size: 0.95rem;">
+              🎁 รับรางวัล & บันทึกประวัติ
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

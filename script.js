@@ -667,6 +667,27 @@ class ArtSoundPlayer {
     }
   }
 
+  playWheelTick() {
+    if (!soundEnabled) return;
+    this.ensureActive();
+    if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(320, this.ctx.currentTime + 0.025);
+
+      gain.gain.setValueAtTime(0.09, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.025);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.025);
+    } catch (e) {}
+  }
+
   playChime() {
     if (!soundEnabled) return;
     this.ensureActive();
@@ -2356,6 +2377,12 @@ function openStudentProfileModal(student) {
   const totalDrawTickets = Math.floor(earnedBadgesCount / 5);
   const remainingTickets = Math.max(0, totalDrawTickets - earnedCards.length);
 
+  // Art Lucky Wheel (การ์ด 5 ใบ = สิทธิ์หมุนวงล้อ 1 ครั้ง)
+  const totalWheelSpins = Math.floor(earnedCards.length / 5);
+  const spentWheelSpins = student.checklist && typeof student.checklist.spent_spins === 'number' ? student.checklist.spent_spins : 0;
+  const remainingWheelSpins = Math.max(0, totalWheelSpins - spentWheelSpins);
+  const wheelRewards = (student.checklist && student.checklist.wheel_rewards) || [];
+
   const cardsListHtml = ART_CARDS.map(card => {
     const isUnlocked = earnedCards.includes(card.id);
     if (isUnlocked) {
@@ -2475,6 +2502,50 @@ function openStudentProfileModal(student) {
         </div>
       </div>
 
+      <!-- LUCKY WHEEL SECTION (การ์ด 5 ใบ = หมุนวงล้อได้ 1 ครั้ง) -->
+      <div class="passport-scores-card" style="background: linear-gradient(135deg, #FAF5FF 0%, #FFFFFF 100%); border: 1.5px solid #DDD6FE;">
+        <div class="scores-card-header" style="flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h4 style="font-size: 1.05rem; font-weight: 800; color: #6D28D9;">🎡 วงล้อรางวัลศิลปะนำโชค</h4>
+            <p style="font-size: 0.8rem; color: #64748B;">
+              สะสมการ์ดพลังครบทุก 5 ใบ = สิทธิ์หมุนวงล้อรับรางวัล 1 ครั้ง (มีสิทธิ์หมุนคงเหลือ: <strong style="color: #7C3AED;">${remainingWheelSpins}</strong> ครั้ง)
+            </p>
+          </div>
+          <div>
+            ${remainingWheelSpins > 0 ? `
+              <button type="button" id="btnOpenLuckyWheelModal" class="btn btn-sm btn-bounce" style="background: linear-gradient(135deg, #EC4899, #8B5CF6); color: white; border: none; font-weight: 800; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4); padding: 8px 20px; border-radius: 9999px;">
+                <span>🎡 ไปหมุนวงล้อเลย! (เหลือ ${remainingWheelSpins} ครั้ง)</span>
+              </button>
+            ` : `
+              <span style="font-size: 0.8rem; color: #7C3AED; background: #EDE9FE; padding: 6px 14px; border-radius: 9999px; font-weight: 700;">
+                การ์ดปัจจุบัน: ${earnedCards.length}/5 ใบ (ขาดอีก ${Math.max(0, 5 - (earnedCards.length % 5 || (earnedCards.length === 0 ? 0 : 5)))} ใบ เพื่อหมุน)
+              </span>
+            `}
+          </div>
+        </div>
+
+        ${wheelRewards.length > 0 ? `
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #DDD6FE;">
+            <div style="font-size: 0.82rem; font-weight: 800; color: #4B5563; margin-bottom: 8px;">
+              🎁 รางวัลที่ได้รับแล้วจากการหมุน (${wheelRewards.length} รายการ):
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              ${wheelRewards.map(r => `
+                <span class="wheel-reward-pill" title="${r.desc || ''} (${r.date || ''})">
+                  <span>${r.icon || '🎁'}</span>
+                  <span>${r.name}</span>
+                  <small style="color: #94A3B8; font-weight: normal; margin-left: 2px;">${r.date ? `• ${r.date}` : ''}</small>
+                </span>
+              `).join('')}
+            </div>
+          </div>
+        ` : `
+          <div style="margin-top: 10px; font-size: 0.8rem; color: #94A3B8; font-style: italic;">
+            ยังไม่มีประวัติการได้รับรางวัลจากวงล้อ (สะสมการ์ดพลังให้ครบ 5 ใบเพื่อเริ่มลุ้นรางวัลใหญ่!)
+          </div>
+        `}
+      </div>
+
       <!-- Student Artwork Portfolio Section -->
       <div class="passport-scores-card">
         <div class="scores-card-header">
@@ -2548,6 +2619,14 @@ function openStudentProfileModal(student) {
   if (btnDraw) {
     btnDraw.addEventListener('click', () => {
       drawRandomCard(student);
+    });
+  }
+
+  // Open Lucky Wheel Listener
+  const btnOpenWheel = content.querySelector('#btnOpenLuckyWheelModal');
+  if (btnOpenWheel) {
+    btnOpenWheel.addEventListener('click', () => {
+      openLuckyWheelModal(student);
     });
   }
 
@@ -3116,6 +3195,7 @@ function drawRandomCard(student) {
     if (confirmBtn) {
       confirmBtn.addEventListener('click', () => {
         closeCardDrawModal();
+      closeLuckyWheelModal();
         openStudentProfileModal(student);
       });
     }
@@ -3125,6 +3205,314 @@ function drawRandomCard(student) {
 function closeCardDrawModal() {
   const modal = document.getElementById('cardDrawModal');
   if (modal) modal.classList.add('hidden');
+}
+
+// ==========================================
+// 10.6 ART LUCKY WHEEL SYSTEM (วงล้อรางวัลศิลปะนำโชค)
+// การ์ด 5 ใบ กดวงล้อได้ 1 ครั้ง
+// ==========================================
+const ART_WHEEL_PRIZES = [
+  { id: 'prize_tools', name: 'เลือกอุปกรณ์ก่อนใคร', icon: '🎨', color: '#F43F5E', desc: 'ได้สิทธิ์เลือกพู่กัน สี หรืออุปกรณ์พิเศษก่อนเพื่อนในคาบถัดไป' },
+  { id: 'prize_bonus', name: 'คะแนนพิเศษ +2', icon: '⭐', color: '#8B5CF6', desc: 'ได้รับคะแนนโบนัสสะสมวิชาศิลปะเพิ่ม 2 คะแนน' },
+  { id: 'prize_snack', name: 'ขนมรางวัลจากครู', icon: '🍬', color: '#06B6D4', desc: 'รับขนมอร่อยๆ 1 ชิ้นจากโต๊ะคุณครูศิลปะ' },
+  { id: 'prize_time', name: 'ตั๋วต่อเวลา +2 วัน', icon: '🎟️', color: '#10B981', desc: 'ขยายเวลาส่งงานศิลปะชิ้นต่อไปได้อีก 2 วัน' },
+  { id: 'prize_leader', name: 'หัวหน้ากลุ่มศิลปะ 1 วัน', icon: '👑', color: '#F59E0B', desc: 'ได้สิทธิ์เป็นผู้ช่วยครูจัดแจงอุปกรณ์และดูแลเพื่อน 1 วัน' },
+  { id: 'prize_brush', name: 'สติ๊กเกอร์พรีเมียม', icon: '🖌️', color: '#EC4899', desc: 'รับสติ๊กเกอร์โฮโลแกรมศิลปะสุดเท่ไปสะสม' },
+  { id: 'prize_title', name: 'ฉายาปรมาจารย์ศิลป์', icon: '🌟', color: '#3B82F6', desc: 'ได้รับการโปรโมตชื่อและผลงานเด่นในหน้า THE ART TIME' },
+  { id: 'prize_respin', name: 'ดวงดีสองต่อ (หมุนฟรี)', icon: '🔄', color: '#14B8A6', desc: 'รับสิทธิ์หมุนวงล้อนำโชคเพิ่มฟรีอีก 1 รอบทันที!' }
+];
+
+let currentWheelStudent = null;
+let isWheelSpinning = false;
+let wheelCurrentAngle = 0;
+let lastTickSector = -1;
+
+function drawLuckyWheel(canvas, angle) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  const cx = w / 2;
+  const cy = h / 2;
+  const radius = cx - 18;
+  const numPrizes = ART_WHEEL_PRIZES.length;
+  const arc = (2 * Math.PI) / numPrizes;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Outer Golden Rim with lights
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius + 12, 0, 2 * Math.PI);
+  ctx.fillStyle = '#1E1B4B';
+  ctx.fill();
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#FCD34D';
+  ctx.stroke();
+
+  // Decorative lights on rim
+  const numDots = 24;
+  for (let i = 0; i < numDots; i++) {
+    const dotAngle = (2 * Math.PI / numDots) * i + angle;
+    const dotX = cx + (radius + 6) * Math.cos(dotAngle);
+    const dotY = cy + (radius + 6) * Math.sin(dotAngle);
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = i % 2 === 0 ? '#FBBF24' : '#FFFFFF';
+    ctx.shadowColor = '#FDE047';
+    ctx.shadowBlur = 4;
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // Draw Slices
+  for (let i = 0; i < numPrizes; i++) {
+    const p = ART_WHEEL_PRIZES[i];
+    const startAngle = angle + i * arc;
+    const endAngle = startAngle + arc;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = p.color;
+    ctx.fill();
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.stroke();
+
+    // Slice Content (Icon & Text)
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(startAngle + arc / 2);
+
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+
+    // Text Label
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 12.5px Kanit, sans-serif';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(p.name, radius - 38, 0);
+
+    // Icon Emoji
+    ctx.font = '22px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+    ctx.fillText(p.icon, radius - 10, 0);
+
+    ctx.restore();
+    ctx.restore();
+  }
+
+  // Center Inner Circle Rim
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, 38, 0, 2 * Math.PI);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#8B5CF6';
+  ctx.stroke();
+  ctx.restore();
+}
+
+function openLuckyWheelModal(student) {
+  currentWheelStudent = student;
+  const modal = document.getElementById('luckyWheelModal');
+  if (!modal) return;
+
+  const earnedCards = student.cards || [];
+  const totalSpins = Math.floor(earnedCards.length / 5);
+  const spentSpins = student.checklist && typeof student.checklist.spent_spins === 'number' ? student.checklist.spent_spins : 0;
+  const remainingSpins = Math.max(0, totalSpins - spentSpins);
+
+  const titleElem = document.getElementById('wheelModalTitle');
+  if (titleElem) titleElem.textContent = `🎡 วงล้อรางวัล: ${student.name}`;
+
+  const subElem = document.getElementById('wheelModalSub');
+  if (subElem) {
+    subElem.innerHTML = `สะสมการ์ดพลังครบ 5 ใบ = สิทธิ์หมุน 1 ครั้ง (ปัจจุบันมีการ์ด <strong>${earnedCards.length}</strong> ใบ)`;
+  }
+
+  const textRemaining = document.getElementById('wheelSpinsRemainingText');
+  if (textRemaining) {
+    textRemaining.innerHTML = `สิทธิ์หมุนคงเหลือ: <strong style="color: #7C3AED; font-size: 1.05rem;">${remainingSpins}</strong> ครั้ง`;
+  }
+
+  const resultBox = document.getElementById('wheelResultBox');
+  if (resultBox) resultBox.classList.add('hidden');
+
+  const btnSpin = document.getElementById('btnTriggerWheelSpin');
+  if (btnSpin) {
+    btnSpin.disabled = remainingSpins <= 0;
+    btnSpin.style.opacity = remainingSpins <= 0 ? '0.6' : '1';
+    btnSpin.style.cursor = remainingSpins <= 0 ? 'not-allowed' : 'pointer';
+  }
+
+  const canvas = document.getElementById('luckyWheelCanvas');
+  if (canvas) {
+    drawLuckyWheel(canvas, wheelCurrentAngle);
+  }
+
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+  artSound.playPop();
+}
+
+function closeLuckyWheelModal() {
+  if (isWheelSpinning) return;
+  const modal = document.getElementById('luckyWheelModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
+}
+
+function triggerLuckyWheelSpin() {
+  if (isWheelSpinning || !currentWheelStudent) return;
+
+  const student = currentWheelStudent;
+  const earnedCards = student.cards || [];
+  const totalSpins = Math.floor(earnedCards.length / 5);
+  const spentSpins = student.checklist && typeof student.checklist.spent_spins === 'number' ? student.checklist.spent_spins : 0;
+  const remainingSpins = Math.max(0, totalSpins - spentSpins);
+
+  if (remainingSpins <= 0) {
+    showToast("⚠️ ไม่มีสิทธิ์หมุนวงล้อ ต้องสะสมการ์ดพลังครบ 5 ใบเพื่อรับ 1 สิทธิ์!");
+    return;
+  }
+
+  const canvas = document.getElementById('luckyWheelCanvas');
+  if (!canvas) return;
+
+  isWheelSpinning = true;
+  const btnSpin = document.getElementById('btnTriggerWheelSpin');
+  if (btnSpin) {
+    btnSpin.disabled = true;
+    btnSpin.style.opacity = '0.6';
+  }
+
+  const resultBox = document.getElementById('wheelResultBox');
+  if (resultBox) resultBox.classList.add('hidden');
+
+  const numPrizes = ART_WHEEL_PRIZES.length;
+  const arc = (2 * Math.PI) / numPrizes;
+
+  // Choose winning prize index
+  const winnerIndex = Math.floor(Math.random() * numPrizes);
+  const prize = ART_WHEEL_PRIZES[winnerIndex];
+
+  // The pointer pin is at the top (angle = 1.5 * PI)
+  const pinAngle = 1.5 * Math.PI;
+  const targetSliceCenter = (winnerIndex + 0.5) * arc;
+  const desiredEndAngle = pinAngle - targetSliceCenter;
+
+  const currentMod = wheelCurrentAngle % (2 * Math.PI);
+  let angleDiff = desiredEndAngle - currentMod;
+  while (angleDiff < 0) angleDiff += 2 * Math.PI;
+
+  const fullSpins = (5 + Math.floor(Math.random() * 3)) * (2 * Math.PI);
+  const totalRotation = fullSpins + angleDiff;
+
+  const startAngle = wheelCurrentAngle;
+  const startTime = performance.now();
+  const duration = 4500; // 4.5 seconds
+
+  lastTickSector = -1;
+
+  function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function animate(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easeProgress = easeOutCubic(progress);
+
+    wheelCurrentAngle = startAngle + totalRotation * easeProgress;
+    drawLuckyWheel(canvas, wheelCurrentAngle);
+
+    // Audio tick on sector crossing
+    const currentSector = Math.floor(((pinAngle - wheelCurrentAngle) % (2 * Math.PI) + (2 * Math.PI)) % (2 * Math.PI) / arc);
+    if (currentSector !== lastTickSector) {
+      lastTickSector = currentSector;
+      try { artSound.playWheelTick(); } catch (e) {}
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      isWheelSpinning = false;
+      onWheelFinished(student, prize);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function onWheelFinished(student, prize) {
+  if (!student.checklist) student.checklist = {};
+  if (!student.checklist.wheel_rewards) student.checklist.wheel_rewards = [];
+
+  // Update spent spins
+  if (prize.id !== 'prize_respin') {
+    student.checklist.spent_spins = (student.checklist.spent_spins || 0) + 1;
+  } else {
+    // Free re-spin bonus: do not consume spin!
+    showToast("🎉 ส้มหล่นสองต่อ! ได้รับสิทธิ์หมุนฟรีทันทีอีก 1 ครั้ง!", "success");
+  }
+
+  // Record won prize
+  student.checklist.wheel_rewards.push({
+    id: prize.id,
+    name: prize.name,
+    icon: prize.icon,
+    desc: prize.desc,
+    date: new Date().toLocaleDateString('th-TH')
+  });
+
+  saveDataToStorage();
+  apiPost({
+    action: 'save_student',
+    grade: currentGrade,
+    room: currentRoom,
+    student: student
+  });
+
+  try { artSound.playFanfare(); } catch (e) {}
+  confettiEngine.fire(80);
+
+  // Update UI
+  const earnedCards = student.cards || [];
+  const totalSpins = Math.floor(earnedCards.length / 5);
+  const spentSpins = student.checklist && typeof student.checklist.spent_spins === 'number' ? student.checklist.spent_spins : 0;
+  const remainingSpins = Math.max(0, totalSpins - spentSpins);
+
+  const textRemaining = document.getElementById('wheelSpinsRemainingText');
+  if (textRemaining) {
+    textRemaining.innerHTML = `สิทธิ์หมุนคงเหลือ: <strong style="color: #7C3AED; font-size: 1.05rem;">${remainingSpins}</strong> ครั้ง`;
+  }
+
+  const btnSpin = document.getElementById('btnTriggerWheelSpin');
+  if (btnSpin) {
+    btnSpin.disabled = remainingSpins <= 0;
+    btnSpin.style.opacity = remainingSpins <= 0 ? '0.6' : '1';
+    btnSpin.style.cursor = remainingSpins <= 0 ? 'not-allowed' : 'pointer';
+  }
+
+  const resultBox = document.getElementById('wheelResultBox');
+  const resultIcon = document.getElementById('wheelResultIcon');
+  const resultName = document.getElementById('wheelResultName');
+  const resultDesc = document.getElementById('wheelResultDesc');
+
+  if (resultBox && resultIcon && resultName && resultDesc) {
+    resultIcon.textContent = prize.icon;
+    resultName.textContent = `${prize.icon} ${prize.name}`;
+    resultDesc.textContent = prize.desc;
+    resultBox.classList.remove('hidden');
+  }
 }
 
 
@@ -6058,6 +6446,63 @@ document.addEventListener('DOMContentLoaded', () => {
   rankCriteriaModal?.addEventListener('click', (e) => {
     if (e.target.id === 'rankCriteriaModal') closeRankCriteriaModal();
   });
+
+  // Reset Badges & Checklist for Current Room Button
+  document.getElementById('resetRoomBadgesBtn')?.addEventListener('click', async () => {
+    const gradeLabel = getGradeLabel(currentGrade);
+    const confirmed = confirm(`⚠️ ต้องการเอาเหรียญตราออกและรีเซ็ตเกณฑ์งานทั้งหมดของนักเรียนทุกคนใน ${gradeLabel} ห้อง ${currentRoom} ใช่หรือไม่?\n\n(คะแนนเก็บปกติจะไม่ถูกลบ เฉพาะเหรียญตรา การ์ด และสิทธิ์วงล้อจะถูกรีเซ็ตใหม่)`);
+    if (!confirmed) return;
+
+    const roomStudents = getStudentsList(currentGrade, currentRoom);
+    roomStudents.forEach(s => {
+      s.badges = [];
+      s.cards = [];
+      s.checklist = {};
+      s.revoked_badges = ART_BADGES.map(b => b.id);
+    });
+
+    saveDataToStorage();
+
+    try {
+      await apiPost({
+        action: 'reset_badges',
+        grade: currentGrade,
+        room: currentRoom,
+        mode: 'room'
+      });
+    } catch (err) {
+      console.warn("Cloud DB reset_badges failed or offline:", err);
+    }
+
+    try { artSound.playPop(); } catch (e) {}
+    showToast(`🏅 เอาเหรียญออกและรีเซ็ตของทุกคนในห้อง ${currentRoom} เรียบร้อยแล้ว`, 'success');
+    renderTeacherView();
+  });
+
+  // Lucky Wheel Modal Listeners
+  const closeLuckyWheelBtn = document.getElementById('closeLuckyWheelModalBtn');
+  if (closeLuckyWheelBtn) closeLuckyWheelBtn.addEventListener('click', closeLuckyWheelModal);
+
+  const luckyWheelModal = document.getElementById('luckyWheelModal');
+  if (luckyWheelModal) {
+    luckyWheelModal.addEventListener('click', (e) => {
+      if (e.target.id === 'luckyWheelModal') closeLuckyWheelModal();
+    });
+  }
+
+  const btnSpinWheel = document.getElementById('btnTriggerWheelSpin');
+  if (btnSpinWheel) btnSpinWheel.addEventListener('click', triggerLuckyWheelSpin);
+
+  const wheelCenterHub = document.getElementById('wheelSpinCenterBtn');
+  if (wheelCenterHub) wheelCenterHub.addEventListener('click', triggerLuckyWheelSpin);
+
+  const btnCollectPrize = document.getElementById('btnCollectWheelPrize');
+  if (btnCollectPrize) {
+    btnCollectPrize.addEventListener('click', () => {
+      closeLuckyWheelModal();
+      if (currentWheelStudent) openStudentProfileModal(currentWheelStudent);
+    });
+  }
 
   // 14. Reset Data Button
   document.getElementById('resetSampleDataBtn')?.addEventListener('click', () => {
