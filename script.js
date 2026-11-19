@@ -571,57 +571,10 @@ const CHECKLIST_CRITERIA = [
 ];
 
 function autoEvaluateStudentBadges(student) {
+  // ยกเลิกการยัดเยียดหรือแจกเหรียญอัตโนมัติจากคะแนน/ส่งงานโดยสิ้นเชิง
+  // เหรียญตราจะมอบให้ตามที่คุณครูกดมอบด้วยตนเอง หรือติ๊กในตารางเช็คเกณฑ์งานเท่านั้น
   if (!student) return;
   if (!student.badges) student.badges = [];
-  const revoked = student.revoked_badges || [];
-  const tasks = getActiveAssignments();
-  let perfectCount = 0;
-  let submittedCount = 0;
-
-  tasks.forEach(t => {
-    const sc = student.scores ? student.scores[t.id] : undefined;
-    if (sc !== undefined && sc !== null && sc !== '') {
-      submittedCount++;
-      if (Number(sc) === t.maxScore) perfectCount++;
-    }
-  });
-
-  if (perfectCount >= 3 && !student.badges.includes('art_pro') && !revoked.includes('art_pro')) {
-    student.badges.push('art_pro');
-  }
-  if (perfectCount >= 5 && !student.badges.includes('master_of_god') && !revoked.includes('master_of_god')) {
-    student.badges.push('master_of_god');
-  }
-  if (tasks.length > 0 && submittedCount === tasks.length && !student.badges.includes('mission_complete') && !revoked.includes('mission_complete')) {
-    student.badges.push('mission_complete');
-  }
-  if (student.badges.length >= 10 && !student.badges.includes('collector') && !revoked.includes('collector')) {
-    student.badges.push('collector');
-  }
-  if ((student.cards || []).length >= 3 && !student.badges.includes('card_master') && !revoked.includes('card_master')) {
-    student.badges.push('card_master');
-  }
-
-  // Auto-grant badges when accumulated checklist criteria target is reached (supports multiple badges e.g. 6 times = 2 badges!)
-  CHECKLIST_CRITERIA.forEach(crit => {
-    if (crit.badgeId && !revoked.includes(crit.badgeId)) {
-      const bDef = ART_BADGES.find(b => b.id === crit.badgeId);
-      const target = (bDef && bDef.target) ? bDef.target : 3;
-      let cnt = 0;
-      tasks.forEach(t => {
-        if (student.checklist && student.checklist[t.id] && student.checklist[t.id][crit.key]) {
-          cnt++;
-        }
-      });
-      const expectedBadges = Math.floor(cnt / target);
-      const currentInstances = student.badges.filter(id => id === crit.badgeId).length;
-      if (expectedBadges > currentInstances) {
-        for (let i = 0; i < (expectedBadges - currentInstances); i++) {
-          student.badges.push(crit.badgeId);
-        }
-      }
-    }
-  });
 }
 
 // ==========================================
@@ -1196,7 +1149,6 @@ function updateStudentScoreTimestamp(student, grade = currentGrade, room = curre
 
 function getRankedStudents(grade = currentGrade, room = currentRoom) {
   const list = [...getStudentsList(grade, room)];
-  list.forEach(s => autoEvaluateStudentBadges(s));
   return list.sort((a, b) => {
     const scoreA = calcStudentTotalScore(a, grade, room);
     const scoreB = calcStudentTotalScore(b, grade, room);
@@ -2327,7 +2279,6 @@ function openStudentProfileModal(student) {
   if (!student.badges) student.badges = [];
   if (!student.cards) student.cards = [];
   if (!student.checklist) student.checklist = {};
-  autoEvaluateStudentBadges(student);
 
   const scale = getClassScoreScale(currentGrade);
   const totalScore = calcStudentTotalScore(student, currentGrade);
@@ -3246,10 +3197,6 @@ function drawRandomCard(student) {
 
   if (!student.cards.includes(drawnCard.id)) {
     student.cards.push(drawnCard.id);
-  }
-
-  if (student.cards.length >= 3 && !student.badges.includes('card_master')) {
-    student.badges.push('card_master');
   }
 
   saveDataToStorage();
