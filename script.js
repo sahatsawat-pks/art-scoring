@@ -650,6 +650,29 @@ class ArtSoundPlayer {
     }
   }
 
+  playChime() {
+    if (!soundEnabled) return;
+    this.ensureActive();
+    if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1318.5, this.ctx.currentTime + 0.12);
+
+      gain.gain.setValueAtTime(0.16, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.22);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.23);
+    } catch (e) {
+      console.warn("Audio error:", e);
+    }
+  }
+
   playFanfare() {
     if (!soundEnabled) return;
     this.ensureActive();
@@ -2634,7 +2657,7 @@ function scheduleStudentSave(student) {
       room: currentRoom,
       student: student
     });
-  }, 250);
+  }, 800);
 }
 
 function openBadgeManagerModal(student) {
@@ -2842,12 +2865,12 @@ function renderQuickGrantBadges(student) {
       if (idx !== -1) {
         student.badges.splice(idx, 1);
         if (!student.revoked_badges.includes(bId)) student.revoked_badges.push(bId);
-        artSound.playPop();
+        try { artSound.playPop(); } catch (e) {}
         isNowGranted = false;
       } else {
         student.badges.push(bId);
         student.revoked_badges = student.revoked_badges.filter(id => id !== bId);
-        artSound.playChime();
+        try { artSound.playChime(); } catch (e) {}
         isNowGranted = true;
       }
 
@@ -2892,7 +2915,7 @@ function renderQuickGrantBadges(student) {
         student.badges = ART_BADGES.map(b => b.id);
         student.revoked_badges = [];
         scheduleStudentSave(student);
-        artSound.playFanfare();
+        try { artSound.playFanfare(); } catch (e) {}
         confettiEngine.fire(60);
         showToast(`✨ มอบเหรียญทั้งหมด 20 เหรียญให้ ${student.name} เรียบร้อยแล้ว! 👑`);
         renderQuickGrantBadges(student);
@@ -2910,7 +2933,7 @@ function renderQuickGrantBadges(student) {
         student.revoked_badges = ART_BADGES.map(b => b.id);
         student.badges = [];
         scheduleStudentSave(student);
-        artSound.playPop();
+        try { artSound.playPop(); } catch (e) {}
         showToast(`↩️ ขอคืนเหรียญทั้งหมดของ ${student.name} เรียบร้อยแล้ว`);
         renderQuickGrantBadges(student);
         updateBadgeManagerCount(student);
@@ -2923,23 +2946,34 @@ function renderQuickGrantBadges(student) {
 
 function saveBadgeManager() {
   if (!currentBadgeStudent) return;
+  const s = currentBadgeStudent;
+  clearTimeout(badgeSaveTimer);
+  badgeSaveTimer = null;
+
   saveDataToStorage();
   apiPost({
     action: 'save_student',
     grade: currentGrade,
     room: currentRoom,
-    student: currentBadgeStudent
+    student: s
   });
-  artSound.playSaveChime();
-  showToast(`บันทึกข้อมูลเหรียญและเกณฑ์งานของ ${currentBadgeStudent.name} เรียบร้อยแล้ว! 🏅`);
+  try { artSound.playSaveChime(); } catch (e) {}
+  showToast(`บันทึกข้อมูลเหรียญและเกณฑ์งานของ ${s.name} เรียบร้อยแล้ว! 🏅`);
+
+  // Direct fast in-place update of teacher table row without freezing the page
+  const teacherRowBtn = document.querySelector(`.btn-badge-manage[data-student-id="${s.id}"]`);
+  if (teacherRowBtn) {
+    teacherRowBtn.innerHTML = `🏅 ${s.badges.length} เหรียญ`;
+  }
+
   closeBadgeManagerModal();
-  renderTeacherView();
 }
 
 function closeBadgeManagerModal() {
   try {
     if (badgeSaveTimer && currentBadgeStudent) {
       clearTimeout(badgeSaveTimer);
+      badgeSaveTimer = null;
       saveDataToStorage();
       apiPost({
         action: 'save_student',
@@ -2947,11 +2981,18 @@ function closeBadgeManagerModal() {
         room: currentRoom,
         student: currentBadgeStudent
       });
-      badgeSaveTimer = null;
     }
   } catch (err) {
     console.warn("Auto-save on modal close error:", err);
   }
+
+  if (currentBadgeStudent) {
+    const teacherRowBtn = document.querySelector(`.btn-badge-manage[data-student-id="${currentBadgeStudent.id}"]`);
+    if (teacherRowBtn) {
+      teacherRowBtn.innerHTML = `🏅 ${currentBadgeStudent.badges.length} เหรียญ`;
+    }
+  }
+
   const modal = document.getElementById('badgeManagerModal');
   if (modal) {
     modal.classList.add('hidden');
