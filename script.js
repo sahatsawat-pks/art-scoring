@@ -601,6 +601,23 @@ function autoEvaluateStudentBadges(student) {
   if ((student.cards || []).length >= 3 && !student.badges.includes('card_master') && !revoked.includes('card_master')) {
     student.badges.push('card_master');
   }
+
+  // Auto-grant badges when accumulated checklist criteria target is reached
+  CHECKLIST_CRITERIA.forEach(crit => {
+    if (crit.badgeId && !student.badges.includes(crit.badgeId) && !revoked.includes(crit.badgeId)) {
+      const bDef = ART_BADGES.find(b => b.id === crit.badgeId);
+      const target = (bDef && bDef.target) ? bDef.target : 3;
+      let cnt = 0;
+      tasks.forEach(t => {
+        if (student.checklist && student.checklist[t.id] && student.checklist[t.id][crit.key]) {
+          cnt++;
+        }
+      });
+      if (cnt >= target) {
+        student.badges.push(crit.badgeId);
+      }
+    }
+  });
 }
 
 // ==========================================
@@ -2820,6 +2837,7 @@ function renderBadgeChecklistTable(student) {
       renderBadgeChecklistTable(student);
       renderQuickGrantBadges(student);
       updateBadgeManagerCount(student);
+      scheduleStudentSave(student);
     });
   });
 }
@@ -2831,18 +2849,39 @@ function renderQuickGrantBadges(student) {
   if (!student.badges) student.badges = [];
   if (!student.revoked_badges) student.revoked_badges = [];
 
+  const tasks = getActiveAssignments();
+
   container.innerHTML = ART_BADGES.map(b => {
     const isGranted = student.badges.includes(b.id);
+    const matchedCrit = CHECKLIST_CRITERIA.find(c => c.badgeId === b.id);
+    let progressHtml = '';
+    if (matchedCrit) {
+      let cnt = 0;
+      tasks.forEach(t => {
+        if (student.checklist && student.checklist[t.id] && student.checklist[t.id][matchedCrit.key]) {
+          cnt++;
+        }
+      });
+      const target = b.target || 3;
+      progressHtml = `
+        <div style="font-size: 0.73rem; color: #4338CA; margin-top: 5px; background: #EEF2FF; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #E0E7FF;">
+          <span>📝 ทดไว้:</span> <strong>${cnt}/${target} งาน</strong>
+          <span style="color: ${cnt >= target ? '#059669' : '#64748B'};">(${cnt >= target ? 'ครบแล้ว ✨' : `ขาดอีก ${target - cnt}`})</span>
+        </div>
+      `;
+    }
+
     return `
       <div class="quick-badge-card ${isGranted ? 'granted' : 'revoked'}" data-badge-id="${b.id}" title="${b.title}: ${b.desc} (คลิกเพื่อ ${isGranted ? 'ขอคืนเหรียญ' : 'มอบเหรียญ'})">
         <img src="assets/badges/${b.id}.jpg" class="badge-img-circle ${isGranted ? 'is-earned' : 'is-unearned'}" alt="${b.title}">
         <div class="quick-badge-info" style="flex: 1; min-width: 0;">
-          <div class="quick-badge-title" style="font-weight: 700; font-size: 0.88rem; color: ${isGranted ? '#1E293B' : '#64748B'}; line-height: 1.3;">
+          <div class="quick-badge-title" style="font-weight: 700; font-size: 0.9rem; color: ${isGranted ? '#1E293B' : '#64748B'}; line-height: 1.3;">
             ${b.title}
           </div>
-          <div style="font-size: 0.74rem; color: #64748B; margin-top: 2px;">
+          <div style="font-size: 0.76rem; color: #64748B; margin-top: 2px;">
             ${b.desc}
           </div>
+          ${progressHtml}
           <div style="margin-top: 6px;">
             <span class="badge-toggle-btn-pill ${isGranted ? 'pill-earned' : 'pill-unearned'}">
               ${isGranted ? '✅ ได้รับแล้ว (คลิกเพื่อขอคืน)' : '⚪ ยังไม่ได้มอบ (คลิกเพื่อมอบ)'}
