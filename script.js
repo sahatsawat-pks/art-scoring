@@ -2377,17 +2377,15 @@ function openStudentProfileModal(student) {
           <a href="${art.url}" download="${art.title}.jpg" class="btn btn-sm btn-outline" style="font-size: 0.72rem; padding: 2px 8px;">
             📥 ดาวน์โหลด
           </a>
-          ${isTeacher ? `
-            <button class="btn btn-sm btn-outline-danger delete-art-btn" data-art-index="${idx}" style="font-size: 0.72rem; padding: 2px 6px;" title="ลบผลงาน (อาจารย์เท่านั้น)">
-              🗑️
-            </button>
-          ` : ''}
+          <button class="btn btn-sm btn-outline-danger delete-art-btn" data-art-index="${idx}" style="font-size: 0.72rem; padding: 2px 6px;" title="ลบผลงานนี้">
+            🗑️
+          </button>
         </div>
       </div>
     </div>
   `).join('') : `
-    <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #94A3B8; background: #F8FAFC; border-radius: 14px;">
-      🎨 ยังไม่มีภาพผลงานในคลัง ${isTeacher ? 'คลิกปุ่ม "+ อัปโหลดผลงานศิลปะ" ด้านบนเพื่อเริ่มสร้างแกลเลอรีของน้อง' : '(อาจารย์ผู้สอนเป็นผู้อัปโหลดผลงาน)'}
+    <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #94A3B8; background: #F8FAFC; border-radius: 14px; border: 1.5px dashed #CBD5E1;">
+      🎨 ยังไม่มีภาพผลงานในคลัง (แตะปุ่ม "➕ อัปโหลดผลงานศิลปะ" ด้านบนเพื่อเพิ่มภาพผลงานของนักเรียนได้เลย!)
     </div>
   `;
 
@@ -2641,22 +2639,16 @@ function openStudentProfileModal(student) {
         ` : ''}
       </div>
 
-      <!-- Student Artwork Portfolio Section -->
+      <!-- Student Artwork Portfolio Section (เปิดให้ทั้งนักเรียนและคุณครูอัปโหลดได้เอง) -->
       <div class="passport-scores-card">
         <div class="scores-card-header">
           <div>
             <h4 style="font-size: 1.05rem; font-weight: 800; color: #1E293B;">🖼️ คลังผลงานศิลปะของ ${student.name}</h4>
             <p style="font-size: 0.8rem; color: #64748B;">แสดงผลงานสร้างสรรค์ที่ภาคภูมิใจของนักเรียน</p>
           </div>
-          ${isTeacher ? `
-            <button type="button" id="uploadMyArtworkBtn" class="btn btn-sm btn-art-primary">
-              <span>➕ อัปโหลดผลงานศิลปะ</span>
-            </button>
-          ` : `
-            <span style="font-size: 0.8rem; color: #64748B; background: #F1F5F9; padding: 4px 12px; border-radius: 9999px; border: 1px solid #E2E8F0;">
-              🔒 อาจารย์อัปได้เท่านั้น
-            </span>
-          `}
+          <button type="button" id="uploadMyArtworkBtn" class="btn btn-sm btn-art-primary" style="box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);">
+            <span>➕ อัปโหลดผลงานศิลปะ</span>
+          </button>
         </div>
 
         <div class="portfolio-artworks-grid">
@@ -2760,14 +2752,10 @@ function openStudentProfileModal(student) {
     });
   }
 
-  // Upload Artwork Listener (Teacher Only)
+  // Upload Artwork Listener (เปิดให้ทั้งนักเรียนและคุณครูอัปโหลดผลงานได้เอง)
   const uploadArtBtn = content.querySelector('#uploadMyArtworkBtn');
   if (uploadArtBtn) {
     uploadArtBtn.addEventListener('click', () => {
-      if (!getLoggedInTeacher()) {
-        showToast("🔒 สำหรับอาจารย์ผู้สอนเท่านั้น กรุณาเข้าสู่ระบบครู");
-        return;
-      }
       const artFileHidden = document.createElement('input');
       artFileHidden.type = 'file';
       artFileHidden.accept = 'image/*';
@@ -2779,20 +2767,18 @@ function openStudentProfileModal(student) {
       artFileHidden.addEventListener('change', async (e) => {
         if (e.target.files.length > 0) {
           const file = e.target.files[0];
-          const title = prompt("ระบุชื่อผลงานศิลปะชิ้นนี้:", file.name.replace(/\.[^/.]+$/, ""));
-          if (!title || !title.trim()) {
-            artFileHidden.remove();
-            return;
-          }
-          const technique = prompt("ระบุเทคนิคหรือสื่อที่ใช้ (เช่น สีน้ำ, สีโปสเตอร์, คอลลาจ):", "สีน้ำบนกระดาษวาดเขียน");
+          const defaultName = file.name ? file.name.replace(/\.[^/.]+$/, "") : "ผลงานศิลปะของฉัน";
+          const title = prompt("ระบุชื่อผลงานศิลปะชิ้นนี้:", defaultName) || defaultName;
+          const technique = prompt("ระบุเทคนิคหรือสื่อที่ใช้ (เช่น สีน้ำ, สีโปสเตอร์, คอลลาจ):", "ภาพวาดสร้างสรรค์") || "ภาพวาดสร้างสรรค์";
 
           try {
-            const resizedUrl = await resizeImageToCanvas(file, 700, 700, 0.8);
+            showToast("กำลังประมวลผลและอัปโหลดภาพผลงาน... 🎨", "info");
+            const resizedUrl = await resizeImageToCanvas(file, 800, 800, 0.85);
             if (!student.portfolio) student.portfolio = [];
             student.portfolio.push({
               id: `art_${Date.now()}`,
-              title: title.trim(),
-              technique: (technique || 'สื่อผสม').trim(),
+              title: title.trim() || 'ผลงานสร้างสรรค์',
+              technique: technique.trim() || 'ภาพวาดสร้างสรรค์',
               date: new Date().toLocaleDateString('th-TH'),
               url: resizedUrl
             });
